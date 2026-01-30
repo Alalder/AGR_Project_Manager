@@ -1,0 +1,267 @@
+[
+  {
+    "Id": "b15ca36d-48e9-4884-a2e4-d0b3df070944",
+    "Name": "5872542",
+    "Description": "",
+    "CreatedDate": "2026-01-30T17:59:27.9750918+08:00",
+    "ModifiedDate": "2026-01-30T18:18:15.7629891+08:00",
+    "Models": [
+      {
+        "Name": "001",
+        "UdimRows": [
+          [
+            {
+              "UdimNumber": 1001,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1002,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1003,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1004,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1005,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1006,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1007,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1008,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1009,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1010,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            }
+          ]
+        ]
+      },
+      {
+        "Name": "Ground",
+        "UdimRows": [
+          [
+            {
+              "UdimNumber": 1001,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1002,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1003,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1004,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1005,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1006,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1007,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1008,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1009,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1010,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            }
+          ]
+        ]
+      }
+    ],
+    "SelectedModelIndex": 0,
+    "DistrictCode": "0207"
+  }
+]

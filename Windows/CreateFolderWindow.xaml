@@ -1,0 +1,250 @@
+﻿<Window x:Class="AGR_Project_Manager.Windows.CreateFolderWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="📁 Создать папку проекта" 
+        Height="650" Width="800"
+        MinHeight="600" MinWidth="700"
+        WindowStartupLocation="CenterOwner"
+        Background="#1e1d22"
+        ResizeMode="CanResizeWithGrip">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Название проекта -->
+        <StackPanel Grid.Row="0">
+            <TextBlock Text="Название папки проекта" 
+                       Foreground="#aaa" 
+                       FontSize="12" 
+                       Margin="0,0,0,8"/>
+            <TextBox x:Name="ProjectNameTextBox" 
+                     Background="#2d2c35" 
+                     Foreground="White" 
+                     BorderBrush="#3a3a3a"
+                     Padding="12,10"
+                     FontSize="14"
+                     CaretBrush="White"/>
+        </StackPanel>
+
+        <!-- Выбор папки -->
+        <StackPanel Grid.Row="2">
+            <TextBlock Text="Рабочая папка (где будет создана структура)" 
+                       Foreground="#aaa" 
+                       FontSize="12" 
+                       Margin="0,0,0,8"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="FolderPathTextBox" 
+                         Background="#2d2c35" 
+                         Foreground="White" 
+                         BorderBrush="#3a3a3a"
+                         Padding="12,10"
+                         FontSize="14"
+                         CaretBrush="White"
+                         IsReadOnly="True"/>
+                <Button Grid.Column="1" 
+                        Content="📂 Выбрать..." 
+                        Background="#3a3a3a" 
+                        Foreground="White"
+                        Padding="15,10"
+                        Margin="10,0,0,0"
+                        Cursor="Hand"
+                        Click="BrowseFolder_Click"/>
+            </Grid>
+        </StackPanel>
+
+        <!-- Структура папок -->
+        <Border Grid.Row="4" 
+                Background="#252429" 
+                CornerRadius="8" 
+                Padding="20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="1.2*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Дерево папок -->
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="📁 Структура папок" 
+                               Foreground="White" 
+                               FontSize="14" 
+                               FontWeight="Bold"
+                               Margin="0,0,0,15"/>
+
+                    <Border Background="#1e1d22" 
+                            CornerRadius="6" 
+                            Padding="15">
+                        <StackPanel>
+                            <!-- Корневая папка -->
+                            <TextBlock x:Name="RootFolderName" 
+                                       Text="📁 [Название проекта]" 
+                                       Foreground="#6a9955" 
+                                       FontFamily="Consolas" 
+                                       FontSize="13"
+                                       FontWeight="Bold"/>
+
+                            <!-- Source -->
+                            <StackPanel Margin="20,8,0,0">
+                                <TextBlock Text="📁 source" Foreground="#ddd" FontFamily="Consolas" FontSize="12"/>
+                                <StackPanel Margin="20,4,0,0">
+                                    <TextBlock Text="📁 maps" Foreground="#888" FontFamily="Consolas" FontSize="11"/>
+                                    <TextBlock Text="📁 mesh" Foreground="#888" FontFamily="Consolas" FontSize="11"/>
+                                    <TextBlock Text="📁 dwg" Foreground="#888" FontFamily="Consolas" FontSize="11"/>
+                                    <TextBlock Text="📁 pln" Foreground="#888" FontFamily="Consolas" FontSize="11"/>
+                                    <TextBlock Text="📁 pdf" Foreground="#888" FontFamily="Consolas" FontSize="11"/>
+                                    <TextBlock Text="📁 skp" Foreground="#888" FontFamily="Consolas" FontSize="11"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Export -->
+                            <StackPanel Margin="20,8,0,0">
+                                <TextBlock Text="📁 export" Foreground="#ddd" FontFamily="Consolas" FontSize="12"/>
+                                <StackPanel Margin="20,4,0,0">
+                                    <TextBlock Text="📁 HP" Foreground="#888" FontFamily="Consolas" FontSize="11"/>
+                                    <TextBlock Text="📁 LP" Foreground="#888" FontFamily="Consolas" FontSize="11"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Work -->
+                            <StackPanel Margin="20,8,0,0">
+                                <TextBlock Text="📁 work" Foreground="#ddd" FontFamily="Consolas" FontSize="12"/>
+                                <StackPanel Margin="20,4,0,0">
+                                    <TextBlock Text="📁 texture" Foreground="#888" FontFamily="Consolas" FontSize="11"/>
+                                    <TextBlock Text="📁 mesh" Foreground="#888" FontFamily="Consolas" FontSize="11"/>
+                                    <TextBlock Text="📁 bake" Foreground="#888" FontFamily="Consolas" FontSize="11"/>
+                                    <StackPanel Margin="0,4,0,0">
+                                        <TextBlock Text="📁 AGR_Check" Foreground="#888" FontFamily="Consolas" FontSize="11"/>
+                                        <StackPanel Margin="20,4,0,0">
+                                            <TextBlock Text="📁 HP" Foreground="#666" FontFamily="Consolas" FontSize="11"/>
+                                            <TextBlock Text="📁 LP" Foreground="#666" FontFamily="Consolas" FontSize="11"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Описания -->
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="📋 Описание папок" 
+                               Foreground="White" 
+                               FontSize="14" 
+                               FontWeight="Bold"
+                               Margin="0,0,0,15"/>
+
+                    <StackPanel>
+                        <!-- Source -->
+                        <Border Background="#2a3a2a" CornerRadius="6" Padding="12" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="📂 source" Foreground="#6a9955" FontWeight="Bold" FontSize="13"/>
+                                <TextBlock Text="Исходные данные по проекту" 
+                                           Foreground="#aaa" FontSize="12" Margin="0,5,0,0" TextWrapping="Wrap"/>
+                                <StackPanel Margin="10,8,0,0">
+                                    <TextBlock Text="• maps — карты, подложки" Foreground="#888" FontSize="11"/>
+                                    <TextBlock Text="• mesh — 3D модели" Foreground="#888" FontSize="11"/>
+                                    <TextBlock Text="• dwg — чертежи AutoCAD" Foreground="#888" FontSize="11"/>
+                                    <TextBlock Text="• pln — файлы ArchiCAD" Foreground="#888" FontSize="11"/>
+                                    <TextBlock Text="• pdf — документация PDF" Foreground="#888" FontSize="11"/>
+                                    <TextBlock Text="• skp — файлы SketchUp" Foreground="#888" FontSize="11"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Export -->
+                        <Border Background="#3a3a2a" CornerRadius="6" Padding="12" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="📤 export" Foreground="#c9a959" FontWeight="Bold" FontSize="13"/>
+                                <TextBlock Text="Финальные файлы для отправки" 
+                                           Foreground="#aaa" FontSize="12" Margin="0,5,0,0" TextWrapping="Wrap"/>
+                                <StackPanel Margin="10,8,0,0">
+                                    <TextBlock Text="• HP — High-Poly модели и архивы" Foreground="#888" FontSize="11"/>
+                                    <TextBlock Text="• LP — Low-Poly модели и архивы" Foreground="#888" FontSize="11"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Work -->
+                        <Border Background="#2a2a3a" CornerRadius="6" Padding="12" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="🔧 work" Foreground="#5a7ac9" FontWeight="Bold" FontSize="13"/>
+                                <TextBlock Text="Рабочие файлы проекта" 
+                                           Foreground="#aaa" FontSize="12" Margin="0,5,0,0" TextWrapping="Wrap"/>
+                                <StackPanel Margin="10,8,0,0">
+                                    <TextBlock Text="• texture — текстуры (PSD, PNG)" Foreground="#888" FontSize="11"/>
+                                    <TextBlock Text="• mesh — рабочие 3D файлы" Foreground="#888" FontSize="11"/>
+                                    <TextBlock Text="• bake — файлы запечки" Foreground="#888" FontSize="11"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- AGR_Check -->
+                        <Border Background="#3a2a2a" CornerRadius="6" Padding="12">
+                            <StackPanel>
+                                <TextBlock Text="✅ AGR_Check" Foreground="#c95a5a" FontWeight="Bold" FontSize="13"/>
+                                <TextBlock Text="Архивы для проверки на соответствие Распоряжению" 
+                                           Foreground="#aaa" FontSize="12" Margin="0,5,0,0" TextWrapping="Wrap"/>
+                                <StackPanel Margin="10,8,0,0">
+                                    <TextBlock Text="• HP — архивы High-Poly" Foreground="#888" FontSize="11"/>
+                                    <TextBlock Text="• LP — архивы Low-Poly" Foreground="#888" FontSize="11"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Кнопки -->
+        <Grid Grid.Row="6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Путь создания -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Будет создано:" Foreground="#666" FontSize="11" Margin="0,0,8,0"/>
+                <TextBlock x:Name="FullPathPreview" 
+                           Text="" 
+                           Foreground="#4a7c59" 
+                           FontSize="11" 
+                           FontFamily="Consolas"
+                           MaxWidth="350"
+                           TextTrimming="CharacterEllipsis"/>
+            </StackPanel>
+
+            <Button Grid.Column="2" 
+                    Content="Отмена" 
+                    Background="#3a3a3a" 
+                    Foreground="White"
+                    Padding="25,12"
+                    Margin="0,0,10,0"
+                    Cursor="Hand"
+                    Click="Cancel_Click"/>
+            <Button Grid.Column="3" 
+                    Content="✨ Создать структуру" 
+                    Background="#4a7c59" 
+                    Foreground="White"
+                    Padding="25,12"
+                    FontWeight="SemiBold"
+                    Cursor="Hand"
+                    Click="Create_Click"/>
+        </Grid>
+    </Grid>
+</Window>

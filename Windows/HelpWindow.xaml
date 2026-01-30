@@ -1,0 +1,315 @@
+﻿<Window x:Class="AGR_Project_Manager.Windows.HelpWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="📖 Справка — AGR Project Manager"
+        Height="700" Width="900"
+        MinHeight="500" MinWidth="700"
+        WindowStartupLocation="CenterScreen"
+        Background="#1e1d22"
+        Icon="/Resource/app_icon.ico">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок -->
+        <Border Grid.Row="0" Background="#252429" Padding="20">
+            <StackPanel>
+                <TextBlock Text="AGR Project Manager" 
+                           FontSize="28" 
+                           FontWeight="Bold" 
+                           Foreground="White"/>
+                <TextBlock Text="Версия 1.0.0 — Инструмент для управления проектами и текстурами" 
+                           FontSize="14" 
+                           Foreground="#888"
+                           Margin="0,5,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Контент -->
+        <ScrollViewer Grid.Row="1" 
+                      VerticalScrollBarVisibility="Auto"
+                      Padding="20">
+            <StackPanel>
+
+                <!-- Проекты -->
+                <Border Background="#252429" CornerRadius="8" Padding="20" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="📁 Управление проектами" 
+                                   FontSize="18" FontWeight="Bold" Foreground="#4a7c59"/>
+                        <TextBlock Foreground="#ccc" FontSize="13" Margin="0,10,0,0" TextWrapping="Wrap">
+                            <Run FontWeight="Bold">Создание проекта:</Run>
+                            <Run>Нажмите "➕ Новый проект" в левой панели. Введите название (адрес объекта) и описание.</Run>
+                            <LineBreak/><LineBreak/>
+                            <Run FontWeight="Bold">Редактирование:</Run>
+                            <Run>Кнопка ✏️ рядом с названием проекта.</Run>
+                            <LineBreak/><LineBreak/>
+                            <Run FontWeight="Bold">Дублирование:</Run>
+                            <Run>Кнопка 📋 создаст копию проекта со всеми моделями и настройками.</Run>
+                            <LineBreak/><LineBreak/>
+                            <Run FontWeight="Bold">Удаление:</Run>
+                            <Run>Кнопка ❌ удалит проект (с подтверждением).</Run>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- Модели -->
+                <Border Background="#252429" CornerRadius="8" Padding="20" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="🏠 Модели (вкладки)" 
+                                   FontSize="18" FontWeight="Bold" Foreground="#5a7ac9"/>
+                        <TextBlock Foreground="#ccc" FontSize="13" Margin="0,10,0,0" TextWrapping="Wrap">
+                            <Run FontWeight="Bold">Вкладки:</Run>
+                            <Run>Каждый проект содержит модели (001, 002, Ground и т.д.). Переключайтесь между ними кликом по вкладке.</Run>
+                            <LineBreak/><LineBreak/>
+                            <Run FontWeight="Bold">Добавить модель:</Run>
+                            <Run>Кнопка "➕ Добавить модель" создаст новую вкладку с автоматическим номером.</Run>
+                            <LineBreak/><LineBreak/>
+                            <Run FontWeight="Bold">Переименовать:</Run>
+                            <Run>Кнопка ✏️ на вкладке. Название модели используется в именах экспортируемых текстур.</Run>
+                            <LineBreak/><LineBreak/>
+                            <Run FontWeight="Bold">Дублировать/Удалить:</Run>
+                            <Run>Кнопки 📋 и ❌ на каждой вкладке.</Run>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- UDIM -->
+                <Border Background="#252429" CornerRadius="8" Padding="20" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="🎨 UDIM тайлы и текстуры" 
+                   FontSize="18" FontWeight="Bold" Foreground="#c9a959"/>
+                        <TextBlock Foreground="#ccc" FontSize="13" Margin="0,10,0,0" TextWrapping="Wrap">
+            <Run FontWeight="Bold">Сетка UDIM:</Run>
+            <Run>Каждая модель имеет сетку UDIM тайлов (1001-1010 и далее). Добавляйте ряды кнопкой "➕ Добавить ряд".</Run>
+            <LineBreak/><LineBreak/>
+            <Run FontWeight="Bold">Загрузка текстур:</Run>
+            <Run>Кликните по кнопкам D (Diffuse), E (ERM), N (Normal) чтобы загрузить текстуру. Зелёный цвет = текстура загружена.</Run>
+            <LineBreak/><LineBreak/>
+            <Run FontWeight="Bold">Название тайла:</Run>
+            <Run>Кликните по "—" сверху тайла чтобы задать название материала (дерево, металл и т.д.).</Run>
+            <LineBreak/><LineBreak/>
+            <Run FontWeight="Bold">Копирование:</Run>
+            <Run>Выберите тайл (клик), нажмите "📋 Копировать", затем выберите другой тайл и "📥 Вставить".</Run>
+            <LineBreak/><LineBreak/>
+            <Run FontWeight="Bold">Превью:</Run>
+            <Run>Загруженная Diffuse текстура отображается как фон тайла.</Run>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- Пресеты UDIM — НОВЫЙ БЛОК -->
+                <Border Background="#252429" CornerRadius="8" Padding="20" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="💾 Пресеты UDIM" 
+                   FontSize="18" FontWeight="Bold" Foreground="#59a9c9"/>
+                        <TextBlock Foreground="#ccc" FontSize="13" Margin="0,10,0,0" TextWrapping="Wrap">
+            <Run FontWeight="Bold">Что такое пресеты:</Run>
+            <Run>Пресеты позволяют сохранять наборы текстур (Diffuse, ERM, Normal) для быстрого применения к другим тайлам. Это удобно, когда один и тот же материал используется в разных проектах.</Run>
+            <LineBreak/><LineBreak/>
+            <Run FontWeight="Bold">Сохранение пресета:</Run>
+            <Run>1. Выберите заполненный UDIM тайл (кликните на него)</Run>
+            <LineBreak/>
+            <Run>2. Нажмите "➕ Сохранить как пресет"</Run>
+            <LineBreak/>
+            <Run>3. Введите название пресета (например, "Кирпич красный", "Металл ржавый")</Run>
+            <LineBreak/><LineBreak/>
+            <Run FontWeight="Bold">Применение пресета:</Run>
+            <Run>1. Выберите UDIM тайл, в который хотите вставить текстуры</Run>
+            <LineBreak/>
+            <Run>2. Выберите пресет из выпадающего списка</Run>
+            <LineBreak/>
+            <Run>3. Нажмите "📥 Применить"</Run>
+            <LineBreak/><LineBreak/>
+            <Run FontWeight="Bold">Удаление пресета:</Run>
+            <Run>Выберите пресет в списке и нажмите кнопку 🗑️</Run>
+            <LineBreak/><LineBreak/>
+            <Run FontWeight="Bold">Хранение:</Run>
+            <Run>Пресеты сохраняются глобально в файле Data\presets.json и доступны во всех проектах.</Run>
+                        </TextBlock>
+
+                        <!-- Визуальная схема -->
+                        <Border Background="#1e1d22" CornerRadius="6" Padding="15" Margin="0,15,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Пример использования:" Foreground="#888" FontSize="11" Margin="0,0,0,10"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Исходный тайл -->
+                                    <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                        <Border Background="#2d2c35" CornerRadius="4" Padding="10" Width="80">
+                                            <StackPanel HorizontalAlignment="Center">
+                                                <TextBlock Text="Кирпич" Foreground="#6a9955" FontSize="10" HorizontalAlignment="Center"/>
+                                                <TextBlock Text="D E N" Foreground="#4a7c59" FontSize="12" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                                                <TextBlock Text="1001" Foreground="#666" FontSize="9" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <TextBlock Text="Исходный тайл" Foreground="#666" FontSize="10" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                                    </StackPanel>
+
+                                    <!-- Стрелка -->
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="15,0">
+                                        <TextBlock Text="💾 Сохранить" Foreground="#59a9c9" FontSize="10" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="→" Foreground="#59a9c9" FontSize="20" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="📥 Применить" Foreground="#59a9c9" FontSize="10" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <!-- Целевой тайл -->
+                                    <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                        <Border Background="#2d2c35" CornerRadius="4" Padding="10" Width="80">
+                                            <StackPanel HorizontalAlignment="Center">
+                                                <TextBlock Text="—" Foreground="#666" FontSize="10" HorizontalAlignment="Center"/>
+                                                <TextBlock Text="D E N" Foreground="#4a7c59" FontSize="12" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                                                <TextBlock Text="1005" Foreground="#666" FontSize="9" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <TextBlock Text="Любой другой тайл" Foreground="#666" FontSize="10" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Экспорт -->
+                <Border Background="#252429" CornerRadius="8" Padding="20" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="📤 Экспорт текстур" 
+                                   FontSize="18" FontWeight="Bold" Foreground="#c95a8a"/>
+                        <TextBlock Foreground="#ccc" FontSize="13" Margin="0,10,0,0" TextWrapping="Wrap">
+                            <Run FontWeight="Bold">Шаблон имени:</Run>
+                            <Run>Отображается над сеткой UDIM. Пример: T_АдресПроекта_001_Diffuse_1.1001.png</Run>
+                            <LineBreak/><LineBreak/>
+                            <Run FontWeight="Bold">Папка экспорта:</Run>
+                            <Run>Выберите папку кнопкой "..." внизу окна.</Run>
+                            <LineBreak/><LineBreak/>
+                            <Run FontWeight="Bold">Экспорт текущей модели:</Run>
+                            <Run>Экспортирует текстуры только активной вкладки в выбранную папку.</Run>
+                            <LineBreak/><LineBreak/>
+                            <Run FontWeight="Bold">Экспорт всех моделей:</Run>
+                            <Run>Создаёт отдельную папку для каждой модели с её текстурами.</Run>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- Утилиты -->
+                <Border Background="#252429" CornerRadius="8" Padding="20" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="🔧 Утилиты" 
+                                   FontSize="18" FontWeight="Bold" Foreground="#9a6ac9"/>
+
+                        <!-- RAL Colors -->
+                        <Border Background="#2a2a3a" CornerRadius="6" Padding="15" Margin="0,15,0,10">
+                            <StackPanel>
+                                <TextBlock Text="🎨 RAL Colors" FontWeight="Bold" Foreground="White" FontSize="14"/>
+                                <TextBlock Foreground="#aaa" FontSize="12" Margin="0,8,0,0" TextWrapping="Wrap">
+                                    Поиск цветов по каталогу RAL. Введите номер (например, 3020) для поиска.
+                                    Клик по HEX коду копирует его в буфер. Можно сохранить цвет как PNG
+                                    в разных разрешениях (256-4096 px) без альфа-канала.
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Name Generator -->
+                        <Border Background="#2a3a2a" CornerRadius="6" Padding="15" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="🔤 Name Generator" FontWeight="Bold" Foreground="White" FontSize="14"/>
+                                <TextBlock Foreground="#aaa" FontSize="12" Margin="0,8,0,0" TextWrapping="Wrap">
+                                    Генерирует стандартные имена файлов для проекта: геометрия, материалы, 
+                                    текстуры, коллизии, освещение, FBX и архивы. Выберите район для Low-Poly 
+                                    имён. Клик по строке копирует имя в буфер.
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Create Folder -->
+                        <Border Background="#3a2a2a" CornerRadius="6" Padding="15">
+                            <StackPanel>
+                                <TextBlock Text="📁 Создать папку проекта" FontWeight="Bold" Foreground="White" FontSize="14"/>
+                                <TextBlock Foreground="#aaa" FontSize="12" Margin="0,8,0,0" TextWrapping="Wrap">
+                                    Создаёт стандартную структуру папок для нового проекта:
+                                    source (исходники), export (финальные файлы), work (рабочие файлы).
+                                    Включает папки для HP/LP и AGR_Check.
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Горячие клавиши -->
+                <Border Background="#252429" CornerRadius="8" Padding="20" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="⌨️ Горячие клавиши" 
+                                   FontSize="18" FontWeight="Bold" Foreground="#6ac9a9"/>
+                        <Grid Margin="0,15,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Enter" Foreground="#6a9955" FontFamily="Consolas" FontWeight="Bold"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="Сохранить в диалогах переименования" Foreground="#ccc"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Escape" Foreground="#6a9955" FontFamily="Consolas" FontWeight="Bold" Margin="0,5,0,0"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="Отмена в диалогах" Foreground="#ccc" Margin="0,5,0,0"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Ctrl+Enter" Foreground="#6a9955" FontFamily="Consolas" FontWeight="Bold" Margin="0,5,0,0"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="Сохранить в диалоге проекта" Foreground="#ccc" Margin="0,5,0,0"/>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="↑ ↓" Foreground="#6a9955" FontFamily="Consolas" FontWeight="Bold" Margin="0,5,0,0"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="Переключение между результатами поиска RAL" Foreground="#ccc" Margin="0,5,0,0"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Хранение данных -->
+                <Border Background="#252429" CornerRadius="8" Padding="20">
+                    <StackPanel>
+                        <TextBlock Text="💾 Хранение данных" 
+                                   FontSize="18" FontWeight="Bold" Foreground="#c9c959"/>
+                        <TextBlock Foreground="#ccc" FontSize="13" Margin="0,10,0,0" TextWrapping="Wrap">
+                            <Run FontWeight="Bold">Portable режим:</Run>
+                            <Run>Все данные хранятся в папке Data рядом с программой.</Run>
+                            <LineBreak/><LineBreak/>
+                            <Run FontWeight="Bold">Автосохранение:</Run>
+                            <Run>Проекты сохраняются автоматически при любых изменениях.</Run>
+                            <LineBreak/><LineBreak/>
+                            <Run FontWeight="Bold">Текстуры:</Run>
+                            <Run>Программа хранит только пути к текстурам, не сами файлы. Убедитесь, что исходные текстуры доступны.</Run>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Нижняя панель -->
+        <Border Grid.Row="2" Background="#252429" Padding="15">
+            <Grid>
+                <TextBlock Text="© 2024 AGR Project Manager" 
+                           Foreground="#666" 
+                           VerticalAlignment="Center"/>
+                <Button Content="Закрыть" 
+                        Background="#3a3a3a" 
+                        Foreground="White"
+                        Padding="20,8"
+                        HorizontalAlignment="Right"
+                        Cursor="Hand"
+                        Click="Close_Click"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

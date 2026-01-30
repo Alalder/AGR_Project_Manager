@@ -1,0 +1,267 @@
+[
+  {
+    "Id": "08d85805-1ace-4019-99bb-cb9d3ee246dc",
+    "Name": "234312",
+    "Description": "\u0439\u0446\u0443\u044B\u0444\u0432",
+    "CreatedDate": "2026-01-30T17:30:22.0033866+08:00",
+    "ModifiedDate": "2026-01-30T17:31:06.3378493+08:00",
+    "Models": [
+      {
+        "Name": "001",
+        "UdimRows": [
+          [
+            {
+              "UdimNumber": 1001,
+              "Name": "\u0430\u0441\u0444\u0430\u043B\u044C\u0442",
+              "DisplayName": "\u0430\u0441\u0444\u0430\u043B\u044C\u0442",
+              "DiffusePath": "E:\\E_work_3dsmax\\Vladislav Yurchenko\\My_textures\\\u0430\u0441\u0444\u0430\u043B\u044C\u0442_Diffuse.png",
+              "ErmPath": "E:\\E_work_3dsmax\\Vladislav Yurchenko\\My_textures\\\u0430\u0441\u0444\u0430\u043B\u044C\u0442_ERM.png",
+              "NormalPath": "E:\\E_work_3dsmax\\Vladislav Yurchenko\\My_textures\\\u0430\u0441\u0444\u0430\u043B\u044C\u0442_Normal.png",
+              "HasDiffuse": true,
+              "HasErm": true,
+              "HasNormal": true,
+              "HasAnyTexture": true
+            },
+            {
+              "UdimNumber": 1002,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1003,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1004,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1005,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1006,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1007,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1008,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1009,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1010,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            }
+          ]
+        ]
+      },
+      {
+        "Name": "Ground",
+        "UdimRows": [
+          [
+            {
+              "UdimNumber": 1001,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1002,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1003,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1004,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1005,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1006,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1007,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1008,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1009,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            },
+            {
+              "UdimNumber": 1010,
+              "Name": "",
+              "DisplayName": "\u2014",
+              "DiffusePath": null,
+              "ErmPath": null,
+              "NormalPath": null,
+              "HasDiffuse": false,
+              "HasErm": false,
+              "HasNormal": false,
+              "HasAnyTexture": false
+            }
+          ]
+        ]
+      }
+    ],
+    "SelectedModelIndex": 0,
+    "DistrictCode": ""
+  }
+]
