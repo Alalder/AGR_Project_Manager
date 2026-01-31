@@ -1,2 +1,0 @@
-E:\My_projects\AGR_Project_Manager\AGR_Project_Manager\bin\Release\net8.0-windows\win-x64\publish\AGR_Project_Manager.pdb
-E:\My_projects\AGR_Project_Manager\AGR_Project_Manager\bin\Release\net8.0-windows\win-x64\publish\AGR_Project_Manager.exe

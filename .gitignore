@@ -1,0 +1,12 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.cache
+
+# Сборка
+bin/
+obj/
+
+# Публикация
+publish/
