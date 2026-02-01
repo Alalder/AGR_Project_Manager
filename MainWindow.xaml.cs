@@ -630,6 +630,24 @@ namespace AGR_Project_Manager
             window.Show();
         }
 
+        private void RequirementsBtn_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var psi = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "https://www.mos.ru/upload/content/files/3082f7e5e5f574e2be658d0542484d4c/RasporyajeniepoVPMiNPM.pdf",
+                    UseShellExecute = true
+                };
+                System.Diagnostics.Process.Start(psi);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Не удалось открыть ссылку:\n{ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         #endregion
     }
 }

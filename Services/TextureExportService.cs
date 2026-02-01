@@ -25,18 +25,18 @@ namespace AGR_Project_Manager.Services
         public string GetFileNameTemplate(Project project, ModelData model)
         {
             if (project == null || model == null)
-                return "T_[Проект]_[Модель]_[Тип]_1.[UDIM].png";
+                return "T_[Проект]_[Модель]_[Diffuse/ERM/Normal]_1.[UDIM].png";
 
             bool needsSuffix = NeedsModelSuffix(project);
             bool isGround = model.Name.Equals("Ground", StringComparison.OrdinalIgnoreCase);
 
             if (needsSuffix || isGround)
             {
-                return $"T_{project.Name}_{model.Name}_[D/E/N]_1.[UDIM].png";
+                return $"T_{project.Name}_{model.Name}_[Diffuse/ERM/Normal]_1.[UDIM].png";
             }
             else
             {
-                return $"T_{project.Name}_[D/E/N]_1.[UDIM].png";
+                return $"T_{project.Name}_[Diffuse/ERM/Normal]_1.[UDIM].png";
             }
         }
 

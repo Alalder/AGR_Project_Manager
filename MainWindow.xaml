@@ -122,7 +122,9 @@
                         <Separator Background="#3a3a3a" Margin="0,4"/>
 
                         <Button Content="📖 Справка" Background="#3a3a3a" Foreground="White" 
-                Margin="0,6,0,0" Padding="8,6" Cursor="Hand" Click="HelpBtn_Click"/>
+                Margin="0,6,0,6" Padding="8,6" Cursor="Hand" Click="HelpBtn_Click"/>
+                        <Button Content="📋 Актуальные требования" Background="#3a3a3a" Foreground="White" 
+                Margin="0,0,0,0" Padding="8,6" Cursor="Hand" Click="RequirementsBtn_Click"/>
                     </StackPanel>
                 </Border>
             </Grid>
