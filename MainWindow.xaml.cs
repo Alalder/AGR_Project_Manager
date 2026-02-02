@@ -618,6 +618,12 @@ namespace AGR_Project_Manager
             window.Show();
         }
 
+        private void GeoJsonBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var window = new GeoJsonGeneratorWindow(_projectService, _selectedProject);
+            window.Show();
+        }
+
         private void CreateFolderBtn_Click(object sender, RoutedEventArgs e)
         {
             var window = new CreateFolderWindow();

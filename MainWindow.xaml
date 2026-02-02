@@ -118,6 +118,8 @@
                 Margin="0,0,0,6" Padding="8,6" Cursor="Hand" Click="NameGeneratorBtn_Click"/>
                         <Button Content="📁 Создать папку проекта" Background="#3a3a3a" Foreground="White" 
                 Margin="0,0,0,6" Padding="8,6" Cursor="Hand" Click="CreateFolderBtn_Click"/>
+                        <Button Content="🌍 GeoJSON Generator" Background="#3a3a3a" Foreground="White" 
+        Margin="0,0,0,6" Padding="8,6" Cursor="Hand" Click="GeoJsonBtn_Click"/>
 
                         <Separator Background="#3a3a3a" Margin="0,4"/>
 

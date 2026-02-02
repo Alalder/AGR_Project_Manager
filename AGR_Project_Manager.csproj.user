@@ -5,6 +5,9 @@
     <Compile Update="Windows\CreateFolderWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Windows\GeoJsonGeneratorWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Windows\HelpWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
