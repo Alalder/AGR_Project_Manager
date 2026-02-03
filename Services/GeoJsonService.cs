@@ -22,7 +22,7 @@ namespace AGR_Project_Manager.Services
             sb.AppendLine("    \"type\": \"ObjectFeature\",");
             sb.AppendLine("    \"properties\": {");
 
-            // Properties
+            // Текстовые поля (всегда в кавычках)
             sb.AppendLine($"      \"address\": \"{Escape(data.Address)}\",");
             sb.AppendLine($"      \"okrug\": \"{Escape(data.Okrug)}\",");
             sb.AppendLine($"      \"rajon\": \"{Escape(data.Rajon)}\",");
@@ -32,20 +32,24 @@ namespace AGR_Project_Manager.Services
             sb.AppendLine($"      \"cadNum\": \"{Escape(data.CadNum)}\",");
             sb.AppendLine($"      \"FNO_code\": \"{Escape(data.FnoCode)}\",");
             sb.AppendLine($"      \"FNO_name\": \"{Escape(data.FnoName)}\",");
-            sb.AppendLine($"      \"ZU_area\": \"{Escape(data.ZuArea)}\",");
-            sb.AppendLine($"      \"h_relief\": \"{Escape(data.HRelief)}\",");
-            sb.AppendLine($"      \"h_otn\": \"{Escape(data.HOtn)}\",");
-            sb.AppendLine($"      \"h_abs\": \"{Escape(data.HAbs)}\",");
-            sb.AppendLine($"      \"s_obsh\": \"{Escape(data.SObsh)}\",");
-            sb.AppendLine($"      \"s_naz\": \"{Escape(data.SNaz)}\",");
-            sb.AppendLine($"      \"s_podz\": \"{Escape(data.SPodz)}\",");
-            sb.AppendLine($"      \"spp_gns\": \"{Escape(data.SppGns)}\",");
+
+            // Числовые поля (без кавычек если есть значение, с кавычками если пусто)
+            sb.AppendLine($"      \"ZU_area\": {FormatNumericField(data.ZuArea)},");
+            sb.AppendLine($"      \"h_relief\": {FormatNumericField(data.HRelief)},");
+            sb.AppendLine($"      \"h_otn\": {FormatNumericField(data.HOtn)},");
+            sb.AppendLine($"      \"h_abs\": {FormatNumericField(data.HAbs)},");
+            sb.AppendLine($"      \"s_obsh\": {FormatNumericField(data.SObsh)},");
+            sb.AppendLine($"      \"s_naz\": {FormatNumericField(data.SNaz)},");
+            sb.AppendLine($"      \"s_podz\": {FormatNumericField(data.SPodz)},");
+            sb.AppendLine($"      \"spp_gns\": {FormatNumericField(data.SppGns)},");
+
+            // Остальные текстовые поля
             sb.AppendLine($"      \"act_AGR\": \"{Escape(data.ActAgr)}\",");
             sb.AppendLine($"      \"imageBase64\": \"{data.ImageBase64 ?? ""}\",");
             sb.AppendLine($"      \"other\": \"{Escape(data.Other)}\"");
             sb.AppendLine("    },");
 
-            // Geometry
+            // Geometry с координатами в столбик
             double.TryParse(data.CoordX?.Replace(',', '.'),
                 System.Globalization.NumberStyles.Any,
                 System.Globalization.CultureInfo.InvariantCulture, out double x);
@@ -55,10 +59,13 @@ namespace AGR_Project_Manager.Services
 
             sb.AppendLine("    \"geometry\": {");
             sb.AppendLine("      \"type\": \"Point\",");
-            sb.AppendLine($"      \"coordinates\": [{FormatDouble(x)}, {FormatDouble(y)}]");
+            sb.AppendLine("      \"coordinates\": [");
+            sb.AppendLine($"        {FormatDouble(x)},");
+            sb.AppendLine($"        {FormatDouble(y)}");
+            sb.AppendLine("      ]");
             sb.AppendLine("    },");
 
-            // Glasses
+            // Glasses с числовыми значениями без кавычек
             sb.AppendLine("    \"Glasses\": [");
             if (data.Glasses != null && data.Glasses.Count > 0)
             {
@@ -69,14 +76,14 @@ namespace AGR_Project_Manager.Services
                     var glassStr = new StringBuilder();
                     glassStr.AppendLine($"        \"{Escape(glass.Name)}\": {{");
                     glassStr.AppendLine("          \"color_RGB\": {");
-                    glassStr.AppendLine($"            \"Red\": \"{glass.Red}\",");
-                    glassStr.AppendLine($"            \"Green\": \"{glass.Green}\",");
-                    glassStr.AppendLine($"            \"Blue\": \"{glass.Blue}\"");
+                    glassStr.AppendLine($"            \"Red\": {glass.Red},");
+                    glassStr.AppendLine($"            \"Green\": {glass.Green},");
+                    glassStr.AppendLine($"            \"Blue\": {glass.Blue}");
                     glassStr.AppendLine("          },");
-                    glassStr.AppendLine($"          \"transparency\": \"{Escape(glass.Transparency)}\",");
-                    glassStr.AppendLine($"          \"refraction\": \"{Escape(glass.Refraction)}\",");
-                    glassStr.AppendLine($"          \"roughness\": \"{Escape(glass.Roughness)}\",");
-                    glassStr.AppendLine($"          \"metallicity\": \"{Escape(glass.Metallicity)}\"");
+                    glassStr.AppendLine($"          \"transparency\": {FormatNumericField(glass.Transparency)},");
+                    glassStr.AppendLine($"          \"refraction\": {FormatNumericField(glass.Refraction)},");
+                    glassStr.AppendLine($"          \"roughness\": {FormatNumericField(glass.Roughness)},");
+                    glassStr.AppendLine($"          \"metallicity\": {FormatNumericField(glass.Metallicity)}");
                     glassStr.Append("        }");
                     glassList.Add(glassStr.ToString());
                 }
@@ -88,6 +95,32 @@ namespace AGR_Project_Manager.Services
             sb.AppendLine("}");
 
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Форматирует числовое поле: без кавычек если есть значение, с кавычками если пусто
+        /// </summary>
+        private string FormatNumericField(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return "\"\"";
+            }
+
+            // Заменяем запятую на точку для корректного JSON
+            string normalized = value.Trim().Replace(',', '.');
+
+            // Проверяем, что это действительно число
+            if (double.TryParse(normalized,
+                System.Globalization.NumberStyles.Any,
+                System.Globalization.CultureInfo.InvariantCulture,
+                out double num))
+            {
+                return normalized;
+            }
+
+            // Если не число — возвращаем в кавычках
+            return $"\"{Escape(value)}\"";
         }
 
         public GeoJsonData ParseGeoJson(string json)
