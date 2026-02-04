@@ -129,7 +129,7 @@
                VerticalAlignment="Center"
                Margin="0,0,8,0"/>
                             <ComboBox x:Name="ThemeComboBox"
-              Width="160"
+              Width="144"
               SelectionChanged="ThemeComboBox_SelectionChanged">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
