@@ -1,14 +1,14 @@
-﻿using System.Configuration;
-using System.Data;
-using System.Windows;
+﻿using System.Windows;
+using AGR_Project_Manager.Services;
 
 namespace AGR_Project_Manager
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
+        private void Application_Startup(object sender, StartupEventArgs e)
+        {
+            // Загружаем сохранённую тему при запуске
+            ThemeManager.LoadSavedTheme();
+        }
     }
-
 }

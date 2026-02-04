@@ -32,6 +32,16 @@ namespace AGR_Project_Manager
             PresetComboBox.ItemsSource = _presetService.Presets;  // НОВОЕ
         }
 
+        private void ThemeToggleBtn_Click(object sender, RoutedEventArgs e)
+        {
+            ThemeManager.ToggleTheme();
+
+            // Обновляем текст кнопки
+            ThemeToggleBtn.Content = ThemeManager.CurrentTheme == ThemeManager.Theme.Dark
+                ? "☀️ Светлая тема"
+                : "🌙 Тёмная тема";
+        }
+
         #region Project Management
 
         private void NewProjectBtn_Click(object sender, RoutedEventArgs e)
