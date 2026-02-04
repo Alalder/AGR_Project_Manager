@@ -5,7 +5,7 @@
         Height="500" Width="500"
         MinHeight="450" MinWidth="400"
         WindowStartupLocation="CenterOwner"
-        Background="#1e1d22"
+        Background="{DynamicResource BackgroundPrimary}"
         Loaded="Window_Loaded">
 
     <Grid Margin="20">
@@ -24,40 +24,33 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBox x:Name="SearchTextBox"
-                     Background="#2d2c35"
-                     Foreground="White"
-                     BorderBrush="#3a3a3a"
-                     Padding="12,10"
-                     FontSize="16"
-                     CaretBrush="White"
-                     VerticalContentAlignment="Center"
-                     TextChanged="SearchTextBox_TextChanged"
-                     KeyDown="SearchTextBox_KeyDown">
-                <TextBox.Style>
-                    <Style TargetType="TextBox">
-                        <Style.Triggers>
-                            <Trigger Property="Text" Value="">
-                                <Setter Property="Background">
-                                    <Setter.Value>
-                                        <VisualBrush Stretch="None" AlignmentX="Left">
-                                            <VisualBrush.Visual>
-                                                <TextBlock Text="  Введите номер RAL (например: 1000, 3020, 5015)" 
-                                                           Foreground="#666" FontSize="14" Margin="10,0,0,0"/>
-                                            </VisualBrush.Visual>
-                                        </VisualBrush>
-                                    </Setter.Value>
-                                </Setter>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBox.Style>
-            </TextBox>
+            <!-- TextBox с плейсхолдером -->
+            <Grid>
+                <TextBox x:Name="SearchTextBox"
+                         Background="{DynamicResource BackgroundTertiary}"
+                         Foreground="{DynamicResource ForegroundPrimary}"
+                         BorderBrush="{DynamicResource BorderPrimary}"
+                         Padding="12,10"
+                         FontSize="16"
+                         CaretBrush="{DynamicResource ForegroundPrimary}"
+                         VerticalContentAlignment="Center"
+                         TextChanged="SearchTextBox_TextChanged"
+                         KeyDown="SearchTextBox_KeyDown"/>
+
+                <!-- Плейсхолдер (скрывается когда есть текст) -->
+                <TextBlock x:Name="SearchPlaceholder"
+                           Text="Введите номер RAL (например: 1000, 3020, 5015)"
+                           Foreground="{DynamicResource ForegroundDisabled}"
+                           FontSize="14"
+                           Margin="14,0,0,0"
+                           VerticalAlignment="Center"
+                           IsHitTestVisible="False"/>
+            </Grid>
 
             <Button Grid.Column="1" 
                     Content="🔍" 
-                    Background="#4a7c59" 
-                    Foreground="White"
+                    Background="{DynamicResource AccentPrimary}" 
+                    Foreground="{DynamicResource ForegroundPrimary}"
                     FontSize="16"
                     Padding="15,10"
                     Margin="10,0,0,0"
@@ -67,14 +60,14 @@
 
         <!-- Результат -->
         <Border Grid.Row="2" 
-                Background="#252429" 
+                Background="{DynamicResource BackgroundSecondary}" 
                 CornerRadius="8"
                 Padding="20">
 
             <!-- Когда ничего не найдено -->
             <TextBlock x:Name="PlaceholderText"
                        Text="Введите номер RAL для поиска"
-                       Foreground="#666"
+                       Foreground="{DynamicResource ForegroundDisabled}"
                        FontSize="14"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"/>
@@ -84,7 +77,7 @@
         <!-- Панель с найденным цветом (изначально скрыта) -->
         <Border x:Name="ResultPanel" 
                 Grid.Row="2" 
-                Background="#252429" 
+                Background="{DynamicResource BackgroundSecondary}" 
                 CornerRadius="8"
                 Padding="20"
                 Visibility="Collapsed">
@@ -111,16 +104,16 @@
                     <TextBlock x:Name="ColorCodeText"
                                FontSize="22"
                                FontWeight="Bold"
-                               Foreground="White"
+                               Foreground="{DynamicResource ForegroundPrimary}"
                                HorizontalAlignment="Center"/>
                     <TextBlock x:Name="ColorNameText"
                                FontSize="14"
-                               Foreground="#aaa"
+                               Foreground="{DynamicResource ForegroundSecondary}"
                                HorizontalAlignment="Center"
                                Margin="0,5,0,15"/>
 
                     <!-- HEX (копируемый) -->
-                    <Border Background="#1e1d22" 
+                    <Border Background="{DynamicResource BackgroundPrimary}" 
                             CornerRadius="6" 
                             Padding="15,10"
                             Margin="0,0,0,10"
@@ -133,20 +126,22 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="HEX" Foreground="#888" FontSize="12" VerticalAlignment="Center"/>
+                            <TextBlock Text="HEX" 
+                                       Foreground="{DynamicResource ForegroundTertiary}" 
+                                       FontSize="12" VerticalAlignment="Center"/>
                             <TextBlock x:Name="HexText" 
                                        Grid.Column="1" 
                                        FontSize="16" 
                                        FontWeight="SemiBold"
                                        FontFamily="Consolas"
-                                       Foreground="#6a9955" 
+                                       Foreground="{DynamicResource CodeText}" 
                                        HorizontalAlignment="Center"/>
                             <TextBlock Text="📋" Grid.Column="2" FontSize="14" VerticalAlignment="Center"/>
                         </Grid>
                     </Border>
 
                     <!-- RGB -->
-                    <Border Background="#1e1d22" 
+                    <Border Background="{DynamicResource BackgroundPrimary}" 
                             CornerRadius="6" 
                             Padding="15,10">
                         <Grid>
@@ -154,12 +149,14 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="RGB" Foreground="#888" FontSize="12" VerticalAlignment="Center"/>
+                            <TextBlock Text="RGB" 
+                                       Foreground="{DynamicResource ForegroundTertiary}" 
+                                       FontSize="12" VerticalAlignment="Center"/>
                             <TextBlock x:Name="RgbText" 
                                        Grid.Column="1" 
                                        FontSize="16" 
                                        FontFamily="Consolas"
-                                       Foreground="White" 
+                                       Foreground="{DynamicResource ForegroundPrimary}" 
                                        HorizontalAlignment="Center"/>
                         </Grid>
                     </Border>
@@ -170,7 +167,7 @@
         <!-- Панель сохранения -->
         <Border x:Name="SavePanel"
                 Grid.Row="4" 
-                Background="#252429" 
+                Background="{DynamicResource BackgroundSecondary}" 
                 CornerRadius="8"
                 Padding="15"
                 Visibility="Collapsed">
@@ -184,13 +181,10 @@
                 <!-- Выбор размера -->
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Размер:" 
-                               Foreground="#aaa" 
+                               Foreground="{DynamicResource ForegroundSecondary}" 
                                VerticalAlignment="Center"
                                Margin="0,0,10,0"/>
                     <ComboBox x:Name="SizeComboBox"
-                              Background="#2d2c35"
-                              Foreground="White"
-                              Padding="10,6"
                               Width="100"
                               SelectedIndex="1">
                         <ComboBoxItem Content="256 px"/>
@@ -203,8 +197,8 @@
                 <!-- Кнопка сохранения -->
                 <Button Grid.Column="2"
                         Content="💾 Сохранить PNG"
-                        Background="#4a7c59"
-                        Foreground="White"
+                        Background="{DynamicResource AccentPrimary}"
+                        Foreground="{DynamicResource ForegroundPrimary}"
                         Padding="20,10"
                         FontWeight="SemiBold"
                         Cursor="Hand"

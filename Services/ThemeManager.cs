@@ -1,39 +1,50 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 
 namespace AGR_Project_Manager.Services
 {
     public static class ThemeManager
     {
-        public enum Theme
+        // Модель для темы
+        public class ThemeInfo
         {
-            Dark,
-            Light
+            public string Id { get; set; }
+            public string DisplayName { get; set; }
+            public string FileName { get; set; }
         }
 
-        private static Theme _currentTheme = Theme.Dark;
-
-        public static Theme CurrentTheme => _currentTheme;
-
-        public static void ChangeTheme(Theme theme)
+        // Список всех доступных тем
+        public static List<ThemeInfo> AvailableThemes { get; } = new List<ThemeInfo>
         {
-            _currentTheme = theme;
+            new ThemeInfo { Id = "Dark", DisplayName = "🌙 Тёмная", FileName = "DarkTheme" },
+            new ThemeInfo { Id = "DarkBlue", DisplayName = "🌊 Тёмно-синяя", FileName = "DarkBlueTheme" },
+            new ThemeInfo { Id = "DarkPurple", DisplayName = "🔮 Фиолетовая", FileName = "DarkPurpleTheme" },
+            new ThemeInfo { Id = "Light", DisplayName = "☀️ Светлая", FileName = "LightTheme" },
+            new ThemeInfo { Id = "LightBlue", DisplayName = "🌤️ Светло-голубая", FileName = "LightBlueTheme" }
+        };
 
-            var themeName = theme switch
+        private static string _currentThemeId = "Dark";
+
+        public static string CurrentThemeId => _currentThemeId;
+
+        public static void ChangeTheme(string themeId)
+        {
+            var theme = AvailableThemes.Find(t => t.Id == themeId);
+            if (theme == null)
             {
-                Theme.Light => "LightTheme",
-                Theme.Dark => "DarkTheme",
-                _ => "DarkTheme"
-            };
+                theme = AvailableThemes[0]; // Fallback на первую тему
+            }
 
-            var uri = new Uri($"Themes/{themeName}.xaml", UriKind.Relative);
+            _currentThemeId = theme.Id;
+
+            var uri = new Uri($"Themes/{theme.FileName}.xaml", UriKind.Relative);
 
             var app = Application.Current.Resources.MergedDictionaries;
 
-            // Ищем и удаляем старую тему (первый словарь - это тема)
+            // Удаляем старую тему (первый словарь)
             if (app.Count > 0)
             {
-                // Удаляем только словарь темы (первый)
                 app.RemoveAt(0);
             }
 
@@ -42,34 +53,53 @@ namespace AGR_Project_Manager.Services
             app.Insert(0, newTheme);
 
             // Сохраняем выбор пользователя
-            Properties.Settings.Default.Theme = theme.ToString();
-            Properties.Settings.Default.Save();
+            SaveThemePreference(themeId);
+        }
+
+        public static void ChangeTheme(ThemeInfo theme)
+        {
+            if (theme != null)
+            {
+                ChangeTheme(theme.Id);
+            }
         }
 
         public static void LoadSavedTheme()
         {
             try
             {
-                var savedTheme = Properties.Settings.Default.Theme;
-                if (!string.IsNullOrEmpty(savedTheme) && Enum.TryParse<Theme>(savedTheme, out var theme))
+                var savedThemeId = Properties.Settings.Default.Theme;
+                if (!string.IsNullOrEmpty(savedThemeId))
                 {
-                    ChangeTheme(theme);
+                    ChangeTheme(savedThemeId);
                 }
                 else
                 {
-                    // По умолчанию тёмная тема
-                    ChangeTheme(Theme.Dark);
+                    ChangeTheme("Dark");
                 }
             }
             catch
             {
-                ChangeTheme(Theme.Dark);
+                ChangeTheme("Dark");
             }
         }
 
-        public static void ToggleTheme()
+        public static ThemeInfo GetCurrentTheme()
         {
-            ChangeTheme(_currentTheme == Theme.Dark ? Theme.Light : Theme.Dark);
+            return AvailableThemes.Find(t => t.Id == _currentThemeId) ?? AvailableThemes[0];
+        }
+
+        private static void SaveThemePreference(string themeId)
+        {
+            try
+            {
+                Properties.Settings.Default.Theme = themeId;
+                Properties.Settings.Default.Save();
+            }
+            catch
+            {
+                // Игнорируем ошибки сохранения
+            }
         }
     }
 }

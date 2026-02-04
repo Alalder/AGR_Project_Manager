@@ -29,6 +29,12 @@ namespace AGR_Project_Manager.Windows
             _allDistricts = DistrictDatabase.Districts.ToList();
         }
 
+        // ===== ВСПОМОГАТЕЛЬНЫЙ МЕТОД ДЛЯ ПОЛУЧЕНИЯ КИСТЕЙ ИЗ ТЕМЫ =====
+        private SolidColorBrush GetThemeBrush(string resourceKey)
+        {
+            return (SolidColorBrush)Application.Current.FindResource(resourceKey);
+        }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             ProjectComboBox.ItemsSource = _projectService.Projects;
@@ -190,7 +196,7 @@ namespace AGR_Project_Manager.Windows
             var textBlock = new TextBlock
             {
                 Text = text,
-                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6a9955")),
+                Foreground = GetThemeBrush("CodeText"),
                 FontFamily = new FontFamily("Consolas"),
                 FontSize = 11,
                 TextTrimming = TextTrimming.CharacterEllipsis
@@ -198,7 +204,7 @@ namespace AGR_Project_Manager.Windows
 
             var border = new Border
             {
-                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2d2c35")),
+                Background = GetThemeBrush("BackgroundTertiary"),
                 CornerRadius = new CornerRadius(4),
                 Padding = new Thickness(10, 6, 10, 6),
                 Margin = new Thickness(0, 2, 0, 2),
@@ -209,12 +215,12 @@ namespace AGR_Project_Manager.Windows
 
             border.MouseEnter += (s, e) =>
             {
-                border.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3d3c45"));
+                border.Background = GetThemeBrush("HoverBackground");
             };
 
             border.MouseLeave += (s, e) =>
             {
-                border.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2d2c35"));
+                border.Background = GetThemeBrush("BackgroundTertiary");
             };
 
             border.MouseLeftButtonDown += (s, e) =>
@@ -235,7 +241,7 @@ namespace AGR_Project_Manager.Windows
                 var originalBrush = textBlock.Foreground;
 
                 textBlock.Text = "✓ Скопировано!";
-                textBlock.Foreground = new SolidColorBrush(Colors.LightGreen);
+                textBlock.Foreground = GetThemeBrush("SuccessText");
 
                 var timer = new System.Windows.Threading.DispatcherTimer
                 {

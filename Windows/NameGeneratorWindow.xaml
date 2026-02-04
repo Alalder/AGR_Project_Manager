@@ -4,7 +4,7 @@
         Title="🔤 Name Generator" 
         WindowState="Maximized"
         WindowStartupLocation="CenterScreen"
-        Background="#1e1d22"
+        Background="{DynamicResource BackgroundPrimary}"
         Loaded="Window_Loaded">
 
     <Window.Resources>
@@ -12,7 +12,7 @@
         <Style x:Key="BlockHeaderStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="16"/>
             <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundPrimary}"/>
             <Setter Property="Margin" Value="0,0,0,10"/>
         </Style>
 
@@ -20,30 +20,30 @@
         <Style x:Key="SubBlockHeaderStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#888"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundTertiary}"/>
             <Setter Property="Margin" Value="0,10,0,5"/>
         </Style>
 
         <!-- Стиль для элементов ComboBox -->
         <Style x:Key="DarkComboBoxItemStyle" TargetType="ComboBoxItem">
-            <Setter Property="Background" Value="#2d2c35"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="{DynamicResource ComboBoxBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundPrimary}"/>
             <Setter Property="Padding" Value="10,8"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBoxItem">
                         <Border Background="{TemplateBinding Background}" 
-                            Padding="{TemplateBinding Padding}"
-                            BorderThickness="0">
+                                Padding="{TemplateBinding Padding}"
+                                BorderThickness="0">
                             <ContentPresenter/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsHighlighted" Value="True">
-                                <Setter Property="Background" Value="#3d3c45"/>
+                                <Setter Property="Background" Value="{DynamicResource ComboBoxItemHighlighted}"/>
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Background" Value="#4a7c59"/>
+                                <Setter Property="Background" Value="{DynamicResource ComboBoxItemSelected}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -53,9 +53,9 @@
 
         <!-- Стиль для тёмного ComboBox -->
         <Style x:Key="DarkComboBoxStyle" TargetType="ComboBox">
-            <Setter Property="Background" Value="#2d2c35"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#3a3a3a"/>
+            <Setter Property="Background" Value="{DynamicResource ComboBoxBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundPrimary}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderPrimary}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="10,8"/>
             <Setter Property="ItemContainerStyle" Value="{StaticResource DarkComboBoxItemStyle}"/>
@@ -70,20 +70,20 @@
 
                             <!-- Основной фон -->
                             <Border x:Name="Border"
-                                Grid.ColumnSpan="2"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="4"/>
+                                    Grid.ColumnSpan="2"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="4"/>
 
                             <!-- Кнопка выпадающего списка -->
                             <ToggleButton x:Name="ToggleButton"
-                                      Grid.ColumnSpan="2"
-                                      Background="Transparent"
-                                      BorderThickness="0"
-                                      Focusable="False"
-                                      IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
-                                      ClickMode="Press">
+                                          Grid.ColumnSpan="2"
+                                          Background="Transparent"
+                                          BorderThickness="0"
+                                          Focusable="False"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                          ClickMode="Press">
                                 <ToggleButton.Template>
                                     <ControlTemplate TargetType="ToggleButton">
                                         <Border Background="Transparent">
@@ -93,11 +93,11 @@
                                                     <ColumnDefinition Width="30"/>
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Grid.Column="1" 
-                                                       Text="▼" 
-                                                       Foreground="#888"
-                                                       FontSize="10"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Center"/>
+                                                           Text="▼" 
+                                                           Foreground="{DynamicResource ComboBoxArrow}"
+                                                           FontSize="10"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
                                             </Grid>
                                         </Border>
                                     </ControlTemplate>
@@ -106,51 +106,51 @@
 
                             <!-- Контент (для не-редактируемого) -->
                             <ContentPresenter x:Name="ContentSite"
-                                          Grid.Column="0"
-                                          Margin="{TemplateBinding Padding}"
-                                          HorizontalAlignment="Left"
-                                          VerticalAlignment="Center"
-                                          Content="{TemplateBinding SelectionBoxItem}"
-                                          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
-                                          IsHitTestVisible="False"/>
+                                              Grid.Column="0"
+                                              Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="Left"
+                                              VerticalAlignment="Center"
+                                              Content="{TemplateBinding SelectionBoxItem}"
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                              IsHitTestVisible="False"/>
 
                             <!-- TextBox для редактируемого ComboBox -->
                             <TextBox x:Name="PART_EditableTextBox"
-                                 Grid.Column="0"
-                                 Margin="3,3,23,3"
-                                 Padding="{TemplateBinding Padding}"
-                                 Background="Transparent"
-                                 Foreground="{TemplateBinding Foreground}"
-                                 BorderThickness="0"
-                                 CaretBrush="White"
-                                 IsReadOnly="{TemplateBinding IsReadOnly}"
-                                 Visibility="Hidden"
-                                 Focusable="True"
-                                 HorizontalAlignment="Stretch"
-                                 VerticalAlignment="Center"/>
+                                     Grid.Column="0"
+                                     Margin="3,3,23,3"
+                                     Padding="{TemplateBinding Padding}"
+                                     Background="Transparent"
+                                     Foreground="{TemplateBinding Foreground}"
+                                     BorderThickness="0"
+                                     CaretBrush="{DynamicResource ForegroundPrimary}"
+                                     IsReadOnly="{TemplateBinding IsReadOnly}"
+                                     Visibility="Hidden"
+                                     Focusable="True"
+                                     HorizontalAlignment="Stretch"
+                                     VerticalAlignment="Center"/>
 
                             <!-- Выпадающий список -->
                             <Popup x:Name="Popup"
-                               Placement="Bottom"
-                               IsOpen="{TemplateBinding IsDropDownOpen}"
-                               AllowsTransparency="True"
-                               Focusable="False"
-                               PopupAnimation="Slide">
+                                   Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True"
+                                   Focusable="False"
+                                   PopupAnimation="Slide">
                                 <Grid x:Name="DropDown"
-                                  MinWidth="{TemplateBinding ActualWidth}"
-                                  MaxHeight="{TemplateBinding MaxDropDownHeight}"
-                                  SnapsToDevicePixels="True">
+                                      MinWidth="{TemplateBinding ActualWidth}"
+                                      MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                      SnapsToDevicePixels="True">
                                     <Border x:Name="DropDownBorder"
-                                        Background="#2d2c35"
-                                        BorderBrush="#3a3a3a"
-                                        BorderThickness="1"
-                                        CornerRadius="4"
-                                        Margin="0,2,0,0">
+                                            Background="{DynamicResource ComboBoxBackground}"
+                                            BorderBrush="{DynamicResource BorderPrimary}"
+                                            BorderThickness="1"
+                                            CornerRadius="4"
+                                            Margin="0,2,0,0">
                                         <ScrollViewer SnapsToDevicePixels="True"
-                                                  VerticalScrollBarVisibility="Auto"
-                                                  MaxHeight="300">
+                                                      VerticalScrollBarVisibility="Auto"
+                                                      MaxHeight="300">
                                             <StackPanel IsItemsHost="True" 
-                                                    KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                                        KeyboardNavigation.DirectionalNavigation="Contained"/>
                                         </ScrollViewer>
                                     </Border>
                                 </Grid>
@@ -163,10 +163,10 @@
                                 <Setter TargetName="ContentSite" Property="Visibility" Value="Hidden"/>
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Border" Property="BorderBrush" Value="#5a5a5a"/>
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource BorderHover}"/>
                             </Trigger>
                             <Trigger Property="IsFocused" Value="True">
-                                <Setter TargetName="Border" Property="BorderBrush" Value="#4a7c59"/>
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource AccentPrimary}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -182,7 +182,7 @@
         </Grid.RowDefinitions>
 
         <!-- Верхняя панель -->
-        <Border Grid.Row="0" Background="#252429" Padding="15">
+        <Border Grid.Row="0" Background="{DynamicResource BackgroundSecondary}" Padding="15">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -198,50 +198,51 @@
 
                 <!-- Выбор проекта -->
                 <TextBlock Grid.Column="0" 
-                   Text="Проект:" 
-                   Foreground="#aaa" 
-                   VerticalAlignment="Center"
-                   Margin="0,0,10,0"/>
+                           Text="Проект:" 
+                           Foreground="{DynamicResource ForegroundSecondary}" 
+                           VerticalAlignment="Center"
+                           Margin="0,0,10,0"/>
                 <ComboBox x:Name="ProjectComboBox"
-                  Grid.Column="1"
-                  Style="{StaticResource DarkComboBoxStyle}"
-                  FontSize="14"
-                  SelectionChanged="ProjectComboBox_SelectionChanged">
+                          Grid.Column="1"
+                          Style="{StaticResource DarkComboBoxStyle}"
+                          FontSize="14"
+                          SelectionChanged="ProjectComboBox_SelectionChanged">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Name}" Foreground="White"/>
+                            <TextBlock Text="{Binding Name}" 
+                                       Foreground="{DynamicResource ForegroundPrimary}"/>
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
 
                 <!-- Выбор района -->
                 <TextBlock Grid.Column="3" 
-                   Text="Район:" 
-                   Foreground="#aaa" 
-                   VerticalAlignment="Center"
-                   Margin="0,0,10,0"/>
+                           Text="Район:" 
+                           Foreground="{DynamicResource ForegroundSecondary}" 
+                           VerticalAlignment="Center"
+                           Margin="0,0,10,0"/>
                 <ComboBox x:Name="DistrictComboBox"
-                  Grid.Column="4"
-                  Style="{StaticResource DarkComboBoxStyle}"
-                  FontSize="13"
-                  IsEditable="True"
-                  IsTextSearchEnabled="True"
-                  IsTextSearchCaseSensitive="False"
-                  StaysOpenOnEdit="True"
-                  TextSearch.TextPath="Name"
-                  SelectionChanged="DistrictComboBox_SelectionChanged"
-                  PreviewTextInput="DistrictComboBox_PreviewTextInput">
+                          Grid.Column="4"
+                          Style="{StaticResource DarkComboBoxStyle}"
+                          FontSize="13"
+                          IsEditable="True"
+                          IsTextSearchEnabled="True"
+                          IsTextSearchCaseSensitive="False"
+                          StaysOpenOnEdit="True"
+                          TextSearch.TextPath="Name"
+                          SelectionChanged="DistrictComboBox_SelectionChanged"
+                          PreviewTextInput="DistrictComboBox_PreviewTextInput">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="{Binding Number}" 
-                                   Foreground="#6a9955" 
-                                   FontFamily="Consolas"
-                                   FontWeight="Bold"
-                                   Width="55"
-                                   Margin="0,0,10,0"/>
+                                           Foreground="{DynamicResource CodeText}" 
+                                           FontFamily="Consolas"
+                                           FontWeight="Bold"
+                                           Width="55"
+                                           Margin="0,0,10,0"/>
                                 <TextBlock Text="{Binding Name}" 
-                                   Foreground="White"/>
+                                           Foreground="{DynamicResource ForegroundPrimary}"/>
                             </StackPanel>
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
@@ -250,29 +251,29 @@
                 <!-- Отображение кода района -->
                 <StackPanel Grid.Column="6" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="Код:" 
-                       Foreground="#888" 
-                       Margin="0,0,8,0"
-                       VerticalAlignment="Center"/>
-                    <Border Background="#1e1d22" 
-                    CornerRadius="4" 
-                    Padding="15,8"
-                    MinWidth="70">
+                               Foreground="{DynamicResource ForegroundTertiary}" 
+                               Margin="0,0,8,0"
+                               VerticalAlignment="Center"/>
+                    <Border Background="{DynamicResource BackgroundPrimary}" 
+                            CornerRadius="4" 
+                            Padding="15,8"
+                            MinWidth="70">
                         <TextBlock x:Name="DistrictCodeText"
-                           Text="----"
-                           Foreground="#6a9955"
-                           FontFamily="Consolas"
-                           FontSize="16"
-                           FontWeight="Bold"
-                           HorizontalAlignment="Center"/>
+                                   Text="----"
+                                   Foreground="{DynamicResource CodeText}"
+                                   FontFamily="Consolas"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center"/>
                     </Border>
                 </StackPanel>
 
                 <!-- Информация -->
                 <StackPanel Grid.Column="8" Orientation="Horizontal">
                     <TextBlock Text="💡 Клик по строке = копирование" 
-                       Foreground="#666" 
-                       VerticalAlignment="Center"
-                       FontSize="12"/>
+                               Foreground="{DynamicResource ForegroundDisabled}" 
+                               VerticalAlignment="Center"
+                               FontSize="12"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -291,7 +292,9 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Блок 1: Геометрия -->
-                <Border Grid.Column="0" Background="#252429" CornerRadius="8" Margin="5" Padding="15">
+                <Border Grid.Column="0" 
+                        Background="{DynamicResource BackgroundSecondary}" 
+                        CornerRadius="8" Margin="5" Padding="15">
                     <StackPanel>
                         <TextBlock Text="📐 Геометрия" Style="{StaticResource BlockHeaderStyle}"/>
 
@@ -304,7 +307,9 @@
                 </Border>
 
                 <!-- Блок 2: Материалы -->
-                <Border Grid.Column="1" Background="#252429" CornerRadius="8" Margin="5" Padding="15">
+                <Border Grid.Column="1" 
+                        Background="{DynamicResource BackgroundSecondary}" 
+                        CornerRadius="8" Margin="5" Padding="15">
                     <StackPanel>
                         <TextBlock Text="🎨 Материалы" Style="{StaticResource BlockHeaderStyle}"/>
 
@@ -317,7 +322,9 @@
                 </Border>
 
                 <!-- Блок 3: Текстуры -->
-                <Border Grid.Column="2" Background="#252429" CornerRadius="8" Margin="5" Padding="15">
+                <Border Grid.Column="2" 
+                        Background="{DynamicResource BackgroundSecondary}" 
+                        CornerRadius="8" Margin="5" Padding="15">
                     <StackPanel>
                         <TextBlock Text="🖼️ Текстуры" Style="{StaticResource BlockHeaderStyle}"/>
 
@@ -330,7 +337,9 @@
                 </Border>
 
                 <!-- Блок 4: Коллизии и Освещение -->
-                <Border Grid.Column="3" Background="#252429" CornerRadius="8" Margin="5" Padding="15">
+                <Border Grid.Column="3" 
+                        Background="{DynamicResource BackgroundSecondary}" 
+                        CornerRadius="8" Margin="5" Padding="15">
                     <StackPanel>
                         <TextBlock Text="💥 Коллизии и Освещение" Style="{StaticResource BlockHeaderStyle}"/>
 
@@ -343,7 +352,9 @@
                 </Border>
 
                 <!-- Блок 5: FBX и Архивы -->
-                <Border Grid.Column="4" Background="#252429" CornerRadius="8" Margin="5" Padding="15">
+                <Border Grid.Column="4" 
+                        Background="{DynamicResource BackgroundSecondary}" 
+                        CornerRadius="8" Margin="5" Padding="15">
                     <StackPanel>
                         <TextBlock Text="📦 FBX и Архивы" Style="{StaticResource BlockHeaderStyle}"/>
 

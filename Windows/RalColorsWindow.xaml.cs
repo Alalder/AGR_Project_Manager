@@ -27,11 +27,18 @@ namespace AGR_Project_Manager.Windows
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            SearchPlaceholder.Visibility = string.IsNullOrEmpty(SearchTextBox.Text)
+                ? Visibility.Visible
+                : Visibility.Collapsed;
             SearchTextBox.Focus();
         }
 
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+            // Управление видимостью плейсхолдера
+            SearchPlaceholder.Visibility = string.IsNullOrEmpty(SearchTextBox.Text)
+                ? Visibility.Visible
+                : Visibility.Collapsed;
             // Автопоиск при вводе
             string searchText = SearchTextBox.Text.Trim();
 

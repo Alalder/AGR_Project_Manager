@@ -5,35 +5,35 @@
         Height="900" Width="1500"
         MinHeight="700" MinWidth="1200"
         WindowStartupLocation="CenterScreen"
-        Background="#1e1d22"
+        Background="{DynamicResource BackgroundPrimary}"
         Icon="/Resource/app_icon.ico">
 
     <Window.Resources>
         <Style x:Key="FieldLabelStyle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#888"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundTertiary}"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="Margin" Value="0,0,0,3"/>
         </Style>
 
         <Style x:Key="FieldInputStyle" TargetType="TextBox">
-            <Setter Property="Background" Value="#2d2c35"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#3a3a3a"/>
+            <Setter Property="Background" Value="{DynamicResource BackgroundTertiary}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundPrimary}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderPrimary}"/>
             <Setter Property="Padding" Value="8,5"/>
             <Setter Property="FontSize" Value="12"/>
-            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource ForegroundPrimary}"/>
         </Style>
 
         <Style x:Key="DisabledFieldStyle" TargetType="TextBox" BasedOn="{StaticResource FieldInputStyle}">
-            <Setter Property="Background" Value="#252525"/>
-            <Setter Property="Foreground" Value="#666"/>
+            <Setter Property="Background" Value="{DynamicResource ButtonBackgroundDisabled}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundDisabled}"/>
             <Setter Property="IsReadOnly" Value="True"/>
         </Style>
 
         <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundPrimary}"/>
             <Setter Property="Margin" Value="0,0,0,10"/>
         </Style>
     </Window.Resources>
@@ -46,7 +46,7 @@
         </Grid.RowDefinitions>
 
         <!-- Верхняя панель: выбор проекта -->
-        <Border Grid.Row="0" Background="#252429" Padding="15">
+        <Border Grid.Row="0" Background="{DynamicResource BackgroundSecondary}" Padding="15">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -55,26 +55,36 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Column="0" Text="Проект:" Foreground="#aaa" 
-                   VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Grid.Column="0" Text="Проект:" 
+                           Foreground="{DynamicResource ForegroundSecondary}" 
+                           VerticalAlignment="Center" Margin="0,0,10,0"/>
                 <ComboBox x:Name="ProjectComboBox" Grid.Column="1"
-                  SelectionChanged="ProjectComboBox_SelectionChanged">
+                          SelectionChanged="ProjectComboBox_SelectionChanged">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Name}" Foreground="White"/>
+                            <TextBlock Text="{Binding Name}" 
+                                       Foreground="{DynamicResource ForegroundPrimary}"/>
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
 
                 <StackPanel Grid.Column="3" Orientation="Horizontal">
-                    <Button Content="📂 Open GEOJSON" Background="#3a3a3a" Foreground="White"
-                    Padding="12,8" Margin="0,0,10,0" Click="OpenGeoJson_Click"/>
-                    <Button Content="👁️ Preview" Background="#3a3a3a" Foreground="White"
-                    Padding="12,8" Margin="0,0,10,0" Click="PreviewGeoJson_Click"/>
-                    <Button Content="💾 Export Current" Background="#4a7c59" Foreground="White"
-                    Padding="12,8" Margin="0,0,10,0" Click="ExportCurrentGeoJson_Click"/>
-                    <Button Content="📦 Export All" Background="#5a8c69" Foreground="White"
-                    Padding="12,8" FontWeight="SemiBold" Click="ExportAllGeoJson_Click"/>
+                    <Button Content="📂 Open GEOJSON" 
+                            Background="{DynamicResource ButtonBackground}" 
+                            Foreground="{DynamicResource ForegroundPrimary}"
+                            Padding="12,8" Margin="0,0,10,0" Click="OpenGeoJson_Click"/>
+                    <Button Content="👁️ Preview" 
+                            Background="{DynamicResource ButtonBackground}" 
+                            Foreground="{DynamicResource ForegroundPrimary}"
+                            Padding="12,8" Margin="0,0,10,0" Click="PreviewGeoJson_Click"/>
+                    <Button Content="💾 Export Current" 
+                            Background="{DynamicResource AccentPrimary}" 
+                            Foreground="{DynamicResource ForegroundPrimary}"
+                            Padding="12,8" Margin="0,0,10,0" Click="ExportCurrentGeoJson_Click"/>
+                    <Button Content="📦 Export All" 
+                            Background="{DynamicResource AccentSecondary}" 
+                            Foreground="{DynamicResource ForegroundPrimary}"
+                            Padding="12,8" FontWeight="SemiBold" Click="ExportAllGeoJson_Click"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -86,21 +96,25 @@
                     SelectionChanged="ModelsTabControl_SelectionChanged">
             <TabControl.ItemContainerStyle>
                 <Style TargetType="TabItem">
-                    <Setter Property="Background" Value="#2d2c35"/>
-                    <Setter Property="Foreground" Value="#aaa"/>
+                    <Setter Property="Background" Value="{DynamicResource BackgroundTertiary}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource ForegroundSecondary}"/>
                     <Setter Property="Padding" Value="15,8"/>
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="TabItem">
-                                <Border x:Name="Border" Background="{TemplateBinding Background}" 
-                                        Padding="{TemplateBinding Padding}" Margin="0,0,2,0"
+                                <Border x:Name="Border" 
+                                        Background="{TemplateBinding Background}" 
+                                        Padding="{TemplateBinding Padding}" 
+                                        Margin="0,0,2,0"
                                         CornerRadius="4,4,0,0">
                                     <ContentPresenter ContentSource="Header"/>
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsSelected" Value="True">
-                                        <Setter TargetName="Border" Property="Background" Value="#3a3a5a"/>
-                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter TargetName="Border" Property="Background" 
+                                                Value="{DynamicResource SelectionBackground}"/>
+                                        <Setter Property="Foreground" 
+                                                Value="{DynamicResource ForegroundPrimary}"/>
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
@@ -111,7 +125,8 @@
         </TabControl>
 
         <!-- Основной контент -->
-        <Border Grid.Row="2" Background="#252429" Margin="15,0,15,15" CornerRadius="0,8,8,8" Padding="15">
+        <Border Grid.Row="2" Background="{DynamicResource BackgroundSecondary}" 
+                Margin="15,0,15,15" CornerRadius="0,8,8,8" Padding="15">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -125,10 +140,12 @@
                 <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <!-- Coordinates вверху -->
-                        <Border Background="#2a3a2a" CornerRadius="6" Padding="12" Margin="0,0,0,15">
+                        <Border Background="{DynamicResource InfoBoxSourceBackground}" 
+                                CornerRadius="6" Padding="12" Margin="0,0,0,15">
                             <StackPanel>
-                                <TextBlock Text="📍 Coordinates (МСК77)" Style="{StaticResource SectionHeaderStyle}"
-                                           Foreground="#6a9955"/>
+                                <TextBlock Text="📍 Coordinates (МСК77)" 
+                                           Style="{StaticResource SectionHeaderStyle}"
+                                           Foreground="{DynamicResource InfoBoxSourceForeground}"/>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
@@ -151,104 +168,145 @@
                         <TextBlock Text="📋 Properties" Style="{StaticResource SectionHeaderStyle}"/>
 
                         <StackPanel Margin="0,0,0,8">
-                            <TextBlock Text="address" Style="{StaticResource FieldLabelStyle}" ToolTip="Улица, владение, корпус/строение"/>
-                            <TextBox x:Name="AddressTextBox" Style="{StaticResource FieldInputStyle}" TextChanged="CommonField_TextChanged"/>
+                            <TextBlock Text="address" Style="{StaticResource FieldLabelStyle}" 
+                                       ToolTip="Улица, владение, корпус/строение"/>
+                            <TextBox x:Name="AddressTextBox" Style="{StaticResource FieldInputStyle}" 
+                                     TextChanged="CommonField_TextChanged"/>
                         </StackPanel>
 
                         <StackPanel Margin="0,0,0,8">
-                            <TextBlock Text="okrug" Style="{StaticResource FieldLabelStyle}" ToolTip="Округ (до 50 символов)"/>
-                            <TextBox x:Name="OkrugTextBox" Style="{StaticResource FieldInputStyle}" TextChanged="CommonField_TextChanged"/>
+                            <TextBlock Text="okrug" Style="{StaticResource FieldLabelStyle}" 
+                                       ToolTip="Округ (до 50 символов)"/>
+                            <TextBox x:Name="OkrugTextBox" Style="{StaticResource FieldInputStyle}" 
+                                     TextChanged="CommonField_TextChanged"/>
                         </StackPanel>
 
                         <StackPanel Margin="0,0,0,8">
-                            <TextBlock Text="rajon" Style="{StaticResource FieldLabelStyle}" ToolTip="Район (до 50 символов)"/>
-                            <TextBox x:Name="RajonTextBox" Style="{StaticResource FieldInputStyle}" TextChanged="CommonField_TextChanged"/>
+                            <TextBlock Text="rajon" Style="{StaticResource FieldLabelStyle}" 
+                                       ToolTip="Район (до 50 символов)"/>
+                            <TextBox x:Name="RajonTextBox" Style="{StaticResource FieldInputStyle}" 
+                                     TextChanged="CommonField_TextChanged"/>
                         </StackPanel>
 
                         <StackPanel Margin="0,0,0,8">
-                            <TextBlock Text="name" Style="{StaticResource FieldLabelStyle}" ToolTip="Наименование объекта"/>
-                            <TextBox x:Name="NameTextBox" Style="{StaticResource FieldInputStyle}" TextChanged="CommonField_TextChanged"/>
+                            <TextBlock Text="name" Style="{StaticResource FieldLabelStyle}" 
+                                       ToolTip="Наименование объекта"/>
+                            <TextBox x:Name="NameTextBox" Style="{StaticResource FieldInputStyle}" 
+                                     TextChanged="CommonField_TextChanged"/>
                         </StackPanel>
 
                         <StackPanel Margin="0,0,0,8">
-                            <TextBlock Text="developer" Style="{StaticResource FieldLabelStyle}" ToolTip="Организация застройщика (до 255 символов)"/>
-                            <TextBox x:Name="DeveloperTextBox" Style="{StaticResource FieldInputStyle}" TextChanged="CommonField_TextChanged"/>
+                            <TextBlock Text="developer" Style="{StaticResource FieldLabelStyle}" 
+                                       ToolTip="Организация застройщика (до 255 символов)"/>
+                            <TextBox x:Name="DeveloperTextBox" Style="{StaticResource FieldInputStyle}" 
+                                     TextChanged="CommonField_TextChanged"/>
                         </StackPanel>
 
                         <StackPanel Margin="0,0,0,8">
-                            <TextBlock Text="designer" Style="{StaticResource FieldLabelStyle}" ToolTip="Проектная организация (до 255 символов)"/>
-                            <TextBox x:Name="DesignerTextBox" Style="{StaticResource FieldInputStyle}" TextChanged="CommonField_TextChanged"/>
+                            <TextBlock Text="designer" Style="{StaticResource FieldLabelStyle}" 
+                                       ToolTip="Проектная организация (до 255 символов)"/>
+                            <TextBox x:Name="DesignerTextBox" Style="{StaticResource FieldInputStyle}" 
+                                     TextChanged="CommonField_TextChanged"/>
                         </StackPanel>
 
                         <StackPanel Margin="0,0,0,8">
-                            <TextBlock Text="cadNum" Style="{StaticResource FieldLabelStyle}" ToolTip="Кадастровый номер: АА:ББ:ВВВВВВ:ГГ"/>
-                            <TextBox x:Name="CadNumTextBox" Style="{StaticResource FieldInputStyle}" TextChanged="CommonField_TextChanged"/>
+                            <TextBlock Text="cadNum" Style="{StaticResource FieldLabelStyle}" 
+                                       ToolTip="Кадастровый номер: АА:ББ:ВВВВВВ:ГГ"/>
+                            <TextBox x:Name="CadNumTextBox" Style="{StaticResource FieldInputStyle}" 
+                                     TextChanged="CommonField_TextChanged"/>
                         </StackPanel>
 
                         <StackPanel Margin="0,0,0,8">
-                            <TextBlock Text="FNO_code" Style="{StaticResource FieldLabelStyle}" ToolTip="Код по 306-ПП"/>
-                            <TextBox x:Name="FnoCodeTextBox" Style="{StaticResource FieldInputStyle}" TextChanged="CommonField_TextChanged"/>
+                            <TextBlock Text="FNO_code" Style="{StaticResource FieldLabelStyle}" 
+                                       ToolTip="Код по 306-ПП"/>
+                            <TextBox x:Name="FnoCodeTextBox" Style="{StaticResource FieldInputStyle}" 
+                                     TextChanged="CommonField_TextChanged"/>
                         </StackPanel>
 
                         <StackPanel Margin="0,0,0,8">
-                            <TextBlock x:Name="FnoNameLabel" Text="FNO_name" Style="{StaticResource FieldLabelStyle}" ToolTip="Назначение по 306-ПП"/>
-                            <TextBox x:Name="FnoNameTextBox" Style="{StaticResource FieldInputStyle}" TextChanged="CommonField_TextChanged"/>
+                            <TextBlock x:Name="FnoNameLabel" Text="FNO_name" 
+                                       Style="{StaticResource FieldLabelStyle}" 
+                                       ToolTip="Назначение по 306-ПП"/>
+                            <TextBox x:Name="FnoNameTextBox" Style="{StaticResource FieldInputStyle}" 
+                                     TextChanged="CommonField_TextChanged"/>
                         </StackPanel>
 
                         <StackPanel Margin="0,0,0,8">
-                            <TextBlock Text="ZU_area" Style="{StaticResource FieldLabelStyle}" ToolTip="Площадь участка, га. Не более 4 знаков после точки.&#x0a;Указывается общая площадь согласно проекту АГР"/>
-                            <TextBox x:Name="ZuAreaTextBox" Style="{StaticResource FieldInputStyle}" TextChanged="CommonField_TextChanged"/>
+                            <TextBlock Text="ZU_area" Style="{StaticResource FieldLabelStyle}" 
+                                       ToolTip="Площадь участка, га. Не более 4 знаков после точки.&#x0a;Указывается общая площадь согласно проекту АГР"/>
+                            <TextBox x:Name="ZuAreaTextBox" Style="{StaticResource FieldInputStyle}" 
+                                     TextChanged="CommonField_TextChanged"/>
                         </StackPanel>
 
                         <StackPanel Margin="0,0,0,8">
-                            <TextBlock Text="h_relief" Style="{StaticResource FieldLabelStyle}" ToolTip="Нулевая отметка, м. Не более 2 знаков после точки.&#x0a;Указывается единая нулевая отметка согласно проекту АГР."/>
-                            <TextBox x:Name="HReliefTextBox" Style="{StaticResource FieldInputStyle}" TextChanged="CommonField_TextChanged"/>
+                            <TextBlock Text="h_relief" Style="{StaticResource FieldLabelStyle}" 
+                                       ToolTip="Нулевая отметка, м. Не более 2 знаков после точки.&#x0a;Указывается единая нулевая отметка согласно проекту АГР."/>
+                            <TextBox x:Name="HReliefTextBox" Style="{StaticResource FieldInputStyle}" 
+                                     TextChanged="CommonField_TextChanged"/>
                         </StackPanel>
 
                         <StackPanel x:Name="HOtnPanel" Margin="0,0,0,8">
-                            <TextBlock Text="h_otn" Style="{StaticResource FieldLabelStyle}" ToolTip="Относительная высота, м. Не более 2 знаков после точки.&#x0a;Указывается максимальная относительная высота согласно проекту АГР"/>
-                            <TextBox x:Name="HOtnTextBox" Style="{StaticResource FieldInputStyle}" TextChanged="CommonField_TextChanged"/>
+                            <TextBlock Text="h_otn" Style="{StaticResource FieldLabelStyle}" 
+                                       ToolTip="Относительная высота, м. Не более 2 знаков после точки.&#x0a;Указывается максимальная относительная высота согласно проекту АГР"/>
+                            <TextBox x:Name="HOtnTextBox" Style="{StaticResource FieldInputStyle}" 
+                                     TextChanged="CommonField_TextChanged"/>
                         </StackPanel>
 
                         <StackPanel x:Name="HAbsPanel" Margin="0,0,0,8">
-                            <TextBlock Text="h_abs" Style="{StaticResource FieldLabelStyle}" ToolTip="Абсолютная высота, м. Не более 2 знаков после точки.&#x0a;Указывается максимальная абсолютная высота согласно проекту АГР."/>
-                            <TextBox x:Name="HAbsTextBox" Style="{StaticResource FieldInputStyle}" TextChanged="CommonField_TextChanged"/>
+                            <TextBlock Text="h_abs" Style="{StaticResource FieldLabelStyle}" 
+                                       ToolTip="Абсолютная высота, м. Не более 2 знаков после точки.&#x0a;Указывается максимальная абсолютная высота согласно проекту АГР."/>
+                            <TextBox x:Name="HAbsTextBox" Style="{StaticResource FieldInputStyle}" 
+                                     TextChanged="CommonField_TextChanged"/>
                         </StackPanel>
 
                         <StackPanel x:Name="SObshPanel" Margin="0,0,0,8">
-                            <TextBlock Text="s_obsh" Style="{StaticResource FieldLabelStyle}" ToolTip="Общая площадь, м². Не более 2 знаков после точки.&#x0a;Указывается суммарная площадь всех зданий согласно проекту АГР."/>
-                            <TextBox x:Name="SObshTextBox" Style="{StaticResource FieldInputStyle}" TextChanged="CommonField_TextChanged"/>
+                            <TextBlock Text="s_obsh" Style="{StaticResource FieldLabelStyle}" 
+                                       ToolTip="Общая площадь, м². Не более 2 знаков после точки.&#x0a;Указывается суммарная площадь всех зданий согласно проекту АГР."/>
+                            <TextBox x:Name="SObshTextBox" Style="{StaticResource FieldInputStyle}" 
+                                     TextChanged="CommonField_TextChanged"/>
                         </StackPanel>
 
                         <StackPanel x:Name="SNazPanel" Margin="0,0,0,8">
-                            <TextBlock Text="s_naz" Style="{StaticResource FieldLabelStyle}" ToolTip="Наземная площадь, м². Не более 2 знаков после точки.&#x0a;Указывается суммарная площадь всех зданий согласну проекту АГР."/>
-                            <TextBox x:Name="SNazTextBox" Style="{StaticResource FieldInputStyle}" TextChanged="CommonField_TextChanged"/>
+                            <TextBlock Text="s_naz" Style="{StaticResource FieldLabelStyle}" 
+                                       ToolTip="Наземная площадь, м². Не более 2 знаков после точки.&#x0a;Указывается суммарная площадь всех зданий согласну проекту АГР."/>
+                            <TextBox x:Name="SNazTextBox" Style="{StaticResource FieldInputStyle}" 
+                                     TextChanged="CommonField_TextChanged"/>
                         </StackPanel>
 
                         <StackPanel x:Name="SPodzPanel" Margin="0,0,0,8">
-                            <TextBlock Text="s_podz" Style="{StaticResource FieldLabelStyle}" ToolTip="Подземная площадь, м². Не более 2 знаков после точки.&#x0a;Указывается суммарная площадь подземных частей всех зданий согласно проекту АГР."/>
-                            <TextBox x:Name="SPodzTextBox" Style="{StaticResource FieldInputStyle}" TextChanged="CommonField_TextChanged"/>
+                            <TextBlock Text="s_podz" Style="{StaticResource FieldLabelStyle}" 
+                                       ToolTip="Подземная площадь, м². Не более 2 знаков после точки.&#x0a;Указывается суммарная площадь подземных частей всех зданий согласно проекту АГР."/>
+                            <TextBox x:Name="SPodzTextBox" Style="{StaticResource FieldInputStyle}" 
+                                     TextChanged="CommonField_TextChanged"/>
                         </StackPanel>
 
                         <StackPanel x:Name="SppGnsPanel" Margin="0,0,0,8">
-                            <TextBlock Text="spp_gns" Style="{StaticResource FieldLabelStyle}" ToolTip="Суммарная поэтажная площадь объекта в габаритах наружных стен, м². Не более 2 знаков после точки.&#x0a;Указывается суммарная площадь всех зданий согласно проекту АГР"/>
-                            <TextBox x:Name="SppGnsTextBox" Style="{StaticResource FieldInputStyle}" TextChanged="CommonField_TextChanged"/>
+                            <TextBlock Text="spp_gns" Style="{StaticResource FieldLabelStyle}" 
+                                       ToolTip="Суммарная поэтажная площадь объекта в габаритах наружных стен, м². Не более 2 знаков после точки.&#x0a;Указывается суммарная площадь всех зданий согласно проекту АГР"/>
+                            <TextBox x:Name="SppGnsTextBox" Style="{StaticResource FieldInputStyle}" 
+                                     TextChanged="CommonField_TextChanged"/>
                         </StackPanel>
 
                         <StackPanel Margin="0,0,0,8">
-                            <TextBlock Text="act_AGR" Style="{StaticResource FieldLabelStyle}" ToolTip="Номер САГР, действующего на момент подачи заявления, при наличии"/>
-                            <TextBox x:Name="ActAgrTextBox" Style="{StaticResource FieldInputStyle}" TextChanged="CommonField_TextChanged"/>
+                            <TextBlock Text="act_AGR" Style="{StaticResource FieldLabelStyle}" 
+                                       ToolTip="Номер САГР, действующего на момент подачи заявления, при наличии"/>
+                            <TextBox x:Name="ActAgrTextBox" Style="{StaticResource FieldInputStyle}" 
+                                     TextChanged="CommonField_TextChanged"/>
                         </StackPanel>
 
                         <StackPanel Margin="0,0,0,8">
-                            <TextBlock Text="other" Style="{StaticResource FieldLabelStyle}" ToolTip="Дополнительная информация"/>
-                            <TextBox x:Name="OtherTextBox" Style="{StaticResource FieldInputStyle}" TextChanged="CommonField_TextChanged"/>
+                            <TextBlock Text="other" Style="{StaticResource FieldLabelStyle}" 
+                                       ToolTip="Дополнительная информация"/>
+                            <TextBox x:Name="OtherTextBox" Style="{StaticResource FieldInputStyle}" 
+                                     TextChanged="CommonField_TextChanged"/>
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
 
                 <!-- Центральная колонка: Glasses -->
-                <Border Grid.Column="2" Background="#2d2c35" CornerRadius="6" Padding="12">
+                <Border Grid.Column="2" 
+                        Background="{DynamicResource BackgroundTertiary}" 
+                        CornerRadius="6" Padding="12">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -258,20 +316,29 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0" Text="🪟 Glasses" Style="{StaticResource SectionHeaderStyle}"/>
+                        <TextBlock Grid.Row="0" Text="🪟 Glasses" 
+                                   Style="{StaticResource SectionHeaderStyle}"/>
 
                         <!-- Кнопки управления материалами -->
                         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10">
-                            <Button Content="➕ Add" Background="#4a7c59" Foreground="White"
-                    Padding="10,5" Margin="0,0,5,0" Click="AddMaterial_Click"/>
-                            <Button Content="✏️ Update" Background="#3a3a3a" Foreground="White"
-                    Padding="10,5" Margin="0,0,5,0" Click="UpdateMaterial_Click"/>
-                            <Button Content="🗑️ Delete" Background="#7c4a4a" Foreground="White"
-                    Padding="10,5" Click="DeleteMaterial_Click"/>
+                            <Button Content="➕ Add" 
+                                    Background="{DynamicResource AccentPrimary}" 
+                                    Foreground="{DynamicResource ForegroundPrimary}"
+                                    Padding="10,5" Margin="0,0,5,0" Click="AddMaterial_Click"/>
+                            <Button Content="✏️ Update" 
+                                    Background="{DynamicResource ButtonBackground}" 
+                                    Foreground="{DynamicResource ForegroundPrimary}"
+                                    Padding="10,5" Margin="0,0,5,0" Click="UpdateMaterial_Click"/>
+                            <Button Content="🗑️ Delete" 
+                                    Background="{DynamicResource ButtonDanger}" 
+                                    Foreground="{DynamicResource ForegroundPrimary}"
+                                    Padding="10,5" Click="DeleteMaterial_Click"/>
                         </StackPanel>
 
                         <!-- Пресеты стёкол -->
-                        <Border Grid.Row="2" Background="#252429" CornerRadius="4" Padding="8" Margin="0,0,0,10">
+                        <Border Grid.Row="2" 
+                                Background="{DynamicResource BackgroundSecondary}" 
+                                CornerRadius="4" Padding="8" Margin="0,0,0,10">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -281,30 +348,41 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
-                                <TextBlock Grid.Column="0" Text="💾 Пресеты:" Foreground="#888" 
-                   VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11"/>
+                                <TextBlock Grid.Column="0" Text="💾 Пресеты:" 
+                                           Foreground="{DynamicResource ForegroundTertiary}" 
+                                           VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11"/>
 
                                 <ComboBox x:Name="GlassPresetComboBox" Grid.Column="1"
-                  DisplayMemberPath="Name" Margin="0,0,5,0"/>
+                                          DisplayMemberPath="Name" Margin="0,0,5,0"/>
 
-                                <Button Grid.Column="2" Content="📥" Background="#3a5a3a" Foreground="White"
-                Padding="8,4" Margin="0,0,5,0" ToolTip="Применить пресет к форме"
-                Click="ApplyGlassPreset_Click"/>
+                                <Button Grid.Column="2" Content="📥" 
+                                        Background="{DynamicResource AccentTertiary}" 
+                                        Foreground="{DynamicResource ForegroundPrimary}"
+                                        Padding="8,4" Margin="0,0,5,0" 
+                                        ToolTip="Применить пресет к форме"
+                                        Click="ApplyGlassPreset_Click"/>
 
-                                <Button Grid.Column="3" Content="💾" Background="#3a3a5a" Foreground="White"
-                Padding="8,4" Margin="0,0,5,0" ToolTip="Сохранить текущие параметры как пресет"
-                Click="SaveGlassPreset_Click"/>
+                                <Button Grid.Column="3" Content="💾" 
+                                        Background="{DynamicResource ButtonInfo}" 
+                                        Foreground="{DynamicResource ForegroundPrimary}"
+                                        Padding="8,4" Margin="0,0,5,0" 
+                                        ToolTip="Сохранить текущие параметры как пресет"
+                                        Click="SaveGlassPreset_Click"/>
 
-                                <Button Grid.Column="4" Content="🗑️" Background="#5a3a3a" Foreground="White"
-                Padding="8,4" ToolTip="Удалить выбранный пресет"
-                Click="DeleteGlassPreset_Click"/>
+                                <Button Grid.Column="4" Content="🗑️" 
+                                        Background="{DynamicResource DangerButtonBackground}" 
+                                        Foreground="{DynamicResource ForegroundPrimary}"
+                                        Padding="8,4" ToolTip="Удалить выбранный пресет"
+                                        Click="DeleteGlassPreset_Click"/>
                             </Grid>
                         </Border>
 
                         <!-- Список материалов -->
                         <ListBox x:Name="MaterialsListBox" Grid.Row="3"
-                 Background="#252429" BorderBrush="#3a3a3a" Foreground="White"
-                 SelectionChanged="MaterialsListBox_SelectionChanged"/>
+                                 Background="{DynamicResource BackgroundSecondary}" 
+                                 BorderBrush="{DynamicResource BorderPrimary}" 
+                                 Foreground="{DynamicResource ForegroundPrimary}"
+                                 SelectionChanged="MaterialsListBox_SelectionChanged"/>
 
                         <!-- Форма материала -->
                         <ScrollViewer Grid.Row="4" VerticalScrollBarVisibility="Auto" Margin="0,10,0,0">
@@ -323,20 +401,25 @@
                                         <ColumnDefinition Width="40"/>
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="0" Margin="0,0,3,0">
-                                        <TextBlock Text="R" Foreground="#ff6b6b" FontSize="10"/>
-                                        <TextBox x:Name="RedTextBox" Style="{StaticResource FieldInputStyle}" TextChanged="ColorTextBox_TextChanged"/>
+                                        <TextBlock Text="R" Foreground="{DynamicResource ColorChannelRed}" FontSize="10"/>
+                                        <TextBox x:Name="RedTextBox" Style="{StaticResource FieldInputStyle}" 
+                                                 TextChanged="ColorTextBox_TextChanged"/>
                                     </StackPanel>
                                     <StackPanel Grid.Column="1" Margin="0,0,3,0">
-                                        <TextBlock Text="G" Foreground="#6bff6b" FontSize="10"/>
-                                        <TextBox x:Name="GreenTextBox" Style="{StaticResource FieldInputStyle}" TextChanged="ColorTextBox_TextChanged"/>
+                                        <TextBlock Text="G" Foreground="{DynamicResource ColorChannelGreen}" FontSize="10"/>
+                                        <TextBox x:Name="GreenTextBox" Style="{StaticResource FieldInputStyle}" 
+                                                 TextChanged="ColorTextBox_TextChanged"/>
                                     </StackPanel>
                                     <StackPanel Grid.Column="2" Margin="0,0,3,0">
-                                        <TextBlock Text="B" Foreground="#6b6bff" FontSize="10"/>
-                                        <TextBox x:Name="BlueTextBox" Style="{StaticResource FieldInputStyle}" TextChanged="ColorTextBox_TextChanged"/>
+                                        <TextBlock Text="B" Foreground="{DynamicResource ColorChannelBlue}" FontSize="10"/>
+                                        <TextBox x:Name="BlueTextBox" Style="{StaticResource FieldInputStyle}" 
+                                                 TextChanged="ColorTextBox_TextChanged"/>
                                     </StackPanel>
-                                    <Border x:Name="ColorPreviewBorder" Grid.Column="3" Background="Black" 
-                            CornerRadius="4" Cursor="Hand" MouseLeftButtonDown="ColorPreview_Click"
-                            ToolTip="Выбрать цвет"/>
+                                    <Border x:Name="ColorPreviewBorder" Grid.Column="3" 
+                                            Background="Black" 
+                                            CornerRadius="4" Cursor="Hand" 
+                                            MouseLeftButtonDown="ColorPreview_Click"
+                                            ToolTip="Выбрать цвет"/>
                                 </Grid>
 
                                 <StackPanel Margin="0,0,0,8">
@@ -366,39 +449,55 @@
                 <!-- Правая колонка: Image + Info -->
                 <StackPanel Grid.Column="4">
                     <!-- Image -->
-                    <Border Background="#2d2c35" CornerRadius="6" Padding="12" Margin="0,0,0,15">
+                    <Border Background="{DynamicResource BackgroundTertiary}" 
+                            CornerRadius="6" Padding="12" Margin="0,0,0,15">
                         <StackPanel>
-                            <TextBlock Text="🖼️ Image (256x256 jpg)" Style="{StaticResource SectionHeaderStyle}"/>
+                            <TextBlock Text="🖼️ Image (256x256 jpg)" 
+                                       Style="{StaticResource SectionHeaderStyle}"/>
 
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                <Button Content="📂 Load" Background="#3a3a3a" Foreground="White"
+                                <Button Content="📂 Load" 
+                                        Background="{DynamicResource ButtonBackground}" 
+                                        Foreground="{DynamicResource ForegroundPrimary}"
                                         Padding="10,5" Margin="0,0,5,0" Click="AddImage_Click"/>
-                                <Button Content="📋 Paste" Background="#3a3a3a" Foreground="White"
+                                <Button Content="📋 Paste" 
+                                        Background="{DynamicResource ButtonBackground}" 
+                                        Foreground="{DynamicResource ForegroundPrimary}"
                                         Padding="10,5" Margin="0,0,5,0" Click="PasteImage_Click"/>
-                                <Button Content="🗑️ Delete" Background="#7c4a4a" Foreground="White"
+                                <Button Content="🗑️ Delete" 
+                                        Background="{DynamicResource ButtonDanger}" 
+                                        Foreground="{DynamicResource ForegroundPrimary}"
                                         Padding="10,5" Click="DeleteImage_Click"/>
                             </StackPanel>
 
-                            <Border Background="#1e1d22" CornerRadius="6" Height="200">
+                            <Border Background="{DynamicResource BackgroundPrimary}" 
+                                    CornerRadius="6" Height="200">
                                 <Image x:Name="ImagePreview" Stretch="Uniform" Margin="10"/>
                             </Border>
                         </StackPanel>
                     </Border>
 
                     <!-- File name preview -->
-                    <Border Background="#2d2c35" CornerRadius="6" Padding="12">
+                    <Border Background="{DynamicResource BackgroundTertiary}" 
+                            CornerRadius="6" Padding="12">
                         <StackPanel>
-                            <TextBlock Text="📄 File Name Preview" Style="{StaticResource SectionHeaderStyle}"/>
-                            <Border Background="#1e1d22" CornerRadius="4" Padding="10">
+                            <TextBlock Text="📄 File Name Preview" 
+                                       Style="{StaticResource SectionHeaderStyle}"/>
+                            <Border Background="{DynamicResource BackgroundPrimary}" 
+                                    CornerRadius="4" Padding="10">
                                 <TextBlock x:Name="FileNamePreviewText" 
                                            Text="SM_Project.geojson" 
-                                           Foreground="#6a9955" 
+                                           Foreground="{DynamicResource CodeText}" 
                                            FontFamily="Consolas"
                                            FontSize="13"/>
                             </Border>
 
-                            <TextBlock Text="💡 Подсказка" Foreground="#888" FontSize="12" Margin="0,15,0,5"/>
-                            <TextBlock TextWrapping="Wrap" Foreground="#666" FontSize="11">
+                            <TextBlock Text="💡 Подсказка" 
+                                       Foreground="{DynamicResource ForegroundTertiary}" 
+                                       FontSize="12" Margin="0,15,0,5"/>
+                            <TextBlock TextWrapping="Wrap" 
+                                       Foreground="{DynamicResource ForegroundDisabled}" 
+                                       FontSize="11">
                                 • Поля синхронизируются между моделями (кроме координат, стёкол, изображения)
                                 <LineBreak/>
                                 • Для Ground: FNO_name = "Благоустройство территории", поля высот/площадей пустые

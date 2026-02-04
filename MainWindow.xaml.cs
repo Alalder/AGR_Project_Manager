@@ -23,7 +23,7 @@ namespace AGR_Project_Manager
         public MainWindow()
         {
             InitializeComponent();
-
+            InitializeThemeSelector();
             _projectService = new ProjectService();
             _exportService = new TextureExportService();
             _presetService = new PresetService();  // НОВОЕ
@@ -32,15 +32,24 @@ namespace AGR_Project_Manager
             PresetComboBox.ItemsSource = _presetService.Presets;  // НОВОЕ
         }
 
-        private void ThemeToggleBtn_Click(object sender, RoutedEventArgs e)
+        private void InitializeThemeSelector()
         {
-            ThemeManager.ToggleTheme();
+            // Заполняем ComboBox списком тем
+            ThemeComboBox.ItemsSource = ThemeManager.AvailableThemes;
 
-            // Обновляем текст кнопки
-            ThemeToggleBtn.Content = ThemeManager.CurrentTheme == ThemeManager.Theme.Dark
-                ? "☀️ Светлая тема"
-                : "🌙 Тёмная тема";
+            // Выбираем текущую тему
+            ThemeComboBox.SelectedItem = ThemeManager.GetCurrentTheme();
         }
+
+        private void ThemeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ThemeComboBox.SelectedItem is ThemeManager.ThemeInfo selectedTheme)
+            {
+                ThemeManager.ChangeTheme(selectedTheme);
+            }
+        }
+
+        
 
         #region Project Management
 
@@ -439,15 +448,16 @@ namespace AGR_Project_Manager
                 // Убираем выделение с предыдущего
                 if (_selectedTileBorder != null)
                 {
-                    _selectedTileBorder.Background = new SolidColorBrush(
-                        (Color)ColorConverter.ConvertFromString("#2d2c35"));
+                    // Берём цвет из текущей темы!
+                    _selectedTileBorder.Background = (SolidColorBrush)Application.Current.FindResource("BackgroundTertiary");
                 }
 
                 // Выделяем новый
                 _selectedTile = tile;
                 _selectedTileBorder = border;
-                border.Background = new SolidColorBrush(
-                    (Color)ColorConverter.ConvertFromString("#3d3d55"));
+
+                // Берём цвет выделения из текущей темы!
+                border.Background = (SolidColorBrush)Application.Current.FindResource("SelectionBackground");
 
                 // Активируем кнопку применения пресета если есть выбранный пресет
                 ApplyPresetBtn.IsEnabled = PresetComboBox.SelectedItem != null;

@@ -5,7 +5,7 @@
         SizeToContent="Height"
         Width="380"
         WindowStartupLocation="CenterOwner"
-        Background="#1e1d22"
+        Background="{DynamicResource BackgroundPrimary}"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
         WindowStyle="ToolWindow"
@@ -22,16 +22,16 @@
         <!-- Поле ввода -->
         <StackPanel Grid.Row="0">
             <TextBlock Text="Название" 
-                       Foreground="#aaa" 
+                       Foreground="{DynamicResource ForegroundSecondary}" 
                        FontSize="12" 
                        Margin="0,0,0,8"/>
             <TextBox x:Name="NameTextBox" 
-                     Background="#2d2c35" 
-                     Foreground="White" 
-                     BorderBrush="#3a3a3a"
+                     Background="{DynamicResource BackgroundTertiary}" 
+                     Foreground="{DynamicResource ForegroundPrimary}" 
+                     BorderBrush="{DynamicResource BorderPrimary}"
                      Padding="10,10"
                      FontSize="14"
-                     CaretBrush="White"
+                     CaretBrush="{DynamicResource ForegroundPrimary}"
                      VerticalContentAlignment="Center"/>
         </StackPanel>
 
@@ -40,16 +40,16 @@
                     Orientation="Horizontal" 
                     HorizontalAlignment="Right">
             <Button Content="Отмена" 
-                    Background="#3a3a3a" 
-                    Foreground="White"
+                    Background="{DynamicResource ButtonBackground}" 
+                    Foreground="{DynamicResource ForegroundPrimary}"
                     Padding="25,10"
                     Margin="0,0,10,0"
                     Cursor="Hand"
                     IsCancel="True"
                     Click="CancelBtn_Click"/>
             <Button Content="Сохранить" 
-                    Background="#4a7c59" 
-                    Foreground="White"
+                    Background="{DynamicResource AccentPrimary}" 
+                    Foreground="{DynamicResource ForegroundPrimary}"
                     Padding="25,10"
                     Cursor="Hand"
                     IsDefault="True"

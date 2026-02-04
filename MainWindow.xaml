@@ -114,20 +114,31 @@
 
                 <!-- Блок "Утилиты" -->
                 <Border Grid.Row="2" Background="{DynamicResource BackgroundTertiary}" 
-                        BorderBrush="{DynamicResource BorderPrimary}" 
-                        BorderThickness="1" Margin="10,0,10,10" Padding="8">
+        BorderBrush="{DynamicResource BorderPrimary}" 
+        BorderThickness="1" Margin="10,0,10,10" Padding="8">
                     <StackPanel>
                         <TextBlock Text="🔧 Утилиты" 
-                                   Foreground="{DynamicResource ForegroundSecondary}" 
-                                   FontSize="12" 
-                                   FontWeight="SemiBold" Margin="0,0,0,8"/>
+                   Foreground="{DynamicResource ForegroundSecondary}" 
+                   FontSize="12" 
+                   FontWeight="SemiBold" Margin="0,0,0,8"/>
 
-                        <!-- Кнопка переключения темы -->
-                        <Button x:Name="ThemeToggleBtn" Content="🌙 Сменить тему" 
-                                Background="{DynamicResource ButtonBackground}" 
-                                Foreground="{DynamicResource ForegroundPrimary}" 
-                                Margin="0,0,0,6" Padding="8,6" Cursor="Hand" 
-                                Click="ThemeToggleBtn_Click"/>
+                        <!-- Выбор темы -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <TextBlock Text="🎨 Тема:" 
+               Foreground="{DynamicResource ForegroundSecondary}"
+               VerticalAlignment="Center"
+               Margin="0,0,8,0"/>
+                            <ComboBox x:Name="ThemeComboBox"
+              Width="160"
+              SelectionChanged="ThemeComboBox_SelectionChanged">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DisplayName}" 
+                           Foreground="{DynamicResource ForegroundPrimary}"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
 
                         <Separator Background="{DynamicResource BorderPrimary}" Margin="0,4"/>
 
