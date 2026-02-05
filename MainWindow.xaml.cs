@@ -19,6 +19,7 @@ namespace AGR_Project_Manager
         private Project _selectedProject;
         private UdimTile _copiedTile;
         private UdimTile _selectedTile;
+        private Border _selectedTileBorder;
 
         public MainWindow()
         {
@@ -26,18 +27,46 @@ namespace AGR_Project_Manager
             InitializeThemeSelector();
             _projectService = new ProjectService();
             _exportService = new TextureExportService();
-            _presetService = new PresetService();  // НОВОЕ
+            _presetService = new PresetService();
 
             ProjectsList.ItemsSource = _projectService.Projects;
-            PresetComboBox.ItemsSource = _presetService.Presets;  // НОВОЕ
+            PresetComboBox.ItemsSource = _presetService.Presets;
         }
+
+        #region Helper Methods
+
+        /// <summary>
+        /// Получает кисть из текущей темы
+        /// </summary>
+        private static SolidColorBrush GetThemeBrush(string resourceKey)
+        {
+            return (SolidColorBrush)Application.Current.FindResource(resourceKey);
+        }
+
+        /// <summary>
+        /// Ищет DataContext нужного типа в родительских элементах
+        /// </summary>
+        private static T FindParentDataContext<T>(DependencyObject element) where T : class
+        {
+            var current = element as FrameworkElement;
+            while (current != null)
+            {
+                if (current.DataContext is T result)
+                {
+                    return result;
+                }
+                current = current.Parent as FrameworkElement;
+            }
+            return null;
+        }
+
+        #endregion
+
+        #region Theme
 
         private void InitializeThemeSelector()
         {
-            // Заполняем ComboBox списком тем
             ThemeComboBox.ItemsSource = ThemeManager.AvailableThemes;
-
-            // Выбираем текущую тему
             ThemeComboBox.SelectedItem = ThemeManager.GetCurrentTheme();
         }
 
@@ -49,14 +78,13 @@ namespace AGR_Project_Manager
             }
         }
 
-        
+        #endregion
 
         #region Project Management
 
         private void NewProjectBtn_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new ProjectDialog();
-            dialog.Owner = this;
+            var dialog = new ProjectDialog { Owner = this };
 
             if (dialog.ShowDialog() == true)
             {
@@ -67,35 +95,30 @@ namespace AGR_Project_Manager
 
         private void EditProject_Click(object sender, RoutedEventArgs e)
         {
-            var button = sender as Button;
-            var project = button?.Tag as Project;
-            if (project == null) return;
-
-            var dialog = new ProjectDialog(project);
-            dialog.Owner = this;
-
-            if (dialog.ShowDialog() == true)
+            if (sender is Button { Tag: Project project })
             {
-                _projectService.UpdateProject(project);
-                UpdateProjectPanel(project);
+                var dialog = new ProjectDialog(project) { Owner = this };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    _projectService.UpdateProject(project);
+                    UpdateProjectPanel(project);
+                }
             }
         }
 
         private void CloneProject_Click(object sender, RoutedEventArgs e)
         {
-            var button = sender as Button;
-            var project = button?.Tag as Project;
-            if (project == null) return;
-
-            var clone = _projectService.CloneProject(project);
-            ProjectsList.SelectedItem = clone;
+            if (sender is Button { Tag: Project project })
+            {
+                var clone = _projectService.CloneProject(project);
+                ProjectsList.SelectedItem = clone;
+            }
         }
 
         private void DeleteProject_Click(object sender, RoutedEventArgs e)
         {
-            var button = sender as Button;
-            var project = button?.Tag as Project;
-            if (project == null) return;
+            if (sender is not Button { Tag: Project project }) return;
 
             var result = MessageBox.Show(
                 $"Удалить проект \"{project.Name}\"?",
@@ -116,8 +139,7 @@ namespace AGR_Project_Manager
 
         private void ProjectsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var project = ProjectsList.SelectedItem as Project;
-            if (project != null)
+            if (ProjectsList.SelectedItem is Project project)
             {
                 _selectedProject = project;
                 UpdateProjectPanel(project);
@@ -153,22 +175,16 @@ namespace AGR_Project_Manager
                 {
                     Header = model.Name,
                     Tag = model,
-                    DataContext = model  // Важно для биндинга в шаблоне!
+                    DataContext = model
                 };
                 ModelsTabControl.Items.Add(tabItem);
             }
 
-            // Восстанавливаем выбор
             if (ModelsTabControl.Items.Count > 0)
             {
-                if (previousIndex >= 0 && previousIndex < ModelsTabControl.Items.Count)
-                {
-                    ModelsTabControl.SelectedIndex = previousIndex;
-                }
-                else
-                {
-                    ModelsTabControl.SelectedIndex = 0;
-                }
+                ModelsTabControl.SelectedIndex = previousIndex >= 0 && previousIndex < ModelsTabControl.Items.Count
+                    ? previousIndex
+                    : 0;
             }
         }
 
@@ -204,16 +220,16 @@ namespace AGR_Project_Manager
                 return;
             }
 
-            // Запрашиваем имя пресета
-            var dialog = new RenameDialog(_selectedTile.Name ?? "Новый пресет");
-            dialog.Title = "Сохранить пресет";
-            dialog.Owner = this;
+            var dialog = new RenameDialog(_selectedTile.Name ?? "Новый пресет")
+            {
+                Title = "Сохранить пресет",
+                Owner = this
+            };
 
             if (dialog.ShowDialog() == true)
             {
                 var preset = new UdimPreset(dialog.NewName, _selectedTile);
                 _presetService.AddPreset(preset);
-
                 PresetComboBox.SelectedItem = preset;
 
                 MessageBox.Show($"Пресет \"{dialog.NewName}\" сохранён!", "Успех",
@@ -230,9 +246,7 @@ namespace AGR_Project_Manager
 
         private void ApplyPreset_Click(object sender, RoutedEventArgs e)
         {
-            var preset = PresetComboBox.SelectedItem as UdimPreset;
-
-            if (preset == null)
+            if (PresetComboBox.SelectedItem is not UdimPreset preset)
             {
                 MessageBox.Show("Выберите пресет из списка", "Информация",
                     MessageBoxButton.OK, MessageBoxImage.Information);
@@ -252,9 +266,7 @@ namespace AGR_Project_Manager
 
         private void DeletePreset_Click(object sender, RoutedEventArgs e)
         {
-            var preset = PresetComboBox.SelectedItem as UdimPreset;
-
-            if (preset == null) return;
+            if (PresetComboBox.SelectedItem is not UdimPreset preset) return;
 
             var result = MessageBox.Show(
                 $"Удалить пресет \"{preset.Name}\"?",
@@ -290,14 +302,13 @@ namespace AGR_Project_Manager
 
         private void RenameModel_Click(object sender, RoutedEventArgs e)
         {
-            var button = sender as System.Windows.Controls.Button;
-            var model = button?.Tag as ModelData;
+            if (sender is not Button { Tag: ModelData model }) return;
 
-            if (model == null) return;
-
-            var dialog = new RenameDialog(model.Name);
-            dialog.Title = "Переименовать модель";
-            dialog.Owner = this;
+            var dialog = new RenameDialog(model.Name)
+            {
+                Title = "Переименовать модель",
+                Owner = this
+            };
 
             if (dialog.ShowDialog() == true)
             {
@@ -311,22 +322,14 @@ namespace AGR_Project_Manager
         private void DuplicateModel_Click(object sender, RoutedEventArgs e)
         {
             if (_selectedProject == null) return;
+            if (sender is not Button { Tag: ModelData model }) return;
 
-            var button = sender as System.Windows.Controls.Button;
-            var model = button?.Tag as ModelData;
-
-            if (model == null) return;
-
-            // Находим индекс модели
             int index = _selectedProject.Models.IndexOf(model);
             if (index >= 0)
             {
                 _selectedProject.DuplicateModel(index);
                 RefreshModelTabs();
-
-                // Выбираем новую (дублированную) вкладку
                 ModelsTabControl.SelectedIndex = index + 1;
-
                 _projectService.UpdateProject(_selectedProject);
             }
         }
@@ -334,11 +337,7 @@ namespace AGR_Project_Manager
         private void RemoveModel_Click(object sender, RoutedEventArgs e)
         {
             if (_selectedProject == null) return;
-
-            var button = sender as System.Windows.Controls.Button;
-            var model = button?.Tag as ModelData;
-
-            if (model == null) return;
+            if (sender is not Button { Tag: ModelData model }) return;
 
             if (_selectedProject.Models.Count <= 1)
             {
@@ -382,10 +381,7 @@ namespace AGR_Project_Manager
 
         private void ModelsTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var tabItem = ModelsTabControl.SelectedItem as TabItem;
-            var model = tabItem?.Tag as ModelData;
-
-            if (model != null)
+            if (ModelsTabControl.SelectedItem is TabItem { Tag: ModelData model })
             {
                 UdimGrid.ItemsSource = model.UdimRows;
                 UpdateFileNameTemplate();
@@ -398,14 +394,16 @@ namespace AGR_Project_Manager
 
         private void RenameTile_Click(object sender, MouseButtonEventArgs e)
         {
-            var border = sender as Border;
-            var tile = FindParentDataContext<UdimTile>(border);
+            if (sender is not Border border) return;
 
+            var tile = FindParentDataContext<UdimTile>(border);
             if (tile == null) return;
 
-            var dialog = new RenameDialog(tile.Name ?? "");
-            dialog.Title = $"Название UDIM {tile.UdimNumber}";
-            dialog.Owner = this;
+            var dialog = new RenameDialog(tile.Name ?? "")
+            {
+                Title = $"Название UDIM {tile.UdimNumber}",
+                Owner = this
+            };
 
             if (dialog.ShowDialog() == true)
             {
@@ -413,7 +411,7 @@ namespace AGR_Project_Manager
                 _projectService.UpdateProject(_selectedProject);
             }
 
-            e.Handled = true; // Чтобы не срабатывал выбор тайла
+            e.Handled = true;
         }
 
         private void AddUdimRow_Click(object sender, RoutedEventArgs e)
@@ -429,52 +427,42 @@ namespace AGR_Project_Manager
         private void RemoveUdimRow_Click(object sender, RoutedEventArgs e)
         {
             var model = GetCurrentModel();
-            if (model != null && model.UdimRows.Count > 1)
+            if (model is { UdimRows.Count: > 1 })
             {
                 model.RemoveTopRow();
                 _projectService.UpdateProject(_selectedProject);
             }
         }
 
-        private Border _selectedTileBorder;
-
         private void UdimTile_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            var border = sender as Border;
-            var tile = border?.DataContext as UdimTile;
-
-            if (tile != null)
+            if (sender is Border border && border.DataContext is UdimTile tile)
             {
                 // Убираем выделение с предыдущего
                 if (_selectedTileBorder != null)
                 {
-                    // Берём цвет из текущей темы!
-                    _selectedTileBorder.Background = (SolidColorBrush)Application.Current.FindResource("BackgroundTertiary");
+                    _selectedTileBorder.Background = GetThemeBrush("BackgroundTertiary");
                 }
 
                 // Выделяем новый
                 _selectedTile = tile;
                 _selectedTileBorder = border;
-
-                // Берём цвет выделения из текущей темы!
-                border.Background = (SolidColorBrush)Application.Current.FindResource("SelectionBackground");
+                border.Background = GetThemeBrush("SelectionBackground");
 
                 // Активируем кнопку применения пресета если есть выбранный пресет
                 ApplyPresetBtn.IsEnabled = PresetComboBox.SelectedItem != null;
             }
         }
 
-        private void LoadTexture_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Обработчик клика по зоне текстуры (D, ERM, N)
+        /// </summary>
+        private void TextureZone_Click(object sender, MouseButtonEventArgs e)
         {
-            var button = sender as Button;
-            if (button == null) return;
+            if (sender is not Border { Tag: string textureType } border) return;
 
-            // Ищем UdimTile через визуальное дерево
-            UdimTile tile = FindParentDataContext<UdimTile>(button);
-
+            var tile = FindParentDataContext<UdimTile>(border);
             if (tile == null) return;
-
-            string textureType = button.Tag?.ToString();
 
             var dialog = new OpenFileDialog
             {
@@ -498,23 +486,8 @@ namespace AGR_Project_Manager
                 }
                 _projectService.UpdateProject(_selectedProject);
             }
-        }
 
-        /// <summary>
-        /// Вспомогательный метод для поиска DataContext нужного типа в родительских элементах
-        /// </summary>
-        private T FindParentDataContext<T>(FrameworkElement element) where T : class
-        {
-            var current = element;
-            while (current != null)
-            {
-                if (current.DataContext is T result)
-                {
-                    return result;
-                }
-                current = current.Parent as FrameworkElement;
-            }
-            return null;
+            e.Handled = true; // Не передаём клик родительскому тайлу
         }
 
         private void CopyTile_Click(object sender, RoutedEventArgs e)
@@ -548,8 +521,7 @@ namespace AGR_Project_Manager
 
         private ModelData GetCurrentModel()
         {
-            var tabItem = ModelsTabControl.SelectedItem as TabItem;
-            return tabItem?.Tag as ModelData;
+            return (ModelsTabControl.SelectedItem as TabItem)?.Tag as ModelData;
         }
 
         #endregion
@@ -628,7 +600,6 @@ namespace AGR_Project_Manager
         private void RalColorsBtn_Click(object sender, RoutedEventArgs e)
         {
             var window = new RalColorsWindow();
-            // Убираем Owner чтобы окно было независимым
             window.Show();
         }
 

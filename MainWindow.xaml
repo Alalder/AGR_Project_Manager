@@ -16,18 +16,7 @@
         <converters:PathToImageConverter x:Key="PathToImageConverter"/>
         <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
 
-        <!-- Стиль для кнопок текстур -->
-        <Style x:Key="TextureButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="{DynamicResource ButtonBackground}"/>
-            <Setter Property="Foreground" Value="{DynamicResource ForegroundPrimary}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorder}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="6,4"/>
-            <Setter Property="Margin" Value="2,0"/>
-            <Setter Property="FontSize" Value="10"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="MinWidth" Value="50"/>
-        </Style>
+        
     </Window.Resources>
 
     <Grid>
@@ -378,11 +367,13 @@
                             </Border>
 
                             <!-- Сетка UDIM -->
+                            <!-- Сетка UDIM с адаптивным размером -->
                             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" 
-                                          HorizontalScrollBarVisibility="Disabled">
+              HorizontalScrollBarVisibility="Disabled">
                                 <ItemsControl x:Name="UdimGrid" Margin="10">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
+                                            <!-- Ряд UDIM -->
                                             <ItemsControl ItemsSource="{Binding}" Margin="0,0,0,8">
                                                 <ItemsControl.ItemsPanel>
                                                     <ItemsPanelTemplate>
@@ -391,19 +382,21 @@
                                                 </ItemsControl.ItemsPanel>
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
+                                                        <!-- Один UDIM тайл -->
                                                         <Border Background="{DynamicResource BackgroundTertiary}" 
-                                                                BorderBrush="{DynamicResource BorderPrimary}" 
-                                                                BorderThickness="1" 
-                                                                Margin="3" 
-                                                                CornerRadius="6"
-                                                                MouseLeftButtonDown="UdimTile_MouseDown"
-                                                                Cursor="Hand">
+        BorderBrush="{DynamicResource BorderPrimary}" 
+        BorderThickness="1" 
+        Margin="3" 
+        CornerRadius="6"
+        MouseLeftButtonDown="UdimTile_MouseDown"
+        Cursor="Hand"
+        Focusable="False">
                                                             <Border.Style>
                                                                 <Style TargetType="Border">
                                                                     <Style.Triggers>
                                                                         <DataTrigger Binding="{Binding HasAnyTexture}" Value="True">
                                                                             <Setter Property="BorderBrush" 
-                                                                                    Value="{DynamicResource AccentPrimary}"/>
+                            Value="{DynamicResource AccentPrimary}"/>
                                                                             <Setter Property="BorderThickness" Value="2"/>
                                                                         </DataTrigger>
                                                                     </Style.Triggers>
@@ -411,13 +404,15 @@
                                                             </Border.Style>
 
                                                             <Grid>
+                                                                <!-- Фоновое изображение Diffuse (более яркое) -->
                                                                 <Image Source="{Binding DiffusePath, Converter={StaticResource PathToImageConverter}}"
-                                                                       Stretch="UniformToFill"
-                                                                       Opacity="0.3"
-                                                                       HorizontalAlignment="Stretch"
-                                                                       VerticalAlignment="Stretch"/>
+               Stretch="UniformToFill"
+               Opacity="0.5"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"/>
 
-                                                                <Grid Margin="8">
+                                                                <!-- Контент -->
+                                                                <Grid Margin="4">
                                                                     <Grid.RowDefinitions>
                                                                         <RowDefinition Height="Auto"/>
                                                                         <RowDefinition Height="*"/>
@@ -425,89 +420,128 @@
                                                                         <RowDefinition Height="Auto"/>
                                                                     </Grid.RowDefinitions>
 
+                                                                    <!-- Название материала (сверху) -->
                                                                     <Border Grid.Row="0" 
-                                                                            Background="{DynamicResource BackgroundPrimary}" 
-                                                                            CornerRadius="3" 
-                                                                            Padding="4,2"
-                                                                            Margin="0,0,0,5"
-                                                                            HorizontalAlignment="Center"
-                                                                            Cursor="Hand"
-                                                                            MouseLeftButtonDown="RenameTile_Click">
+                    Background="{DynamicResource BackgroundPrimary}" 
+                    CornerRadius="3" 
+                    Padding="6,2"
+                    HorizontalAlignment="Center"
+                    Cursor="Hand"
+                    MouseLeftButtonDown="RenameTile_Click">
                                                                         <TextBlock Text="{Binding DisplayName}" 
-                                                                                   Foreground="{DynamicResource ForegroundQuaternary}" 
-                                                                                   FontSize="11"
-                                                                                   FontWeight="SemiBold"
-                                                                                   TextTrimming="CharacterEllipsis"
-                                                                                   MaxWidth="80"
-                                                                                   HorizontalAlignment="Center"
-                                                                                   ToolTip="Кликните для переименования"/>
+                           Foreground="{DynamicResource ForegroundQuaternary}" 
+                           FontSize="10"
+                           FontWeight="SemiBold"
+                           TextTrimming="CharacterEllipsis"
+                           MaxWidth="70"
+                           HorizontalAlignment="Center"
+                           ToolTip="Кликните для переименования"/>
                                                                     </Border>
 
+                                                                    <!-- Пустое пространство для превью текстуры -->
                                                                     <Grid Grid.Row="1"/>
 
-                                                                    <StackPanel Grid.Row="2" 
-                                                                                Orientation="Horizontal" 
-                                                                                HorizontalAlignment="Center"
-                                                                                Margin="0,5,0,5">
-                                                                        <Button Content="D" Tag="Diffuse"
-                                                                                Click="LoadTexture_Click"
-                                                                                ToolTip="{Binding DiffusePath}"
-                                                                                Width="28" Height="24" Padding="0"
-                                                                                FontSize="10" FontWeight="Bold">
-                                                                            <Button.Style>
-                                                                                <Style TargetType="Button" BasedOn="{StaticResource TextureButtonStyle}">
+                                                                    <!-- Три зоны текстур (компактные) -->
+                                                                    <UniformGrid Grid.Row="2" Columns="3" Margin="0,4,0,4">
+
+                                                                        <!-- Зона Diffuse (красный) -->
+                                                                        <Border Tag="Diffuse"
+                        CornerRadius="3"
+                        Margin="1"
+                        Padding="4,2"
+                        Cursor="Hand"
+                        MouseLeftButtonDown="TextureZone_Click"
+                        ToolTip="{Binding DiffusePath}">
+                                                                            <Border.Style>
+                                                                                <Style TargetType="Border">
+                                                                                    <Setter Property="Background" Value="{DynamicResource TextureZoneEmpty}"/>
                                                                                     <Style.Triggers>
                                                                                         <DataTrigger Binding="{Binding HasDiffuse}" Value="True">
-                                                                                            <Setter Property="Background" 
-                                                                                                    Value="{DynamicResource TextureDiffuse}"/>
+                                                                                            <Setter Property="Background" Value="{DynamicResource TextureDiffuse}"/>
                                                                                         </DataTrigger>
+                                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                                            <Setter Property="Background" Value="{DynamicResource TextureDiffuseHover}"/>
+                                                                                        </Trigger>
                                                                                     </Style.Triggers>
                                                                                 </Style>
-                                                                            </Button.Style>
-                                                                        </Button>
-                                                                        <Button Content="E" Tag="ERM"
-                                                                                Click="LoadTexture_Click"
-                                                                                ToolTip="{Binding ErmPath}"
-                                                                                Width="28" Height="24" Padding="0"
-                                                                                FontSize="10" FontWeight="Bold">
-                                                                            <Button.Style>
-                                                                                <Style TargetType="Button" BasedOn="{StaticResource TextureButtonStyle}">
+                                                                            </Border.Style>
+                                                                            <TextBlock Text="D" 
+                               Foreground="{DynamicResource ForegroundPrimary}"
+                               FontWeight="Bold"
+                               FontSize="11"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                                                                        </Border>
+
+                                                                        <!-- Зона ERM (зелёный) -->
+                                                                        <Border Tag="ERM"
+                        CornerRadius="3"
+                        Margin="1"
+                        Padding="4,2"
+                        Cursor="Hand"
+                        MouseLeftButtonDown="TextureZone_Click"
+                        ToolTip="{Binding ErmPath}">
+                                                                            <Border.Style>
+                                                                                <Style TargetType="Border">
+                                                                                    <Setter Property="Background" Value="{DynamicResource TextureZoneEmpty}"/>
                                                                                     <Style.Triggers>
                                                                                         <DataTrigger Binding="{Binding HasErm}" Value="True">
-                                                                                            <Setter Property="Background" 
-                                                                                                    Value="{DynamicResource TextureErm}"/>
+                                                                                            <Setter Property="Background" Value="{DynamicResource TextureErm}"/>
                                                                                         </DataTrigger>
+                                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                                            <Setter Property="Background" Value="{DynamicResource TextureErmHover}"/>
+                                                                                        </Trigger>
                                                                                     </Style.Triggers>
                                                                                 </Style>
-                                                                            </Button.Style>
-                                                                        </Button>
-                                                                        <Button Content="N" Tag="Normal"
-                                                                                Click="LoadTexture_Click"
-                                                                                ToolTip="{Binding NormalPath}"
-                                                                                Width="28" Height="24" Padding="0"
-                                                                                FontSize="10" FontWeight="Bold">
-                                                                            <Button.Style>
-                                                                                <Style TargetType="Button" BasedOn="{StaticResource TextureButtonStyle}">
+                                                                            </Border.Style>
+                                                                            <TextBlock Text="E" 
+                               Foreground="{DynamicResource ForegroundPrimary}"
+                               FontWeight="Bold"
+                               FontSize="11"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                                                                        </Border>
+
+                                                                        <!-- Зона Normal (синий) -->
+                                                                        <Border Tag="Normal"
+                        CornerRadius="3"
+                        Margin="1"
+                        Padding="4,2"
+                        Cursor="Hand"
+                        MouseLeftButtonDown="TextureZone_Click"
+                        ToolTip="{Binding NormalPath}">
+                                                                            <Border.Style>
+                                                                                <Style TargetType="Border">
+                                                                                    <Setter Property="Background" Value="{DynamicResource TextureZoneEmpty}"/>
                                                                                     <Style.Triggers>
                                                                                         <DataTrigger Binding="{Binding HasNormal}" Value="True">
-                                                                                            <Setter Property="Background" 
-                                                                                                    Value="{DynamicResource TextureNormal}"/>
+                                                                                            <Setter Property="Background" Value="{DynamicResource TextureNormal}"/>
                                                                                         </DataTrigger>
+                                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                                            <Setter Property="Background" Value="{DynamicResource TextureNormalHover}"/>
+                                                                                        </Trigger>
                                                                                     </Style.Triggers>
                                                                                 </Style>
-                                                                            </Button.Style>
-                                                                        </Button>
-                                                                    </StackPanel>
+                                                                            </Border.Style>
+                                                                            <TextBlock Text="N" 
+                               Foreground="{DynamicResource ForegroundPrimary}"
+                               FontWeight="Bold"
+                               FontSize="11"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                                                                        </Border>
+                                                                    </UniformGrid>
 
+                                                                    <!-- Номер UDIM (внизу) -->
                                                                     <Border Grid.Row="3" 
-                                                                            Background="{DynamicResource BackgroundPrimary}" 
-                                                                            CornerRadius="3" 
-                                                                            Padding="6,2"
-                                                                            HorizontalAlignment="Center">
+                    Background="{DynamicResource BackgroundPrimary}" 
+                    CornerRadius="3" 
+                    Padding="6,2"
+                    HorizontalAlignment="Center">
                                                                         <TextBlock Text="{Binding UdimNumber}" 
-                                                                                   Foreground="{DynamicResource ForegroundTertiary}" 
-                                                                                   FontSize="11"
-                                                                                   FontWeight="Bold"/>
+                           Foreground="{DynamicResource ForegroundTertiary}" 
+                           FontSize="10"
+                           FontWeight="Bold"/>
                                                                     </Border>
                                                                 </Grid>
                                                             </Grid>

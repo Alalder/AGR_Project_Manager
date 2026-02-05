@@ -40,10 +40,21 @@
     <SolidColorBrush x:Key="DangerForeground" Color="#f87171"/>
     <SolidColorBrush x:Key="DangerButtonBackground" Color="#7f1d1d"/>
 
-    <!-- ===== ТЕКСТУРЫ ===== -->
-    <SolidColorBrush x:Key="TextureDiffuse" Color="#22c55e"/>
-    <SolidColorBrush x:Key="TextureErm" Color="#f59e0b"/>
-    <SolidColorBrush x:Key="TextureNormal" Color="#8b5cf6"/>
+    <!-- ===== ТЕКСТУРЫ (зоны D/ERM/N) ===== -->
+    <!-- Пустая зона -->
+    <SolidColorBrush x:Key="TextureZoneEmpty" Color="#3a3a3a"/>
+
+    <!-- Diffuse - красный (приглушённый) -->
+    <SolidColorBrush x:Key="TextureDiffuse" Color="#8b4a4a"/>
+    <SolidColorBrush x:Key="TextureDiffuseHover" Color="#a55a5a"/>
+
+    <!-- ERM - зелёный (приглушённый) -->
+    <SolidColorBrush x:Key="TextureErm" Color="#4a7c59"/>
+    <SolidColorBrush x:Key="TextureErmHover" Color="#5a9c69"/>
+
+    <!-- Normal - синий (приглушённый) -->
+    <SolidColorBrush x:Key="TextureNormal" Color="#4a5a8b"/>
+    <SolidColorBrush x:Key="TextureNormalHover" Color="#5a6aab"/>
 
     <!-- ===== СПИСКИ ===== -->
     <SolidColorBrush x:Key="ListItemBackground" Color="Transparent"/>
@@ -92,8 +103,11 @@
     <SolidColorBrush x:Key="HelpBoxPurple" Color="#2a2a3a"/>
     <SolidColorBrush x:Key="HelpBoxGreen" Color="#2a3a2a"/>
     <SolidColorBrush x:Key="HelpBoxRed" Color="#3a2a2a"/>
+    <SolidColorBrush x:Key="HelpBoxBlue" Color="#2a3a3a"/>
 
     <!-- ===== СТАТУСНЫЕ ЦВЕТА ===== -->
     <SolidColorBrush x:Key="SuccessText" Color="#90EE90"/>
+    
+       
 
 </ResourceDictionary>
