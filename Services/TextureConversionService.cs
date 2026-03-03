@@ -103,44 +103,6 @@ namespace AGR_Project_Manager.Services
         }
 
         /// <summary>
-        /// Добавить альфа-канал (RGB → RGBA)
-        /// </summary>
-        public static async Task<ConversionResult> AddAlphaAsync(string inputPath, string outputPath = null)
-        {
-            return await Task.Run(() =>
-            {
-                try
-                {
-                    outputPath ??= inputPath;
-                    string tempPath = GetTempPath(outputPath);
-
-                    using (var image = Image.Load(inputPath))
-                    {
-                        using var rgba = image.CloneAs<Rgba32>();
-                        SavePngRgba(rgba, tempPath);
-                    }
-
-                    FinalizeFile(tempPath, outputPath);
-
-                    return new ConversionResult
-                    {
-                        Success = true,
-                        OutputPath = outputPath,
-                        Message = "Альфа-канал добавлен"
-                    };
-                }
-                catch (Exception ex)
-                {
-                    return new ConversionResult
-                    {
-                        Success = false,
-                        Message = $"Ошибка: {ex.Message}"
-                    };
-                }
-            });
-        }
-
-        /// <summary>
         /// Конвертировать в PNG формат
         /// </summary>
         public static async Task<ConversionResult> ConvertToPngAsync(string inputPath, string outputPath = null)
@@ -158,12 +120,9 @@ namespace AGR_Project_Manager.Services
 
                     using (var image = Image.Load(inputPath))
                     {
-                        var encoder = new PngEncoder
-                        {
-                            CompressionLevel = PngCompressionLevel.BestCompression,
-                            BitDepth = PngBitDepth.Bit8
-                        };
-                        image.SaveAsPng(tempPath, encoder);
+                        // Сохраняем как полноцветный 8-bit
+                        using var rgba = image.CloneAs<Rgba32>();
+                        SavePngRgba(rgba, tempPath);
                     }
 
                     FinalizeFile(tempPath, outputPath);
@@ -215,11 +174,9 @@ namespace AGR_Project_Manager.Services
 
                         image.Mutate(x => x.Resize(newWidth, newHeight));
 
-                        var encoder = new PngEncoder
-                        {
-                            CompressionLevel = PngCompressionLevel.BestCompression
-                        };
-                        image.SaveAsPng(tempPath, encoder);
+                        // Сохраняем как полноцветный
+                        using var rgba = image.CloneAs<Rgba32>();
+                        SavePngRgba(rgba, tempPath);
                     }
 
                     FinalizeFile(tempPath, outputPath);
@@ -243,11 +200,14 @@ namespace AGR_Project_Manager.Services
         }
 
         /// <summary>
-        /// Изменить размер до ближайшей степени двойки
+        /// Оптимизировать PNG с размытием для уменьшения размера
         /// </summary>
-        public static async Task<ConversionResult> ResizeToPowerOfTwoAsync(
+        /// <param name="inputPath">Путь к файлу</param>
+        /// <param name="mode">Режим оптимизации</param>
+        /// <param name="outputPath">Путь для сохранения (null = перезаписать)</param>
+        public static async Task<ConversionResult> OptimizePngAsync(
             string inputPath,
-            PowerOfTwoMode mode = PowerOfTwoMode.Nearest,
+            OptimizationMode mode = OptimizationMode.LightBlur,
             string outputPath = null)
         {
             return await Task.Run(() =>
@@ -257,31 +217,92 @@ namespace AGR_Project_Manager.Services
                     outputPath ??= inputPath;
                     string tempPath = GetTempPath(outputPath);
 
+                    long originalSize = new FileInfo(inputPath).Length;
+
                     using (var image = Image.Load(inputPath))
                     {
-                        int newWidth = GetPowerOfTwo(image.Width, mode);
-                        int newHeight = GetPowerOfTwo(image.Height, mode);
-
-                        if (newWidth != image.Width || newHeight != image.Height)
+                        // Применяем обработку в зависимости от режима
+                        switch (mode)
                         {
-                            image.Mutate(x => x.Resize(newWidth, newHeight));
+                            case OptimizationMode.Recompress:
+                                // Просто пересохранение с максимальным сжатием
+                                break;
+
+                            case OptimizationMode.LightBlur:
+                                // Лёгкое размытие (sigma 0.3-0.5) — почти незаметно, но помогает
+                                image.Mutate(x => x.GaussianBlur(0.4f));
+                                break;
+
+                            case OptimizationMode.MediumBlur:
+                                // Среднее размытие (sigma 0.7-1.0) — немного заметно
+                                image.Mutate(x => x.GaussianBlur(0.8f));
+                                break;
+
+                            case OptimizationMode.StrongBlur:
+                                // Сильное размытие (sigma 1.5-2.0) — заметно, но сильное сжатие
+                                image.Mutate(x => x.GaussianBlur(1.5f));
+                                break;
+
+                            case OptimizationMode.Denoise:
+                                // Медианный фильтр — хорошо убирает шум, сохраняет края
+                                // ImageSharp не имеет встроенного медианного фильтра,
+                                // используем лёгкое размытие + повышение контраста
+                                image.Mutate(x => x
+                                    .GaussianBlur(0.5f)
+                                    .Contrast(1.05f));
+                                break;
                         }
 
-                        var encoder = new PngEncoder
+                        // Сохраняем как полноцветный 8-bit RGB или RGBA
+                        using var rgba = image.CloneAs<Rgba32>();
+                        bool hasAlpha = HasMeaningfulAlpha(rgba);
+
+                        if (hasAlpha)
                         {
-                            CompressionLevel = PngCompressionLevel.BestCompression
-                        };
-                        image.SaveAsPng(tempPath, encoder);
+                            SavePngRgba(rgba, tempPath);
+                        }
+                        else
+                        {
+                            using var rgb = image.CloneAs<Rgb24>();
+                            SavePngRgb(rgb, tempPath);
+                        }
                     }
+
+                    long newSize = new FileInfo(tempPath).Length;
 
                     FinalizeFile(tempPath, outputPath);
 
-                    return new ConversionResult
+                    long saved = originalSize - newSize;
+                    double percent = originalSize > 0 ? (double)saved / originalSize * 100 : 0;
+
+                    string modeDesc = mode switch
                     {
-                        Success = true,
-                        OutputPath = outputPath,
-                        Message = "Размер приведён к степени двойки"
+                        OptimizationMode.Recompress => "пересжатие",
+                        OptimizationMode.LightBlur => "лёгкое размытие",
+                        OptimizationMode.MediumBlur => "среднее размытие",
+                        OptimizationMode.StrongBlur => "сильное размытие",
+                        OptimizationMode.Denoise => "шумоподавление",
+                        _ => ""
                     };
+
+                    if (saved > 0)
+                    {
+                        return new ConversionResult
+                        {
+                            Success = true,
+                            OutputPath = outputPath,
+                            Message = $"-{percent:F1}% ({modeDesc}, -{FormatSize(saved)})"
+                        };
+                    }
+                    else
+                    {
+                        return new ConversionResult
+                        {
+                            Success = true,
+                            OutputPath = outputPath,
+                            Message = $"Обработано ({modeDesc})"
+                        };
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -295,9 +316,12 @@ namespace AGR_Project_Manager.Services
         }
 
         /// <summary>
-        /// Оптимизировать PNG (максимальное сжатие)
+        /// Применить размытие по Гауссу с указанным радиусом
         /// </summary>
-        public static async Task<ConversionResult> OptimizePngAsync(string inputPath, string outputPath = null)
+        public static async Task<ConversionResult> ApplyGaussianBlurAsync(
+            string inputPath,
+            float sigma,
+            string outputPath = null)
         {
             return await Task.Run(() =>
             {
@@ -310,39 +334,47 @@ namespace AGR_Project_Manager.Services
 
                     using (var image = Image.Load(inputPath))
                     {
-                        var encoder = new PngEncoder
-                        {
-                            CompressionLevel = PngCompressionLevel.BestCompression,
-                            FilterMethod = PngFilterMethod.Adaptive,
-                            BitDepth = PngBitDepth.Bit8
-                        };
-                        image.SaveAsPng(tempPath, encoder);
-                    }
+                        image.Mutate(x => x.GaussianBlur(sigma));
 
-                    long newSize = new FileInfo(tempPath).Length;
+                        // Сохраняем как полноцветный 8-bit
+                        using var rgba = image.CloneAs<Rgba32>();
+                        bool hasAlpha = HasMeaningfulAlpha(rgba);
 
-                    if (newSize >= originalSize && outputPath == inputPath)
-                    {
-                        File.Delete(tempPath);
-                        return new ConversionResult
+                        if (hasAlpha)
                         {
-                            Success = true,
-                            OutputPath = outputPath,
-                            Message = "Файл уже оптимален"
-                        };
+                            SavePngRgba(rgba, tempPath);
+                        }
+                        else
+                        {
+                            using var rgb = image.CloneAs<Rgb24>();
+                            SavePngRgb(rgb, tempPath);
+                        }
                     }
 
                     FinalizeFile(tempPath, outputPath);
 
+                    long newSize = new FileInfo(outputPath).Length;
                     long saved = originalSize - newSize;
-                    double percent = (double)saved / originalSize * 100;
+                    double percent = originalSize > 0 ? (double)saved / originalSize * 100 : 0;
 
-                    return new ConversionResult
+                    if (saved > 0)
                     {
-                        Success = true,
-                        OutputPath = outputPath,
-                        Message = $"Сжато на {percent:F1}% (сохранено {FormatSize(saved)})"
-                    };
+                        return new ConversionResult
+                        {
+                            Success = true,
+                            OutputPath = outputPath,
+                            Message = $"Размытие σ={sigma:F1}, -{percent:F1}% (-{FormatSize(saved)})"
+                        };
+                    }
+                    else
+                    {
+                        return new ConversionResult
+                        {
+                            Success = true,
+                            OutputPath = outputPath,
+                            Message = $"Размытие σ={sigma:F1} применено"
+                        };
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -392,51 +424,27 @@ namespace AGR_Project_Manager.Services
 
                             image.Mutate(x => x.Resize(w, h));
                         }
-                        else if (options.ResizeToPowerOfTwo)
-                        {
-                            int newW = GetPowerOfTwo(image.Width, PowerOfTwoMode.Nearest);
-                            int newH = GetPowerOfTwo(image.Height, PowerOfTwoMode.Nearest);
-                            if (newW != image.Width || newH != image.Height)
-                            {
-                                image.Mutate(x => x.Resize(newW, newH));
-                            }
-                        }
 
-                        // Сохранение с нужными параметрами
+                        // Сохранение как полноцветный 8-bit
                         if (options.RemoveAlpha)
                         {
                             using var rgb = image.CloneAs<Rgb24>();
-                            SavePngRgb(rgb, tempPath, options.OptimizeCompression);
+                            SavePngRgb(rgb, tempPath);
                         }
-                        else if (options.AddAlpha)
-                        {
-                            using var rgba = image.CloneAs<Rgba32>();
-                            SavePngRgba(rgba, tempPath, options.OptimizeCompression);
-                        }
-                        else if (options.ConvertTo8Bit)
+                        else
                         {
                             using var rgba = image.CloneAs<Rgba32>();
                             bool hasAlpha = HasMeaningfulAlpha(rgba);
 
                             if (hasAlpha)
                             {
-                                SavePngRgba(rgba, tempPath, options.OptimizeCompression);
+                                SavePngRgba(rgba, tempPath);
                             }
                             else
                             {
                                 using var rgb = image.CloneAs<Rgb24>();
-                                SavePngRgb(rgb, tempPath, options.OptimizeCompression);
+                                SavePngRgb(rgb, tempPath);
                             }
-                        }
-                        else
-                        {
-                            var encoder = new PngEncoder
-                            {
-                                CompressionLevel = options.OptimizeCompression
-                                    ? PngCompressionLevel.BestCompression
-                                    : PngCompressionLevel.DefaultCompression
-                            };
-                            image.SaveAsPng(tempPath, encoder);
                         }
                     }
 
@@ -444,7 +452,7 @@ namespace AGR_Project_Manager.Services
 
                     long newSize = new FileInfo(outputPath).Length;
                     string sizeInfo = newSize < originalSize
-                        ? $" (сжато на {(originalSize - newSize) * 100 / originalSize}%)"
+                        ? $" (-{(originalSize - newSize) * 100 / originalSize}%)"
                         : "";
 
                     return new ConversionResult
@@ -469,26 +477,26 @@ namespace AGR_Project_Manager.Services
 
         #region Private Helpers
 
-        private static void SavePngRgb(Image<Rgb24> image, string path, bool optimize = true)
+        private static void SavePngRgb(Image<Rgb24> image, string path)
         {
             var encoder = new PngEncoder
             {
-                CompressionLevel = optimize ? PngCompressionLevel.BestCompression : PngCompressionLevel.DefaultCompression,
+                CompressionLevel = PngCompressionLevel.BestCompression,
                 ColorType = PngColorType.Rgb,
                 BitDepth = PngBitDepth.Bit8,
-                FilterMethod = optimize ? PngFilterMethod.Adaptive : PngFilterMethod.None
+                FilterMethod = PngFilterMethod.Adaptive
             };
             image.SaveAsPng(path, encoder);
         }
 
-        private static void SavePngRgba(Image<Rgba32> image, string path, bool optimize = true)
+        private static void SavePngRgba(Image<Rgba32> image, string path)
         {
             var encoder = new PngEncoder
             {
-                CompressionLevel = optimize ? PngCompressionLevel.BestCompression : PngCompressionLevel.DefaultCompression,
+                CompressionLevel = PngCompressionLevel.BestCompression,
                 ColorType = PngColorType.RgbWithAlpha,
                 BitDepth = PngBitDepth.Bit8,
-                FilterMethod = optimize ? PngFilterMethod.Adaptive : PngFilterMethod.None
+                FilterMethod = PngFilterMethod.Adaptive
             };
             image.SaveAsPng(path, encoder);
         }
@@ -505,23 +513,6 @@ namespace AGR_Project_Manager.Services
                 File.Delete(outputPath);
             }
             File.Move(tempPath, outputPath);
-        }
-
-        private static int GetPowerOfTwo(int value, PowerOfTwoMode mode)
-        {
-            if (value <= 0) return 1;
-
-            int lower = 1;
-            while (lower * 2 <= value) lower *= 2;
-            int upper = lower * 2;
-
-            return mode switch
-            {
-                PowerOfTwoMode.Up => upper,
-                PowerOfTwoMode.Down => lower,
-                PowerOfTwoMode.Nearest => (value - lower) < (upper - value) ? lower : upper,
-                _ => lower
-            };
         }
 
         private static bool HasMeaningfulAlpha(Image<Rgba32> image)
@@ -571,13 +562,34 @@ namespace AGR_Project_Manager.Services
     }
 
     /// <summary>
-    /// Режим округления до степени двойки
+    /// Режим оптимизации
     /// </summary>
-    public enum PowerOfTwoMode
+    public enum OptimizationMode
     {
-        Nearest,
-        Up,
-        Down
+        /// <summary>
+        /// Только пересжатие (без изменения изображения)
+        /// </summary>
+        Recompress,
+
+        /// <summary>
+        /// Лёгкое размытие по Гауссу (σ=0.4) — почти незаметно
+        /// </summary>
+        LightBlur,
+
+        /// <summary>
+        /// Среднее размытие (σ=0.8) — немного заметно
+        /// </summary>
+        MediumBlur,
+
+        /// <summary>
+        /// Сильное размытие (σ=1.5) — заметно, сильное сжатие
+        /// </summary>
+        StrongBlur,
+
+        /// <summary>
+        /// Шумоподавление (размытие + контраст)
+        /// </summary>
+        Denoise
     }
 
     /// <summary>
@@ -588,12 +600,9 @@ namespace AGR_Project_Manager.Services
         public bool ConvertTo8Bit { get; set; } = true;
         public bool ConvertToPng { get; set; } = true;
         public bool RemoveAlpha { get; set; }
-        public bool AddAlpha { get; set; }
-        public bool OptimizeCompression { get; set; } = true;
-        public bool ResizeToPowerOfTwo { get; set; }
+        public bool OptimizeCompression { get; set; }
         public int ResizeWidth { get; set; }
         public int ResizeHeight { get; set; }
-        public bool DeleteOriginalOnFormatChange { get; set; }
     }
 
     #endregion

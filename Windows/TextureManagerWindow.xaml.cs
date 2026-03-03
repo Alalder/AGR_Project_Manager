@@ -348,18 +348,51 @@ namespace AGR_Project_Manager.Windows
             var selected = GetSelectedTextures();
             if (!ValidateSelection(selected)) return;
 
-            var pngFiles = selected.Where(t => t.Format.Equals("PNG", StringComparison.OrdinalIgnoreCase)).ToList();
-            if (pngFiles.Count == 0)
+            // Получаем выбранный режим
+            var selectedItem = OptimizationModeCombo.SelectedItem as ComboBoxItem;
+            if (selectedItem?.Tag is not string modeStr)
             {
-                MessageBox.Show("Среди выбранных файлов нет PNG изображений",
-                    "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
+                modeStr = "LightBlur";
             }
 
-            await ProcessTexturesAsync(pngFiles, async (texture) =>
+            var mode = modeStr switch
             {
-                return await TextureConversionService.OptimizePngAsync(texture.FilePath);
-            }, "Оптимизация PNG");
+                "Recompress" => Services.OptimizationMode.Recompress,
+                "LightBlur" => Services.OptimizationMode.LightBlur,
+                "MediumBlur" => Services.OptimizationMode.MediumBlur,
+                "StrongBlur" => Services.OptimizationMode.StrongBlur,
+                "Denoise" => Services.OptimizationMode.Denoise,
+                _ => Services.OptimizationMode.LightBlur
+            };
+
+            // Описание режима
+            string description = mode switch
+            {
+                Services.OptimizationMode.Recompress =>
+                    "Только пересжатие с максимальной компрессией.\nИзображение не изменяется. Эффект минимальный.",
+                Services.OptimizationMode.LightBlur =>
+                    "Лёгкое размытие по Гауссу (σ=0.4).\nПочти незаметно, уменьшает размер на 10-30%.",
+                Services.OptimizationMode.MediumBlur =>
+                    "Среднее размытие по Гауссу (σ=0.8).\nНемного заметно, уменьшает размер на 20-50%.",
+                Services.OptimizationMode.StrongBlur =>
+                    "Сильное размытие по Гауссу (σ=1.5).\nЗаметное размытие, уменьшает размер на 40-70%.",
+                Services.OptimizationMode.Denoise =>
+                    "Шумоподавление (размытие + контраст).\nУбирает мелкий шум, сохраняя контрастность.",
+                _ => ""
+            };
+
+            var result = MessageBox.Show(
+                $"Обработать {selected.Count} файл(ов)?\n\n{description}\n\n⚠️ Файлы будут перезаписаны!",
+                "Подтверждение",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes) return;
+
+            await ProcessTexturesAsync(selected, async (texture) =>
+            {
+                return await TextureConversionService.OptimizePngAsync(texture.FilePath, mode);
+            }, $"Оптимизация ({modeStr})");
         }
 
         private async void ConvertToPng_Click(object sender, RoutedEventArgs e)

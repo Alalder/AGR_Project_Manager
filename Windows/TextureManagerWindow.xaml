@@ -456,14 +456,15 @@
             </DataGrid>
         </Border>
 
-        <!-- ===== Строка 3: Панель действий (одна строка) ===== -->
+        <!-- ===== Строка 3: Панель действий ===== -->
         <Border Grid.Row="3" 
-                Background="{DynamicResource BackgroundSecondary}" 
-                CornerRadius="8" 
-                Padding="12" 
-                Margin="0,10,0,0">
+        Background="{DynamicResource BackgroundSecondary}" 
+        CornerRadius="8" 
+        Padding="12" 
+        Margin="0,10,0,0">
             <Grid>
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -472,95 +473,120 @@
 
                 <!-- Левая часть: основные действия -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
-                    <TextBlock Text="🔧 Действия:" 
-                               Foreground="{DynamicResource ForegroundSecondary}"
-                               VerticalAlignment="Center"
-                               Margin="0,0,10,0"
-                               FontWeight="SemiBold"/>
+                    <TextBlock Text="🔧" 
+                       Foreground="{DynamicResource ForegroundSecondary}"
+                       VerticalAlignment="Center"
+                       Margin="0,0,8,0"
+                       FontWeight="SemiBold"/>
 
-                    <Button Content="📦 В 8-bit PNG" 
-                            Background="{DynamicResource AccentPrimary}"
-                            Foreground="{DynamicResource ForegroundPrimary}"
-                            Padding="10,6"
-                            Margin="0,0,6,0"
-                            ToolTip="Конвертировать в 8-bit PNG"
-                            Click="ConvertTo8BitPng_Click"/>
+                    <Button Content="📦 8-bit PNG" 
+                    Background="{DynamicResource AccentPrimary}"
+                    Foreground="{DynamicResource ForegroundPrimary}"
+                    Padding="10,6"
+                    Margin="0,0,6,0"
+                    ToolTip="Конвертировать в 8-bit PNG (полноцветный)"
+                    Click="ConvertTo8BitPng_Click"/>
 
-                    <Button Content="🚫 Удалить альфа-канал" 
-                            Background="{DynamicResource ButtonBackground}"
-                            Foreground="{DynamicResource ForegroundPrimary}"
-                            Padding="10,6"
-                            Margin="0,0,6,0"
-                            ToolTip="Удалить альфа-канал (RGBA → RGB)"
-                            Click="RemoveAlpha_Click"/>
+                    <Button Content="🚫 Удалить α" 
+                    Background="{DynamicResource ButtonBackground}"
+                    Foreground="{DynamicResource ForegroundPrimary}"
+                    Padding="10,6"
+                    Margin="0,0,6,0"
+                    ToolTip="Удалить альфа-канал (RGBA → RGB)"
+                    Click="RemoveAlpha_Click"/>
 
-                    <Button Content="🗜️ Оптимизировать" 
-                            Background="{DynamicResource ButtonBackground}"
-                            Foreground="{DynamicResource ForegroundPrimary}"
-                            Padding="10,6"
-                            Margin="0,0,6,0"
-                            ToolTip="Максимальное сжатие PNG"
-                            Click="OptimizePng_Click"/>
-
-                    <Button Content="🔄 В PNG" 
-                            Background="{DynamicResource ButtonBackground}"
-                            Foreground="{DynamicResource ForegroundPrimary}"
-                            Padding="10,6"
-                            ToolTip="Конвертировать в PNG формат"
-                            Click="ConvertToPng_Click"/>
+                    <Button Content="🔄 → PNG" 
+                    Background="{DynamicResource ButtonBackground}"
+                    Foreground="{DynamicResource ForegroundPrimary}"
+                    Padding="10,6"
+                    ToolTip="Конвертировать в PNG формат"
+                    Click="ConvertToPng_Click"/>
                 </StackPanel>
 
-                <!-- Разделитель -->
+                <!-- Разделитель 1 -->
                 <Separator Grid.Column="1" 
-                           Width="1" 
-                           Background="{DynamicResource BorderSecondary}" 
-                           Margin="12,0"/>
+                   Width="1" 
+                   Background="{DynamicResource BorderSecondary}" 
+                   Margin="10,0"/>
 
-                <!-- Центральная часть: ресайз -->
-                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Left">
+                <!-- Оптимизация с размытием -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <TextBlock Text="🗜️ Сжатие:" 
+                       Foreground="{DynamicResource ForegroundSecondary}"
+                       VerticalAlignment="Center"
+                       Margin="0,0,8,0"/>
+
+                    <ComboBox x:Name="OptimizationModeCombo"
+                      Width="155"
+                      Margin="0,0,6,0"
+                      SelectedIndex="1"
+                      ToolTip="Режим оптимизации (размытие уменьшает размер файла)">
+                        <ComboBoxItem Content="Только пересжатие" Tag="Recompress"/>
+                        <ComboBoxItem Content="Лёгкое размытие" Tag="LightBlur"/>
+                        <ComboBoxItem Content="Среднее размытие" Tag="MediumBlur"/>
+                        <ComboBoxItem Content="Сильное размытие" Tag="StrongBlur"/>
+                        <ComboBoxItem Content="Шумоподавление" Tag="Denoise"/>
+                    </ComboBox>
+
+                    <Button Content="🗜️ Сжать" 
+                    Background="{DynamicResource ButtonBackground}"
+                    Foreground="{DynamicResource ForegroundPrimary}"
+                    Padding="10,6"
+                    ToolTip="Применить оптимизацию к выбранным файлам"
+                    Click="OptimizePng_Click"/>
+                </StackPanel>
+
+                <!-- Ресайз -->
+                <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Separator Width="1" 
+                       Background="{DynamicResource BorderSecondary}" 
+                       Margin="10,0"/>
+
                     <TextBlock Text="📐 Ресайз:" 
-                               Foreground="{DynamicResource ForegroundSecondary}"
-                               VerticalAlignment="Center"
-                               Margin="0,0,8,0"/>
+                       Foreground="{DynamicResource ForegroundSecondary}"
+                       VerticalAlignment="Center"
+                       Margin="8,0,8,0"/>
 
                     <ComboBox x:Name="ResizePresetCombo"
-                              Width="130"
-                              Margin="0,0,6,0"
-                              SelectedIndex="0">
+                      Width="115"
+                      Margin="0,0,6,0"
+                      SelectedIndex="0">
                         <ComboBoxItem Content="Выбрать..."/>
                         <ComboBoxItem Content="4096 × 4096" Tag="4096"/>
                         <ComboBoxItem Content="2048 × 2048" Tag="2048"/>
                         <ComboBoxItem Content="1024 × 1024" Tag="1024"/>
                         <ComboBoxItem Content="512 × 512" Tag="512"/>
                         <ComboBoxItem Content="256 × 256" Tag="256"/>
-                        <ComboBoxItem Content="128 × 128" Tag="128"/>
                     </ComboBox>
 
-                    <Button Content="📏 Применить" 
-                            Background="{DynamicResource ButtonBackground}"
-                            Foreground="{DynamicResource ForegroundPrimary}"
-                            Padding="10,6"
-                            Click="ApplyResize_Click"/>
+                    <Button Content="📏" 
+                    Background="{DynamicResource ButtonBackground}"
+                    Foreground="{DynamicResource ForegroundPrimary}"
+                    Padding="10,6"
+                    ToolTip="Применить ресайз"
+                    Click="ApplyResize_Click"/>
                 </StackPanel>
 
                 <!-- Правая часть: выделение -->
-                <StackPanel Grid.Column="3" Orientation="Horizontal">
+                <StackPanel Grid.Column="4" Orientation="Horizontal">
                     <Separator Width="1" 
-                               Background="{DynamicResource BorderSecondary}" 
-                               Margin="12,0"/>
+                       Background="{DynamicResource BorderSecondary}" 
+                       Margin="10,0"/>
 
-                    <Button Content="✅ Выбрать все" 
-                            Background="{DynamicResource ButtonBackground}"
-                            Foreground="{DynamicResource ForegroundPrimary}"
-                            Padding="10,6"
-                            Margin="0,0,6,0"
-                            Click="SelectAll_Click"/>
+                    <Button Content="✅" 
+                    Background="{DynamicResource ButtonBackground}"
+                    Foreground="{DynamicResource ForegroundPrimary}"
+                    Padding="10,6"
+                    Margin="0,0,4,0"
+                    ToolTip="Выбрать все файлы"
+                    Click="SelectAll_Click"/>
 
-                    <Button Content="❎ Снять" 
-                            Background="{DynamicResource ButtonBackground}"
-                            Foreground="{DynamicResource ForegroundPrimary}"
-                            Padding="10,6"
-                            Click="DeselectAll_Click"/>
+                    <Button Content="❎" 
+                    Background="{DynamicResource ButtonBackground}"
+                    Foreground="{DynamicResource ForegroundPrimary}"
+                    Padding="10,6"
+                    ToolTip="Снять выделение"
+                    Click="DeselectAll_Click"/>
                 </StackPanel>
             </Grid>
         </Border>
