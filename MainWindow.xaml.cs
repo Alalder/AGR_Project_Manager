@@ -597,6 +597,21 @@ namespace AGR_Project_Manager
 
         #region Utilities
 
+        private void TextureManagerBtn_Click(object sender, RoutedEventArgs e)
+        {
+            // Если есть выбранный путь экспорта, передаём его как начальную папку
+            string initialFolder = null;
+
+            if (!string.IsNullOrEmpty(ExportPathTextBox.Text) &&
+                System.IO.Directory.Exists(ExportPathTextBox.Text))
+            {
+                initialFolder = ExportPathTextBox.Text;
+            }
+
+            var window = new TextureManagerWindow(initialFolder);
+            window.Show();
+        }
+
         private void RalColorsBtn_Click(object sender, RoutedEventArgs e)
         {
             var window = new RalColorsWindow();

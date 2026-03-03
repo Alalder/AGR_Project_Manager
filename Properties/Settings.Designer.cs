@@ -34,5 +34,29 @@ namespace AGR_Project_Manager.Properties {
                 this["Theme"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string TextureManagerLastFolder {
+            get {
+                return ((string)(this["TextureManagerLastFolder"]));
+            }
+            set {
+                this["TextureManagerLastFolder"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string TextureManagerLastFiles {
+            get {
+                return ((string)(this["TextureManagerLastFiles"]));
+            }
+            set {
+                this["TextureManagerLastFiles"] = value;
+            }
+        }
     }
 }

@@ -131,6 +131,13 @@
 
                         <Separator Background="{DynamicResource BorderPrimary}" Margin="0,4"/>
 
+                        <Button Content="🖼️ Texture Manager" 
+                                Background="{DynamicResource ButtonBackground}" 
+                                Foreground="{DynamicResource ForegroundPrimary}" 
+                                Margin="0,0,0,6" Padding="8,6" Cursor="Hand"
+                                FontWeight="SemiBold"
+                                Click="TextureManagerBtn_Click"/>
+
                         <Button Content="🎨 RAL Colors" 
                                 Background="{DynamicResource ButtonBackground}" 
                                 Foreground="{DynamicResource ForegroundPrimary}" 

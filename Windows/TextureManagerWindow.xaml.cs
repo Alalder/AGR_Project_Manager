@@ -1,0 +1,547 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using AGR_Project_Manager.Models;
+using AGR_Project_Manager.Properties;
+using AGR_Project_Manager.Services;
+using Microsoft.Win32;
+using Ookii.Dialogs.Wpf;
+
+namespace AGR_Project_Manager.Windows
+{
+    /// <summary>
+    /// Окно управления текстурами
+    /// </summary>
+    public partial class TextureManagerWindow : Window
+    {
+        private readonly TextureAnalysisService _analysisService;
+        private readonly TextureConversionService _conversionService;
+        private readonly ObservableCollection<TextureInfo> _textures;
+        private bool _isProcessing;
+        private string _lastFolder;
+
+        // Фильтр файлов изображений
+        private const string ImageFilter = "Изображения|*.png;*.jpg;*.jpeg;*.tga;*.tiff;*.tif;*.bmp;*.gif;*.webp|" +
+                                           "PNG файлы (*.png)|*.png|" +
+                                           "JPEG файлы (*.jpg;*.jpeg)|*.jpg;*.jpeg|" +
+                                           "TGA файлы (*.tga)|*.tga|" +
+                                           "TIFF файлы (*.tiff;*.tif)|*.tiff;*.tif|" +
+                                           "Все файлы (*.*)|*.*";
+
+        public TextureManagerWindow()
+        {
+            InitializeComponent();
+
+            _analysisService = new TextureAnalysisService();
+            _conversionService = new TextureConversionService();
+            _textures = new ObservableCollection<TextureInfo>();
+
+            TexturesDataGrid.ItemsSource = _textures;
+        }
+
+        /// <summary>
+        /// Конструктор с указанием начальной папки
+        /// </summary>
+        public TextureManagerWindow(string initialFolder) : this()
+        {
+            if (!string.IsNullOrEmpty(initialFolder) && Directory.Exists(initialFolder))
+            {
+                _lastFolder = initialFolder;
+            }
+        }
+
+        #region Window Events
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            LoadSettings();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            SaveSettings();
+        }
+
+        private void LoadSettings()
+        {
+            try
+            {
+                // Загружаем последнюю папку
+                string savedFolder = Settings.Default.TextureManagerLastFolder;
+                if (!string.IsNullOrEmpty(savedFolder) && Directory.Exists(savedFolder))
+                {
+                    _lastFolder = savedFolder;
+                    FolderPathTextBox.Text = savedFolder;
+                }
+
+                // Загружаем последние файлы
+                string savedFiles = Settings.Default.TextureManagerLastFiles;
+                if (!string.IsNullOrEmpty(savedFiles))
+                {
+                    var files = savedFiles.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Where(File.Exists)
+                        .ToList();
+
+                    if (files.Count > 0)
+                    {
+                        _ = AddFilesAsync(files);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка загрузки настроек: {ex.Message}");
+            }
+        }
+
+        private void SaveSettings()
+        {
+            try
+            {
+                // Сохраняем последнюю папку
+                Settings.Default.TextureManagerLastFolder = _lastFolder ?? "";
+
+                // Сохраняем пути к файлам (максимум 100 для экономии места)
+                var filePaths = _textures
+                    .Take(100)
+                    .Select(t => t.FilePath)
+                    .Where(p => !string.IsNullOrEmpty(p));
+                Settings.Default.TextureManagerLastFiles = string.Join("|", filePaths);
+
+                Settings.Default.Save();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка сохранения настроек: {ex.Message}");
+            }
+        }
+
+        #endregion
+
+        #region File Selection
+
+        private async void BrowseFilesBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFileDialog
+            {
+                Title = "Выберите файлы изображений",
+                Filter = ImageFilter,
+                Multiselect = true,
+                InitialDirectory = GetInitialDirectory()
+            };
+
+            if (dialog.ShowDialog(this) == true)
+            {
+                // Запоминаем папку
+                if (dialog.FileNames.Length > 0)
+                {
+                    _lastFolder = Path.GetDirectoryName(dialog.FileNames[0]);
+                    FolderPathTextBox.Text = _lastFolder;
+                }
+
+                await AddFilesAsync(dialog.FileNames.ToList());
+            }
+
+            this.Activate();
+            this.Focus();
+        }
+
+        private async void BrowseFolderBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new VistaFolderBrowserDialog
+            {
+                Description = "Выберите папку с текстурами",
+                UseDescriptionForTitle = true,
+                SelectedPath = GetInitialDirectory()
+            };
+
+            if (dialog.ShowDialog(this) == true)
+            {
+                _lastFolder = dialog.SelectedPath;
+                FolderPathTextBox.Text = _lastFolder;
+
+                // Получаем все файлы изображений из папки
+                var files = Directory.GetFiles(dialog.SelectedPath)
+                    .Where(f => TextureAnalysisService.IsSupportedImage(f))
+                    .ToList();
+
+                if (files.Count > 0)
+                {
+                    await AddFilesAsync(files);
+                }
+                else
+                {
+                    MessageBox.Show("В выбранной папке не найдено поддерживаемых изображений",
+                        "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+
+            this.Activate();
+            this.Focus();
+        }
+
+        private void ClearListBtn_Click(object sender, RoutedEventArgs e)
+        {
+            _textures.Clear();
+            UpdateStatistics();
+        }
+
+        private string GetInitialDirectory()
+        {
+            if (!string.IsNullOrEmpty(_lastFolder) && Directory.Exists(_lastFolder))
+            {
+                return _lastFolder;
+            }
+            return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        }
+
+        private async Task AddFilesAsync(List<string> filePaths)
+        {
+            if (filePaths == null || filePaths.Count == 0) return;
+
+            _isProcessing = true;
+            ShowProgress("Анализ файлов...");
+
+            try
+            {
+                // Фильтруем уже добавленные файлы
+                var existingPaths = new HashSet<string>(_textures.Select(t => t.FilePath), StringComparer.OrdinalIgnoreCase);
+                var newFiles = filePaths.Where(f => !existingPaths.Contains(f)).ToList();
+
+                if (newFiles.Count == 0)
+                {
+                    MessageBox.Show("Все выбранные файлы уже добавлены в список",
+                        "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                int processed = 0;
+                int total = newFiles.Count;
+
+                await Task.Run(() =>
+                {
+                    foreach (var file in newFiles)
+                    {
+                        var info = TextureAnalysisService.AnalyzeFile(file);
+
+                        // Добавляем в UI-потоке
+                        Dispatcher.Invoke(() =>
+                        {
+                            _textures.Add(info);
+
+                            processed++;
+                            int percent = (processed * 100) / total;
+                            OperationProgress.Value = percent;
+                            ProgressText.Text = $"{percent}%";
+                            OperationStatusText.Text = $"Анализ: {info.FileName}";
+                        });
+                    }
+                });
+
+                UpdateStatistics();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка анализа файлов: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                HideProgress();
+                _isProcessing = false;
+            }
+        }
+
+        private void UpdateStatistics()
+        {
+            var stats = TextureAnalysisService.GetFolderStats(_textures);
+
+            TotalFilesText.Text = stats.TotalFiles.ToString();
+            TotalSizeText.Text = stats.TotalSizeFormatted;
+            OkCountText.Text = stats.FilesOk.ToString();
+            WarningCountText.Text = stats.FilesWarning.ToString();
+            ErrorCountText.Text = stats.FilesError.ToString();
+        }
+
+        #endregion
+
+        #region Selection
+
+        private void SelectAll_Click(object sender, RoutedEventArgs e)
+        {
+            TexturesDataGrid.SelectAll();
+        }
+
+        private void DeselectAll_Click(object sender, RoutedEventArgs e)
+        {
+            TexturesDataGrid.UnselectAll();
+        }
+
+        private List<TextureInfo> GetSelectedTextures()
+        {
+            return TexturesDataGrid.SelectedItems.Cast<TextureInfo>().ToList();
+        }
+
+        #endregion
+
+        #region Conversion Actions
+
+        private async void ConvertTo8BitPng_Click(object sender, RoutedEventArgs e)
+        {
+            var selected = GetSelectedTextures();
+            if (!ValidateSelection(selected)) return;
+
+            var result = MessageBox.Show(
+                $"Конвертировать {selected.Count} файл(ов) в 8-bit PNG?\n\nФайлы будут перезаписаны!",
+                "Подтверждение",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes) return;
+
+            await ProcessTexturesAsync(selected, async (texture) =>
+            {
+                var options = new TextureProcessingOptions
+                {
+                    ConvertTo8Bit = true,
+                    ConvertToPng = true,
+                    OptimizeCompression = true
+                };
+                return await _conversionService.ProcessTextureAsync(texture.FilePath, options);
+            }, "Конвертация в 8-bit PNG");
+        }
+
+        private async void RemoveAlpha_Click(object sender, RoutedEventArgs e)
+        {
+            var selected = GetSelectedTextures();
+            if (!ValidateSelection(selected)) return;
+
+            var withAlpha = selected.Where(t => t.HasAlpha).ToList();
+            if (withAlpha.Count == 0)
+            {
+                MessageBox.Show("Среди выбранных файлов нет изображений с альфа-каналом",
+                    "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var result = MessageBox.Show(
+                $"Удалить альфа-канал у {withAlpha.Count} файл(ов)?\n\nФайлы будут перезаписаны!",
+                "Подтверждение",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes) return;
+
+            await ProcessTexturesAsync(withAlpha, async (texture) =>
+            {
+                return await TextureConversionService.RemoveAlphaAsync(texture.FilePath);
+            }, "Удаление альфа-канала");
+        }
+
+        private async void OptimizePng_Click(object sender, RoutedEventArgs e)
+        {
+            var selected = GetSelectedTextures();
+            if (!ValidateSelection(selected)) return;
+
+            var pngFiles = selected.Where(t => t.Format.Equals("PNG", StringComparison.OrdinalIgnoreCase)).ToList();
+            if (pngFiles.Count == 0)
+            {
+                MessageBox.Show("Среди выбранных файлов нет PNG изображений",
+                    "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            await ProcessTexturesAsync(pngFiles, async (texture) =>
+            {
+                return await TextureConversionService.OptimizePngAsync(texture.FilePath);
+            }, "Оптимизация PNG");
+        }
+
+        private async void ConvertToPng_Click(object sender, RoutedEventArgs e)
+        {
+            var selected = GetSelectedTextures();
+            if (!ValidateSelection(selected)) return;
+
+            var nonPng = selected.Where(t => t.WrongFormat).ToList();
+            if (nonPng.Count == 0)
+            {
+                MessageBox.Show("Все выбранные файлы уже в формате PNG",
+                    "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var result = MessageBox.Show(
+                $"Конвертировать {nonPng.Count} файл(ов) в PNG?\n\nБудут созданы новые файлы с расширением .png",
+                "Подтверждение",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes) return;
+
+            await ProcessTexturesAsync(nonPng, async (texture) =>
+            {
+                return await TextureConversionService.ConvertToPngAsync(texture.FilePath);
+            }, "Конвертация в PNG");
+        }
+
+        #endregion
+
+        #region Resize Actions
+
+        private async void ApplyResize_Click(object sender, RoutedEventArgs e)
+        {
+            var selected = GetSelectedTextures();
+            if (!ValidateSelection(selected)) return;
+
+            if (ResizePresetCombo.SelectedIndex <= 0)
+            {
+                MessageBox.Show("Выберите размер из списка", "Внимание",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var selectedItem = ResizePresetCombo.SelectedItem as ComboBoxItem;
+            if (selectedItem?.Tag is not string sizeStr || !int.TryParse(sizeStr, out int size))
+            {
+                return;
+            }
+
+            var result = MessageBox.Show(
+                $"Изменить размер {selected.Count} файл(ов) на {size}×{size}?\n\nФайлы будут перезаписаны!",
+                "Подтверждение",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes) return;
+
+            await ProcessTexturesAsync(selected, async (texture) =>
+            {
+                return await TextureConversionService.ResizeAsync(texture.FilePath, size, size);
+            }, $"Ресайз до {size}×{size}");
+        }
+
+        #endregion
+
+        #region Processing Helper
+
+        private bool ValidateSelection(List<TextureInfo> selected)
+        {
+            if (_isProcessing)
+            {
+                MessageBox.Show("Дождитесь завершения текущей операции", "Подождите",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return false;
+            }
+
+            if (selected.Count == 0)
+            {
+                MessageBox.Show("Выберите файлы для обработки", "Внимание",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            return true;
+        }
+
+        private async Task ProcessTexturesAsync(
+            List<TextureInfo> textures,
+            Func<TextureInfo, Task<ConversionResult>> processFunc,
+            string operationName)
+        {
+            _isProcessing = true;
+            ShowProgress(operationName);
+
+            int processed = 0;
+            int success = 0;
+            int failed = 0;
+
+            try
+            {
+                foreach (var texture in textures)
+                {
+                    OperationStatusText.Text = $"{operationName}: {texture.FileName}";
+
+                    var result = await processFunc(texture);
+
+                    if (result.Success)
+                        success++;
+                    else
+                        failed++;
+
+                    processed++;
+                    int percent = (processed * 100) / textures.Count;
+                    OperationProgress.Value = percent;
+                    ProgressText.Text = $"{percent}%";
+                }
+
+                // Обновляем информацию о файлах после обработки
+                await RefreshFilesAsync(textures.Select(t => t.FilePath).ToList());
+
+                string message = $"Обработано: {success} успешно";
+                if (failed > 0)
+                    message += $", {failed} с ошибками";
+
+                MessageBox.Show(message, "Готово",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка обработки: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                HideProgress();
+                _isProcessing = false;
+            }
+        }
+
+        private async Task RefreshFilesAsync(List<string> filePaths)
+        {
+            await Task.Run(() =>
+            {
+                foreach (var filePath in filePaths)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        var existing = _textures.FirstOrDefault(t =>
+                            t.FilePath.Equals(filePath, StringComparison.OrdinalIgnoreCase));
+
+                        if (existing != null && File.Exists(filePath))
+                        {
+                            int index = _textures.IndexOf(existing);
+                            var updated = TextureAnalysisService.AnalyzeFile(filePath);
+                            _textures[index] = updated;
+                        }
+                    });
+                }
+            });
+
+            UpdateStatistics();
+        }
+
+        #endregion
+
+        #region Progress UI
+
+        private void ShowProgress(string message)
+        {
+            ProgressPanel.Visibility = Visibility.Visible;
+            OperationProgress.Value = 0;
+            ProgressText.Text = "0%";
+            OperationStatusText.Text = message;
+        }
+
+        private void HideProgress()
+        {
+            ProgressPanel.Visibility = Visibility.Collapsed;
+        }
+
+        #endregion
+    }
+}
