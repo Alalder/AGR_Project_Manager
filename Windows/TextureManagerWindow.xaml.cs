@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using AGR_Project_Manager.Models;
 using AGR_Project_Manager.Properties;
 using AGR_Project_Manager.Services;
@@ -25,6 +28,12 @@ namespace AGR_Project_Manager.Windows
         private bool _isProcessing;
         private string _lastFolder;
 
+        // FileSystemWatcher для автообновления
+        private readonly List<FileSystemWatcher> _watchers = new();
+        private readonly HashSet<string> _watchedFolders = new(StringComparer.OrdinalIgnoreCase);
+        private CancellationTokenSource _refreshCts;
+        private readonly object _refreshLock = new();
+
         // Фильтр файлов изображений
         private const string ImageFilter = "Изображения|*.png;*.jpg;*.jpeg;*.tga;*.tiff;*.tif;*.bmp;*.gif;*.webp|" +
                                            "PNG файлы (*.png)|*.png|" +
@@ -42,6 +51,9 @@ namespace AGR_Project_Manager.Windows
             _textures = new ObservableCollection<TextureInfo>();
 
             TexturesDataGrid.ItemsSource = _textures;
+
+            // Горячая клавиша F5
+            this.KeyDown += Window_KeyDown;
         }
 
         /// <summary>
@@ -65,6 +77,16 @@ namespace AGR_Project_Manager.Windows
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             SaveSettings();
+            StopAllWatchers();
+        }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.F5)
+            {
+                RefreshBtn_Click(sender, e);
+                e.Handled = true;
+            }
         }
 
         private void LoadSettings()
@@ -95,7 +117,7 @@ namespace AGR_Project_Manager.Windows
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Ошибка загрузки настроек: {ex.Message}");
+                Debug.WriteLine($"Ошибка загрузки настроек: {ex.Message}");
             }
         }
 
@@ -117,7 +139,7 @@ namespace AGR_Project_Manager.Windows
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Ошибка сохранения настроек: {ex.Message}");
+                Debug.WriteLine($"Ошибка сохранения настроек: {ex.Message}");
             }
         }
 
@@ -188,7 +210,16 @@ namespace AGR_Project_Manager.Windows
         private void ClearListBtn_Click(object sender, RoutedEventArgs e)
         {
             _textures.Clear();
+            StopAllWatchers();
+            _watchedFolders.Clear();
             UpdateStatistics();
+        }
+
+        private async void RefreshBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (_isProcessing || _textures.Count == 0) return;
+
+            await RefreshAllFilesAsync();
         }
 
         private string GetInitialDirectory()
@@ -223,11 +254,20 @@ namespace AGR_Project_Manager.Windows
                 int processed = 0;
                 int total = newFiles.Count;
 
+                // Собираем папки для отслеживания
+                var foldersToWatch = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
                 await Task.Run(() =>
                 {
                     foreach (var file in newFiles)
                     {
                         var info = TextureAnalysisService.AnalyzeFile(file);
+                        var folder = Path.GetDirectoryName(file);
+
+                        if (!string.IsNullOrEmpty(folder))
+                        {
+                            foldersToWatch.Add(folder);
+                        }
 
                         // Добавляем в UI-потоке
                         Dispatcher.Invoke(() =>
@@ -242,6 +282,15 @@ namespace AGR_Project_Manager.Windows
                         });
                     }
                 });
+
+                // Настраиваем FileSystemWatcher для новых папок
+                if (AutoRefreshCheckBox.IsChecked == true)
+                {
+                    foreach (var folder in foldersToWatch)
+                    {
+                        SetupWatcherForFolder(folder);
+                    }
+                }
 
                 UpdateStatistics();
             }
@@ -266,6 +315,284 @@ namespace AGR_Project_Manager.Windows
             OkCountText.Text = stats.FilesOk.ToString();
             WarningCountText.Text = stats.FilesWarning.ToString();
             ErrorCountText.Text = stats.FilesError.ToString();
+        }
+
+        #endregion
+
+        #region Double Click - Open File
+
+        private void TexturesDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (TexturesDataGrid.SelectedItem is TextureInfo texture)
+            {
+                OpenFile(texture.FilePath);
+            }
+        }
+
+        private void OpenFile(string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
+            {
+                MessageBox.Show("Файл не найден", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = filePath,
+                    UseShellExecute = true
+                };
+                Process.Start(psi);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Не удалось открыть файл:\n{ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        #endregion
+
+        #region Auto-Refresh (FileSystemWatcher)
+
+        private void AutoRefreshCheckBox_Changed(object sender, RoutedEventArgs e)
+        {
+            if (_textures == null) return;
+
+            if (AutoRefreshCheckBox.IsChecked == true)
+            {
+                // Включаем отслеживание для всех текущих папок
+                var folders = _textures
+                    .Select(t => Path.GetDirectoryName(t.FilePath))
+                    .Where(f => !string.IsNullOrEmpty(f))
+                    .Distinct(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var folder in folders)
+                {
+                    SetupWatcherForFolder(folder);
+                }
+            }
+            else
+            {
+                // Отключаем все watchers
+                StopAllWatchers();
+            }
+        }
+
+        private void SetupWatcherForFolder(string folderPath)
+        {
+            if (string.IsNullOrEmpty(folderPath) || !Directory.Exists(folderPath))
+                return;
+
+            if (_watchedFolders.Contains(folderPath))
+                return;
+
+            try
+            {
+                var watcher = new FileSystemWatcher(folderPath)
+                {
+                    NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.FileName,
+                    EnableRaisingEvents = true,
+                    IncludeSubdirectories = false
+                };
+
+                watcher.Changed += OnFileChanged;
+                watcher.Renamed += OnFileRenamed;
+                watcher.Deleted += OnFileDeleted;
+
+                _watchers.Add(watcher);
+                _watchedFolders.Add(folderPath);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Ошибка создания FileSystemWatcher: {ex.Message}");
+            }
+        }
+
+        private void StopAllWatchers()
+        {
+            foreach (var watcher in _watchers)
+            {
+                watcher.EnableRaisingEvents = false;
+                watcher.Changed -= OnFileChanged;
+                watcher.Renamed -= OnFileRenamed;
+                watcher.Deleted -= OnFileDeleted;
+                watcher.Dispose();
+            }
+            _watchers.Clear();
+        }
+
+        private void OnFileChanged(object sender, FileSystemEventArgs e)
+        {
+            // Проверяем, что файл есть в нашем списке
+            if (!TextureAnalysisService.IsSupportedImage(e.FullPath))
+                return;
+
+            var texture = _textures.FirstOrDefault(t =>
+                t.FilePath.Equals(e.FullPath, StringComparison.OrdinalIgnoreCase));
+
+            if (texture != null)
+            {
+                // Debounce — ждём 500ms перед обновлением
+                ScheduleRefresh(e.FullPath);
+            }
+        }
+
+        private void OnFileRenamed(object sender, RenamedEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                var texture = _textures.FirstOrDefault(t =>
+                    t.FilePath.Equals(e.OldFullPath, StringComparison.OrdinalIgnoreCase));
+
+                if (texture != null)
+                {
+                    // Удаляем старую запись и добавляем новую
+                    int index = _textures.IndexOf(texture);
+                    _textures.RemoveAt(index);
+
+                    if (File.Exists(e.FullPath) && TextureAnalysisService.IsSupportedImage(e.FullPath))
+                    {
+                        var updated = TextureAnalysisService.AnalyzeFile(e.FullPath);
+                        _textures.Insert(index, updated);
+                    }
+
+                    UpdateStatistics();
+                }
+            });
+        }
+
+        private void OnFileDeleted(object sender, FileSystemEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                var texture = _textures.FirstOrDefault(t =>
+                    t.FilePath.Equals(e.FullPath, StringComparison.OrdinalIgnoreCase));
+
+                if (texture != null)
+                {
+                    _textures.Remove(texture);
+                    UpdateStatistics();
+                }
+            });
+        }
+
+        private void ScheduleRefresh(string filePath)
+        {
+            lock (_refreshLock)
+            {
+                // Отменяем предыдущий запрос на обновление
+                _refreshCts?.Cancel();
+                _refreshCts = new CancellationTokenSource();
+                var token = _refreshCts.Token;
+
+                Task.Delay(500, token).ContinueWith(t =>
+                {
+                    if (t.IsCanceled) return;
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        RefreshSingleFile(filePath);
+                    });
+                }, token);
+            }
+        }
+
+        private void RefreshSingleFile(string filePath)
+        {
+            if (!File.Exists(filePath)) return;
+
+            var texture = _textures.FirstOrDefault(t =>
+                t.FilePath.Equals(filePath, StringComparison.OrdinalIgnoreCase));
+
+            if (texture != null)
+            {
+                try
+                {
+                    int index = _textures.IndexOf(texture);
+                    var updated = TextureAnalysisService.AnalyzeFile(filePath);
+                    _textures[index] = updated;
+                    UpdateStatistics();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Ошибка обновления файла: {ex.Message}");
+                }
+            }
+        }
+
+        private async Task RefreshAllFilesAsync()
+        {
+            if (_textures.Count == 0) return;
+
+            _isProcessing = true;
+            ShowProgress("Обновление файлов...");
+
+            try
+            {
+                var filePaths = _textures.Select(t => t.FilePath).ToList();
+                int processed = 0;
+                int total = filePaths.Count;
+
+                await Task.Run(() =>
+                {
+                    foreach (var filePath in filePaths)
+                    {
+                        if (File.Exists(filePath))
+                        {
+                            var updated = TextureAnalysisService.AnalyzeFile(filePath);
+
+                            Dispatcher.Invoke(() =>
+                            {
+                                var existing = _textures.FirstOrDefault(t =>
+                                    t.FilePath.Equals(filePath, StringComparison.OrdinalIgnoreCase));
+
+                                if (existing != null)
+                                {
+                                    int index = _textures.IndexOf(existing);
+                                    _textures[index] = updated;
+                                }
+
+                                processed++;
+                                int percent = (processed * 100) / total;
+                                OperationProgress.Value = percent;
+                                ProgressText.Text = $"{percent}%";
+                            });
+                        }
+                        else
+                        {
+                            // Файл удалён — удаляем из списка
+                            Dispatcher.Invoke(() =>
+                            {
+                                var existing = _textures.FirstOrDefault(t =>
+                                    t.FilePath.Equals(filePath, StringComparison.OrdinalIgnoreCase));
+
+                                if (existing != null)
+                                {
+                                    _textures.Remove(existing);
+                                }
+
+                                processed++;
+                            });
+                        }
+                    }
+                });
+
+                UpdateStatistics();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка обновления: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                HideProgress();
+                _isProcessing = false;
+            }
         }
 
         #endregion
@@ -489,6 +816,13 @@ namespace AGR_Project_Manager.Windows
             _isProcessing = true;
             ShowProgress(operationName);
 
+            // Временно отключаем автообновление, чтобы не было конфликтов
+            bool wasAutoRefresh = AutoRefreshCheckBox.IsChecked == true;
+            if (wasAutoRefresh)
+            {
+                StopAllWatchers();
+            }
+
             int processed = 0;
             int success = 0;
             int failed = 0;
@@ -529,6 +863,20 @@ namespace AGR_Project_Manager.Windows
             }
             finally
             {
+                // Восстанавливаем автообновление
+                if (wasAutoRefresh)
+                {
+                    var folders = _textures
+                        .Select(t => Path.GetDirectoryName(t.FilePath))
+                        .Where(f => !string.IsNullOrEmpty(f))
+                        .Distinct(StringComparer.OrdinalIgnoreCase);
+
+                    foreach (var folder in folders)
+                    {
+                        SetupWatcherForFolder(folder);
+                    }
+                }
+
                 HideProgress();
                 _isProcessing = false;
             }

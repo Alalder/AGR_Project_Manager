@@ -49,6 +49,7 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Text="📁 Папка:" 
@@ -87,19 +88,31 @@
                         ToolTip="Добавить все изображения из папки"
                         Click="BrowseFolderBtn_Click"/>
 
-                <Button x:Name="ClearListBtn" 
+                <Button x:Name="RefreshBtn" 
                         Grid.Column="4"
-                        Content="🗑️ Очистить"
+                        Content="🔄"
                         Background="{DynamicResource ButtonBackground}"
                         Foreground="{DynamicResource ForegroundPrimary}"
-                        Padding="12,6"
+                        Padding="10,6"
                         Margin="8,0,0,0"
+                        FontSize="14"
+                        ToolTip="Обновить информацию о файлах (F5)"
+                        Click="RefreshBtn_Click"/>
+
+                <Button x:Name="ClearListBtn" 
+                        Grid.Column="5"
+                        Content="🗑️"
+                        Background="{DynamicResource ButtonBackground}"
+                        Foreground="{DynamicResource ForegroundPrimary}"
+                        Padding="10,6"
+                        Margin="8,0,0,0"
+                        FontSize="14"
                         ToolTip="Очистить список файлов"
                         Click="ClearListBtn_Click"/>
             </Grid>
         </Border>
 
-        <!-- ===== Строка 1: Статистика ===== -->
+        <!-- ===== Строка 1: Статистика + индикатор автообновления ===== -->
         <Border Grid.Row="1" 
                 Background="{DynamicResource BackgroundSecondary}" 
                 CornerRadius="8" 
@@ -112,6 +125,7 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- Всего файлов -->
@@ -166,6 +180,18 @@
                                Foreground="#F44336"
                                FontWeight="Bold"/>
                 </StackPanel>
+
+                <!-- Индикатор автообновления -->
+                <StackPanel Grid.Column="5" Orientation="Horizontal" VerticalAlignment="Center">
+                    <CheckBox x:Name="AutoRefreshCheckBox"
+                              Content="Автообновление"
+                              Foreground="{DynamicResource ForegroundSecondary}"
+                              IsChecked="True"
+                              ToolTip="Автоматически обновлять при изменении файлов"
+                              Checked="AutoRefreshCheckBox_Changed"
+                              Unchecked="AutoRefreshCheckBox_Changed"
+                              Margin="10,0,0,0"/>
+                </StackPanel>
             </Grid>
         </Border>
 
@@ -186,7 +212,12 @@
                       HeadersVisibility="Column"
                       Background="{DynamicResource BackgroundTertiary}"
                       BorderThickness="0"
-                      RowHeaderWidth="0">
+                      RowHeaderWidth="0"
+                      MouseDoubleClick="TexturesDataGrid_MouseDoubleClick">
+
+                <DataGrid.InputBindings>
+                    <KeyBinding Key="F5" Command="{x:Null}" />
+                </DataGrid.InputBindings>
 
                 <DataGrid.ColumnHeaderStyle>
                     <Style TargetType="DataGridColumnHeader">
@@ -240,7 +271,7 @@
                     </Style>
                 </DataGrid.ColumnHeaderStyle>
 
-                <!-- Стиль строки с ControlTemplate для гарантированного выделения -->
+                <!-- Стиль строки -->
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
                         <Setter Property="Background" Value="{DynamicResource BackgroundTertiary}"/>
@@ -273,20 +304,16 @@
                                         </SelectiveScrollingGrid>
                                     </Border>
                                     <ControlTemplate.Triggers>
-                                        <!-- Warning фон -->
                                         <DataTrigger Binding="{Binding Status}" Value="Warning">
                                             <Setter TargetName="DGR_Border" Property="Background" Value="{StaticResource WarningRowBackground}"/>
                                         </DataTrigger>
-                                        <!-- Error фон -->
                                         <DataTrigger Binding="{Binding Status}" Value="Error">
                                             <Setter TargetName="DGR_Border" Property="Background" Value="{StaticResource ErrorRowBackground}"/>
                                         </DataTrigger>
-                                        <!-- Выделение - наивысший приоритет -->
                                         <Trigger Property="IsSelected" Value="True">
                                             <Setter TargetName="DGR_Border" Property="Background" Value="{StaticResource SelectedRowBackground}"/>
                                             <Setter Property="Foreground" Value="White"/>
                                         </Trigger>
-                                        <!-- Hover эффект (если не выделено) -->
                                         <MultiTrigger>
                                             <MultiTrigger.Conditions>
                                                 <Condition Property="IsMouseOver" Value="True"/>
@@ -301,7 +328,7 @@
                     </Style>
                 </DataGrid.RowStyle>
 
-                <!-- Стиль ячейки - прозрачный фон, наследует Foreground от строки -->
+                <!-- Стиль ячейки -->
                 <DataGrid.CellStyle>
                     <Style TargetType="DataGridCell">
                         <Setter Property="Background" Value="Transparent"/>
@@ -458,10 +485,10 @@
 
         <!-- ===== Строка 3: Панель действий ===== -->
         <Border Grid.Row="3" 
-        Background="{DynamicResource BackgroundSecondary}" 
-        CornerRadius="8" 
-        Padding="12" 
-        Margin="0,10,0,0">
+                Background="{DynamicResource BackgroundSecondary}" 
+                CornerRadius="8" 
+                Padding="12" 
+                Margin="0,10,0,0">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -474,53 +501,53 @@
                 <!-- Левая часть: основные действия -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
                     <TextBlock Text="🔧" 
-                       Foreground="{DynamicResource ForegroundSecondary}"
-                       VerticalAlignment="Center"
-                       Margin="0,0,8,0"
-                       FontWeight="SemiBold"/>
+                               Foreground="{DynamicResource ForegroundSecondary}"
+                               VerticalAlignment="Center"
+                               Margin="0,0,8,0"
+                               FontWeight="SemiBold"/>
 
                     <Button Content="📦 8-bit PNG" 
-                    Background="{DynamicResource AccentPrimary}"
-                    Foreground="{DynamicResource ForegroundPrimary}"
-                    Padding="10,6"
-                    Margin="0,0,6,0"
-                    ToolTip="Конвертировать в 8-bit PNG (полноцветный)"
-                    Click="ConvertTo8BitPng_Click"/>
+                            Background="{DynamicResource AccentPrimary}"
+                            Foreground="{DynamicResource ForegroundPrimary}"
+                            Padding="10,6"
+                            Margin="0,0,6,0"
+                            ToolTip="Конвертировать в 8-bit PNG (полноцветный)"
+                            Click="ConvertTo8BitPng_Click"/>
 
                     <Button Content="🚫 Удалить α" 
-                    Background="{DynamicResource ButtonBackground}"
-                    Foreground="{DynamicResource ForegroundPrimary}"
-                    Padding="10,6"
-                    Margin="0,0,6,0"
-                    ToolTip="Удалить альфа-канал (RGBA → RGB)"
-                    Click="RemoveAlpha_Click"/>
+                            Background="{DynamicResource ButtonBackground}"
+                            Foreground="{DynamicResource ForegroundPrimary}"
+                            Padding="10,6"
+                            Margin="0,0,6,0"
+                            ToolTip="Удалить альфа-канал (RGBA → RGB)"
+                            Click="RemoveAlpha_Click"/>
 
                     <Button Content="🔄 → PNG" 
-                    Background="{DynamicResource ButtonBackground}"
-                    Foreground="{DynamicResource ForegroundPrimary}"
-                    Padding="10,6"
-                    ToolTip="Конвертировать в PNG формат"
-                    Click="ConvertToPng_Click"/>
+                            Background="{DynamicResource ButtonBackground}"
+                            Foreground="{DynamicResource ForegroundPrimary}"
+                            Padding="10,6"
+                            ToolTip="Конвертировать в PNG формат"
+                            Click="ConvertToPng_Click"/>
                 </StackPanel>
 
                 <!-- Разделитель 1 -->
                 <Separator Grid.Column="1" 
-                   Width="1" 
-                   Background="{DynamicResource BorderSecondary}" 
-                   Margin="10,0"/>
+                           Width="1" 
+                           Background="{DynamicResource BorderSecondary}" 
+                           Margin="10,0"/>
 
                 <!-- Оптимизация с размытием -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
                     <TextBlock Text="🗜️ Сжатие:" 
-                       Foreground="{DynamicResource ForegroundSecondary}"
-                       VerticalAlignment="Center"
-                       Margin="0,0,8,0"/>
+                               Foreground="{DynamicResource ForegroundSecondary}"
+                               VerticalAlignment="Center"
+                               Margin="0,0,8,0"/>
 
                     <ComboBox x:Name="OptimizationModeCombo"
-                      Width="155"
-                      Margin="0,0,6,0"
-                      SelectedIndex="1"
-                      ToolTip="Режим оптимизации (размытие уменьшает размер файла)">
+                              Width="155"
+                              Margin="0,0,6,0"
+                              SelectedIndex="1"
+                              ToolTip="Режим оптимизации (размытие уменьшает размер файла)">
                         <ComboBoxItem Content="Только пересжатие" Tag="Recompress"/>
                         <ComboBoxItem Content="Лёгкое размытие" Tag="LightBlur"/>
                         <ComboBoxItem Content="Среднее размытие" Tag="MediumBlur"/>
@@ -529,28 +556,28 @@
                     </ComboBox>
 
                     <Button Content="🗜️ Сжать" 
-                    Background="{DynamicResource ButtonBackground}"
-                    Foreground="{DynamicResource ForegroundPrimary}"
-                    Padding="10,6"
-                    ToolTip="Применить оптимизацию к выбранным файлам"
-                    Click="OptimizePng_Click"/>
+                            Background="{DynamicResource ButtonBackground}"
+                            Foreground="{DynamicResource ForegroundPrimary}"
+                            Padding="10,6"
+                            ToolTip="Применить оптимизацию к выбранным файлам"
+                            Click="OptimizePng_Click"/>
                 </StackPanel>
 
                 <!-- Ресайз -->
                 <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Center">
                     <Separator Width="1" 
-                       Background="{DynamicResource BorderSecondary}" 
-                       Margin="10,0"/>
+                               Background="{DynamicResource BorderSecondary}" 
+                               Margin="10,0"/>
 
                     <TextBlock Text="📐 Ресайз:" 
-                       Foreground="{DynamicResource ForegroundSecondary}"
-                       VerticalAlignment="Center"
-                       Margin="8,0,8,0"/>
+                               Foreground="{DynamicResource ForegroundSecondary}"
+                               VerticalAlignment="Center"
+                               Margin="8,0,8,0"/>
 
                     <ComboBox x:Name="ResizePresetCombo"
-                      Width="115"
-                      Margin="0,0,6,0"
-                      SelectedIndex="0">
+                              Width="115"
+                              Margin="0,0,6,0"
+                              SelectedIndex="0">
                         <ComboBoxItem Content="Выбрать..."/>
                         <ComboBoxItem Content="4096 × 4096" Tag="4096"/>
                         <ComboBoxItem Content="2048 × 2048" Tag="2048"/>
@@ -560,33 +587,33 @@
                     </ComboBox>
 
                     <Button Content="📏" 
-                    Background="{DynamicResource ButtonBackground}"
-                    Foreground="{DynamicResource ForegroundPrimary}"
-                    Padding="10,6"
-                    ToolTip="Применить ресайз"
-                    Click="ApplyResize_Click"/>
+                            Background="{DynamicResource ButtonBackground}"
+                            Foreground="{DynamicResource ForegroundPrimary}"
+                            Padding="10,6"
+                            ToolTip="Применить ресайз"
+                            Click="ApplyResize_Click"/>
                 </StackPanel>
 
                 <!-- Правая часть: выделение -->
                 <StackPanel Grid.Column="4" Orientation="Horizontal">
                     <Separator Width="1" 
-                       Background="{DynamicResource BorderSecondary}" 
-                       Margin="10,0"/>
+                               Background="{DynamicResource BorderSecondary}" 
+                               Margin="10,0"/>
 
                     <Button Content="✅" 
-                    Background="{DynamicResource ButtonBackground}"
-                    Foreground="{DynamicResource ForegroundPrimary}"
-                    Padding="10,6"
-                    Margin="0,0,4,0"
-                    ToolTip="Выбрать все файлы"
-                    Click="SelectAll_Click"/>
+                            Background="{DynamicResource ButtonBackground}"
+                            Foreground="{DynamicResource ForegroundPrimary}"
+                            Padding="10,6"
+                            Margin="0,0,4,0"
+                            ToolTip="Выбрать все файлы"
+                            Click="SelectAll_Click"/>
 
                     <Button Content="❎" 
-                    Background="{DynamicResource ButtonBackground}"
-                    Foreground="{DynamicResource ForegroundPrimary}"
-                    Padding="10,6"
-                    ToolTip="Снять выделение"
-                    Click="DeselectAll_Click"/>
+                            Background="{DynamicResource ButtonBackground}"
+                            Foreground="{DynamicResource ForegroundPrimary}"
+                            Padding="10,6"
+                            ToolTip="Снять выделение"
+                            Click="DeselectAll_Click"/>
                 </StackPanel>
             </Grid>
         </Border>
