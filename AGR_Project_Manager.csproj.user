@@ -2,6 +2,9 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup />
   <ItemGroup>
+    <Compile Update="Windows\CoordinateConverterWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Windows\CreateFolderWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -12,6 +15,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Windows\NameGeneratorWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Windows\PdfConverterWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Windows\ProjectDialog.xaml.cs">

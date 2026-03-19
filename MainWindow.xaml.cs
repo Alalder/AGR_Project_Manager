@@ -612,6 +612,18 @@ namespace AGR_Project_Manager
             window.Show();
         }
 
+        private void PdfConverterBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var window = new PdfConverterWindow();
+            window.Show();
+        }
+
+        private void CoordinateConverterBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var window = new CoordinateConverterWindow();
+            window.Show();
+        }
+
         private void RalColorsBtn_Click(object sender, RoutedEventArgs e)
         {
             var window = new RalColorsWindow();

@@ -158,6 +158,18 @@
                                 Foreground="{DynamicResource ForegroundPrimary}" 
                                 Margin="0,0,0,6" Padding="8,6" Cursor="Hand" 
                                 Click="GeoJsonBtn_Click"/>
+                        <Button Content="📄 PDF → Image" 
+                                Background="{DynamicResource ButtonBackground}" 
+                                Foreground="{DynamicResource ForegroundPrimary}" 
+                                Margin="0,0,0,6" Padding="8,6" Cursor="Hand"
+                                ToolTip="Конвертировать PDF в PNG изображения"
+                                Click="PdfConverterBtn_Click"/>
+                        <Button Content="🌍 WGS → МСК-77" 
+                                Background="{DynamicResource ButtonBackground}" 
+                                Foreground="{DynamicResource ForegroundPrimary}" 
+                                Margin="0,0,0,6" Padding="8,6" Cursor="Hand"
+                                ToolTip="Конвертер координат WGS84 → МСК-77"
+                                Click="CoordinateConverterBtn_Click"/>
 
                         <Separator Background="{DynamicResource BorderPrimary}" Margin="0,4"/>
 

@@ -1,0 +1,242 @@
+﻿<Window x:Class="AGR_Project_Manager.Windows.CoordinateConverterWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="🌍 WGS 84 → МСК-77" 
+        Height="520" Width="480"
+        MinHeight="480" MinWidth="420"
+        Background="{DynamicResource BackgroundPrimary}"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanResizeWithGrip">
+
+    <Window.Resources>
+        <Style x:Key="SectionBorder" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource BackgroundSecondary}"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+
+        <Style x:Key="LabelText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundSecondary}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+
+        <Style x:Key="ResultField" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource BackgroundTertiary}"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+        </Style>
+    </Window.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                  HorizontalScrollBarVisibility="Disabled"
+                  Padding="12">
+        <StackPanel>
+
+            <!-- ===== Ввод координат ===== -->
+            <Border Style="{StaticResource SectionBorder}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.ColumnSpan="2"
+                               Text="📍 Координаты WGS 84:" 
+                               Foreground="{DynamicResource ForegroundPrimary}"
+                               FontWeight="SemiBold"
+                               FontSize="12"
+                               Margin="0,0,0,6"/>
+
+                    <TextBox x:Name="CoordsTextBox"
+                             Grid.Row="1" Grid.Column="0"
+                             Height="50"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="False"
+                             Background="{DynamicResource BackgroundTertiary}"
+                             Foreground="{DynamicResource ForegroundPrimary}"
+                             BorderBrush="{DynamicResource BorderPrimary}"
+                             Padding="8"
+                             FontSize="13"
+                             VerticalContentAlignment="Center"
+                             Text="55°52'46.6&quot;N 37°43'26.1&quot;E"
+                             KeyDown="CoordsTextBox_KeyDown"/>
+
+                    <Button Content="🔄"
+                            Grid.Row="1" Grid.Column="1"
+                            Background="{DynamicResource AccentPrimary}"
+                            Foreground="{DynamicResource ForegroundPrimary}"
+                            Width="50"
+                            Height="50"
+                            Margin="8,0,0,0"
+                            FontSize="18"
+                            ToolTip="Конвертировать (Enter)"
+                            Click="ConvertBtn_Click"/>
+                </Grid>
+            </Border>
+
+            <!-- ===== Результат ===== -->
+            <Border x:Name="ResultSection" Style="{StaticResource SectionBorder}" Visibility="Collapsed">
+                <StackPanel>
+                    <TextBlock Text="✅ Результат МСК-77:" 
+                               Foreground="{DynamicResource AccentPrimary}"
+                               FontWeight="SemiBold"
+                               FontSize="12"
+                               Margin="0,0,0,10"/>
+
+                    <!-- X (восток) -->
+                    <Border x:Name="ResultXBorder" 
+                            Style="{StaticResource ResultField}" 
+                            Margin="0,0,0,6"
+                            MouseLeftButtonDown="ResultX_Click"
+                            ToolTip="Нажмите, чтобы скопировать">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="X (восток):" Style="{StaticResource LabelText}"/>
+                            <TextBlock x:Name="ResultXText" Grid.Column="1" 
+                                       Text="—" 
+                                       Foreground="{DynamicResource ForegroundPrimary}"
+                                       FontWeight="Bold"
+                                       FontSize="15"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Y (север) -->
+                    <Border x:Name="ResultYBorder" 
+                            Style="{StaticResource ResultField}"
+                            MouseLeftButtonDown="ResultY_Click"
+                            ToolTip="Нажмите, чтобы скопировать">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Y (север):" Style="{StaticResource LabelText}"/>
+                            <TextBlock x:Name="ResultYText" Grid.Column="1" 
+                                       Text="—" 
+                                       Foreground="{DynamicResource ForegroundPrimary}"
+                                       FontWeight="Bold"
+                                       FontSize="15"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Распознанные координаты (компактно) -->
+                    <TextBlock Margin="0,8,0,0" FontSize="11" Foreground="{DynamicResource ForegroundTertiary}">
+                        <Run Text="Распознано: "/>
+                        <Run x:Name="ParsedLatText" Text="—"/>
+                        <Run Text="°, "/>
+                        <Run x:Name="ParsedLonText" Text="—"/>
+                        <Run Text="°"/>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+            <!-- ===== Ошибка ===== -->
+            <Border x:Name="ErrorSection" Style="{StaticResource SectionBorder}" Visibility="Collapsed"
+                    Background="#33F44336">
+                <TextBlock x:Name="ErrorText" 
+                           Foreground="#F44336" 
+                           FontWeight="SemiBold"
+                           FontSize="12"
+                           TextWrapping="Wrap"/>
+            </Border>
+
+            <!-- ===== Настройки (компактные) ===== -->
+            <Border Style="{StaticResource SectionBorder}">
+                <StackPanel>
+                    <TextBlock Text="⚙️ Настройки" 
+                               Foreground="{DynamicResource ForegroundPrimary}"
+                               FontWeight="SemiBold"
+                               FontSize="12"
+                               Margin="0,0,0,10"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Разделитель -->
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Разделитель:" Style="{StaticResource LabelText}" Margin="0,0,0,4"/>
+                        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                            <RadioButton x:Name="DotSeparator" Content="." IsChecked="True"
+                                         Foreground="{DynamicResource ForegroundPrimary}"
+                                         Margin="0,0,10,0" Checked="Settings_Changed"/>
+                            <RadioButton x:Name="CommaSeparator" Content=","
+                                         Foreground="{DynamicResource ForegroundPrimary}"
+                                         Checked="Settings_Changed"/>
+                        </StackPanel>
+
+                        <!-- Знаков после запятой -->
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Знаков:" Style="{StaticResource LabelText}" Margin="0,6,0,4"/>
+                        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="0,6,0,0">
+                            <RadioButton x:Name="Decimals2" Content="2" 
+                                         Foreground="{DynamicResource ForegroundPrimary}"
+                                         Margin="0,0,10,0" Checked="Settings_Changed"/>
+                            <RadioButton x:Name="Decimals3" Content="3" IsChecked="True"
+                                         Foreground="{DynamicResource ForegroundPrimary}"
+                                         Checked="Settings_Changed"/>
+                        </StackPanel>
+
+                        <!-- Поправки -->
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Поправки X/Y (м):" Style="{StaticResource LabelText}" Margin="0,8,0,0"/>
+                        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,6,0,0">
+                            <TextBox x:Name="CorrXTextBox" Width="55" Text="-5.0"
+                                     Background="{DynamicResource BackgroundTertiary}"
+                                     Foreground="{DynamicResource ForegroundPrimary}"
+                                     BorderBrush="{DynamicResource BorderPrimary}"
+                                     Padding="4,2" FontSize="11"
+                                     TextChanged="Correction_Changed"/>
+                            <TextBox x:Name="CorrYTextBox" Width="55" Text="-35.0" Margin="8,0,0,0"
+                                     Background="{DynamicResource BackgroundTertiary}"
+                                     Foreground="{DynamicResource ForegroundPrimary}"
+                                     BorderBrush="{DynamicResource BorderPrimary}"
+                                     Padding="4,2" FontSize="11"
+                                     TextChanged="Correction_Changed"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- ===== Форматы ввода (сворачиваемые) ===== -->
+            <Expander Header="📋 Форматы ввода" 
+                      Foreground="{DynamicResource ForegroundSecondary}"
+                      FontSize="11"
+                      IsExpanded="False">
+                <Border Background="{DynamicResource BackgroundSecondary}" 
+                        CornerRadius="0,0,6,6" 
+                        Padding="12,8">
+                    <TextBlock FontFamily="Consolas" 
+                               FontSize="10"
+                               Foreground="{DynamicResource ForegroundTertiary}"
+                               LineHeight="16">
+                        <Run>55°52'46.6"N 37°43'26.1"E</Run><LineBreak/>
+                        <Run>N55°52'46.6" E37°43'26.1"</Run><LineBreak/>
+                        <Run>55 52 46.6 N 37 43 26.1 E</Run><LineBreak/>
+                        <Run>55.879056, 37.724472</Run>
+                    </TextBlock>
+                </Border>
+            </Expander>
+
+        </StackPanel>
+    </ScrollViewer>
+</Window>
