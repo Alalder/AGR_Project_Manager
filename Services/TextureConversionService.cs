@@ -16,6 +16,72 @@ namespace AGR_Project_Manager.Services
         #region Public Methods
 
         /// <summary>
+        /// Залить изображение доминантным цветом
+        /// </summary>
+        public static async Task<ConversionResult> FlattenToDominantColorAsync(string inputPath, string outputPath = null)
+        {
+            return await Task.Run(() =>
+            {
+                try
+                {
+                    outputPath ??= inputPath;
+                    string tempPath = GetTempPath(outputPath);
+
+                    // Получаем доминантный цвет
+                    var (r, g, b, a) = TextureAnalysisService.GetDominantColor(inputPath);
+
+                    using (var image = Image.Load<Rgba32>(inputPath))
+                    {
+                        // Заливаем всё изображение одним цветом
+                        var fillColor = new Rgba32(r, g, b, a);
+
+                        image.ProcessPixelRows(accessor =>
+                        {
+                            for (int y = 0; y < accessor.Height; y++)
+                            {
+                                Span<Rgba32> row = accessor.GetRowSpan(y);
+                                for (int x = 0; x < row.Length; x++)
+                                {
+                                    row[x] = fillColor;
+                                }
+                            }
+                        });
+
+                        // Сохраняем
+                        bool hasAlpha = a < 255;
+                        if (hasAlpha)
+                        {
+                            SavePngRgba(image, tempPath);
+                        }
+                        else
+                        {
+                            using var rgb = image.CloneAs<Rgb24>();
+                            SavePngRgb(rgb, tempPath);
+                        }
+                    }
+
+                    FinalizeFile(tempPath, outputPath);
+
+                    string colorHex = $"#{r:X2}{g:X2}{b:X2}";
+                    return new ConversionResult
+                    {
+                        Success = true,
+                        OutputPath = outputPath,
+                        Message = $"Залито цветом {colorHex}"
+                    };
+                }
+                catch (Exception ex)
+                {
+                    return new ConversionResult
+                    {
+                        Success = false,
+                        Message = $"Ошибка: {ex.Message}"
+                    };
+                }
+            });
+        }
+
+        /// <summary>
         /// Конвертировать изображение в 8-bit PNG
         /// </summary>
         public static async Task<ConversionResult> ConvertTo8BitPngAsync(
@@ -592,7 +658,7 @@ namespace AGR_Project_Manager.Services
         Denoise
     }
 
-    /// <summary>
+       /// <summary>
     /// Опции обработки текстуры
     /// </summary>
     public class TextureProcessingOptions

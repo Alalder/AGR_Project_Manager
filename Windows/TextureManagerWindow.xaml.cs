@@ -34,6 +34,10 @@ namespace AGR_Project_Manager.Windows
         private CancellationTokenSource _refreshCts;
         private readonly object _refreshLock = new();
 
+        // Отложенное удаление (для Photoshop и других редакторов с атомарным сохранением)
+        private readonly Dictionary<string, CancellationTokenSource> _pendingDeletions = new(StringComparer.OrdinalIgnoreCase);
+        private readonly object _deletionLock = new();
+
         // Фильтр файлов изображений
         private const string ImageFilter = "Изображения|*.png;*.jpg;*.jpeg;*.tga;*.tiff;*.tif;*.bmp;*.gif;*.webp|" +
                                            "PNG файлы (*.png)|*.png|" +
@@ -402,6 +406,7 @@ namespace AGR_Project_Manager.Windows
                 watcher.Changed += OnFileChanged;
                 watcher.Renamed += OnFileRenamed;
                 watcher.Deleted += OnFileDeleted;
+                watcher.Created += OnFileCreated;
 
                 _watchers.Add(watcher);
                 _watchedFolders.Add(folderPath);
@@ -467,17 +472,93 @@ namespace AGR_Project_Manager.Windows
 
         private void OnFileDeleted(object sender, FileSystemEventArgs e)
         {
+            if (!TextureAnalysisService.IsSupportedImage(e.FullPath))
+                return;
+
+            // Проверяем, есть ли этот файл в нашем списке
+            bool isTracked = false;
             Dispatcher.Invoke(() =>
             {
-                var texture = _textures.FirstOrDefault(t =>
+                isTracked = _textures.Any(t =>
                     t.FilePath.Equals(e.FullPath, StringComparison.OrdinalIgnoreCase));
-
-                if (texture != null)
-                {
-                    _textures.Remove(texture);
-                    UpdateStatistics();
-                }
             });
+
+            if (!isTracked)
+                return;
+
+            // Отложенное удаление — ждём 1.5 секунды и проверяем, вернулся ли файл
+            lock (_deletionLock)
+            {
+                // Отменяем предыдущее ожидание для этого файла, если есть
+                if (_pendingDeletions.TryGetValue(e.FullPath, out var existingCts))
+                {
+                    existingCts.Cancel();
+                    _pendingDeletions.Remove(e.FullPath);
+                }
+
+                var cts = new CancellationTokenSource();
+                _pendingDeletions[e.FullPath] = cts;
+                var token = cts.Token;
+                string filePath = e.FullPath;
+
+                Task.Delay(1500, token).ContinueWith(t =>
+                {
+                    if (t.IsCanceled) return;
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        lock (_deletionLock)
+                        {
+                            // Проверяем, всё ещё ли файл ожидает удаления
+                            if (!_pendingDeletions.ContainsKey(filePath))
+                                return;
+
+                            _pendingDeletions.Remove(filePath);
+
+                            // Проверяем, существует ли файл
+                            if (File.Exists(filePath))
+                            {
+                                // Файл вернулся! (Photoshop workflow) — обновляем информацию
+                                Debug.WriteLine($"Файл вернулся после удаления: {filePath}");
+                                RefreshSingleFile(filePath);
+                            }
+                            else
+                            {
+                                // Файл действительно удалён — удаляем из списка
+                                var texture = _textures.FirstOrDefault(tx =>
+                                    tx.FilePath.Equals(filePath, StringComparison.OrdinalIgnoreCase));
+
+                                if (texture != null)
+                                {
+                                    _textures.Remove(texture);
+                                    UpdateStatistics();
+                                    Debug.WriteLine($"Файл удалён из списка: {filePath}");
+                                }
+                            }
+                        }
+                    });
+                }, token);
+            }
+        }
+
+        private void OnFileCreated(object sender, FileSystemEventArgs e)
+        {
+            if (!TextureAnalysisService.IsSupportedImage(e.FullPath))
+                return;
+
+            lock (_deletionLock)
+            {
+                // Проверяем, ожидает ли этот файл удаления (Photoshop workflow)
+                if (_pendingDeletions.TryGetValue(e.FullPath, out var cts))
+                {
+                    // Отменяем отложенное удаление — файл вернулся!
+                    cts.Cancel();
+                    _pendingDeletions.Remove(e.FullPath);
+
+                    // Обновляем файл с задержкой (чтобы файл был полностью записан)
+                    ScheduleRefresh(e.FullPath);
+                }
+            }
         }
 
         private void ScheduleRefresh(string filePath)
@@ -503,7 +584,27 @@ namespace AGR_Project_Manager.Windows
 
         private void RefreshSingleFile(string filePath)
         {
-            if (!File.Exists(filePath)) return;
+            // Ждём, пока файл станет доступен (максимум 3 попытки)
+            for (int attempt = 0; attempt < 3; attempt++)
+            {
+                if (!File.Exists(filePath)) return;
+
+                try
+                {
+                    // Пробуем открыть файл для проверки доступности
+                    using (var stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    {
+                        // Файл доступен — выходим из цикла
+                        break;
+                    }
+                }
+                catch (IOException)
+                {
+                    // Файл ещё заблокирован — ждём
+                    System.Threading.Thread.Sleep(300);
+                    if (attempt == 2) return; // Последняя попытка неудачна
+                }
+            }
 
             var texture = _textures.FirstOrDefault(t =>
                 t.FilePath.Equals(filePath, StringComparison.OrdinalIgnoreCase));
@@ -617,6 +718,48 @@ namespace AGR_Project_Manager.Windows
         #endregion
 
         #region Conversion Actions
+
+        private async void FlattenColor_Click(object sender, RoutedEventArgs e)
+        {
+            var selected = GetSelectedTextures();
+            if (!ValidateSelection(selected)) return;
+
+            // Фильтруем только заглушки 256×256 с несколькими цветами
+            var stubsToFlatten = selected.Where(t => t.NeedsColorFlattening).ToList();
+
+            if (stubsToFlatten.Count == 0)
+            {
+                // Проверяем, есть ли вообще заглушки среди выбранных
+                var allStubs = selected.Where(t => t.IsStubTexture).ToList();
+
+                if (allStubs.Count == 0)
+                {
+                    MessageBox.Show("Среди выбранных файлов нет текстур 256×256",
+                        "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Все выбранные заглушки 256×256 уже одноцветные",
+                        "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                return;
+            }
+
+            var result = MessageBox.Show(
+                $"Выровнять цвет у {stubsToFlatten.Count} заглушек 256×256?\n\n" +
+                "Каждая текстура будет залита своим доминантным цветом.\n\n" +
+                "⚠️ Файлы будут перезаписаны!",
+                "Подтверждение",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes) return;
+
+            await ProcessTexturesAsync(stubsToFlatten, async (texture) =>
+            {
+                return await TextureConversionService.FlattenToDominantColorAsync(texture.FilePath);
+            }, "Выравнивание цвета");
+        }
 
         private async void ConvertTo8BitPng_Click(object sender, RoutedEventArgs e)
         {

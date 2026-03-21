@@ -149,6 +149,40 @@ namespace AGR_Project_Manager.Models
 
         #endregion
 
+        #region Color Analysis (для заглушек 256×256)
+
+        /// <summary>
+        /// Является ли текстура заглушкой (256×256)
+        /// </summary>
+        public bool IsStubTexture => Width == 256 && Height == 256;
+
+        /// <summary>
+        /// Количество уникальных цветов (только для 256×256)
+        /// </summary>
+        public int? UniqueColorCount { get; set; }
+
+        /// <summary>
+        /// Отображение количества цветов
+        /// </summary>
+        public string UniqueColorsDisplay
+        {
+            get
+            {
+                if (!IsStubTexture)
+                    return "—";
+                if (UniqueColorCount == null)
+                    return "?";
+                return UniqueColorCount.Value.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Нужно ли выравнивание цвета (больше 1 уникального цвета)
+        /// </summary>
+        public bool NeedsColorFlattening => IsStubTexture && UniqueColorCount.HasValue && UniqueColorCount.Value > 1;
+
+        #endregion
+
         #region Status Checking
 
         /// <summary>
@@ -190,6 +224,10 @@ namespace AGR_Project_Manager.Models
 
             if (WrongFormat)
                 errors.Add($"Формат {Format} → нужен PNG");
+
+            // Проблема с заглушкой (много цветов)
+            if (NeedsColorFlattening)
+                errors.Add($"Заглушка: {UniqueColorCount} цветов → нужен 1");
 
             // Предупреждения (некритичные)
             if (HasAlpha)

@@ -469,6 +469,27 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
+                    <!-- Цветов (для заглушек 256×256) -->
+                    <DataGridTemplateColumn Header="🎨 Цветов" Width="65" CanUserSort="True" SortMemberPath="UniqueColorCount">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding UniqueColorsDisplay}" 
+                       HorizontalAlignment="Center"
+                       Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=DataGridRow}}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding NeedsColorFlattening}" Value="True">
+                                                    <Setter Property="FontWeight" Value="Bold"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
                     <!-- Статус/Проблемы -->
                     <DataGridTemplateColumn Header="📝 Статус" Width="220" CanUserSort="True" SortMemberPath="StatusMessage">
                         <DataGridTemplateColumn.CellTemplate>
@@ -528,6 +549,14 @@
                             Padding="10,6"
                             ToolTip="Конвертировать в PNG формат"
                             Click="ConvertToPng_Click"/>
+
+                    <Button Content="🎨 Выровнять цвет" 
+                            Background="{DynamicResource ButtonBackground}"
+                            Foreground="{DynamicResource ForegroundPrimary}"
+                            Padding="10,6"
+                            Margin="6,0,0,0"
+                            ToolTip="Залить заглушки 256×256 доминантным цветом"
+                            Click="FlattenColor_Click"/>
                 </StackPanel>
 
                 <!-- Разделитель 1 -->

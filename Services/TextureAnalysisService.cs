@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AGR_Project_Manager.Models;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace AGR_Project_Manager.Services
 {
@@ -67,6 +68,12 @@ namespace AGR_Project_Manager.Services
                 info.BitsPerChannel = GetBitsPerChannel(pixelType);
                 info.ChannelCount = GetChannelCount(pixelType);
 
+                // Для текстур 256×256 считаем уникальные цвета
+                if (info.IsStubTexture)
+                {
+                    info.UniqueColorCount = CountUniqueColors(filePath);
+                }
+
                 info.UpdateStatus();
             }
             catch (Exception ex)
@@ -78,6 +85,76 @@ namespace AGR_Project_Manager.Services
             }
 
             return info;
+        }
+
+        /// <summary>
+        /// Подсчёт уникальных цветов в изображении
+        /// </summary>
+        public static int CountUniqueColors(string filePath)
+        {
+            try
+            {
+                using var image = Image.Load<Rgba32>(filePath);
+                var uniqueColors = new HashSet<uint>();
+
+                image.ProcessPixelRows(accessor =>
+                {
+                    for (int y = 0; y < accessor.Height; y++)
+                    {
+                        Span<Rgba32> row = accessor.GetRowSpan(y);
+                        for (int x = 0; x < row.Length; x++)
+                        {
+                            var pixel = row[x];
+                            // Упаковываем RGBA в uint для быстрого сравнения
+                            uint colorKey = ((uint)pixel.R << 24) | ((uint)pixel.G << 16) | ((uint)pixel.B << 8) | pixel.A;
+                            uniqueColors.Add(colorKey);
+                        }
+                    }
+                });
+
+                return uniqueColors.Count;
+            }
+            catch
+            {
+                return -1; // Ошибка подсчёта
+            }
+        }
+
+        /// <summary>
+        /// Получить доминантный цвет изображения
+        /// </summary>
+        public static (byte R, byte G, byte B, byte A) GetDominantColor(string filePath)
+        {
+            using var image = Image.Load<Rgba32>(filePath);
+            var colorCounts = new Dictionary<uint, int>();
+
+            image.ProcessPixelRows(accessor =>
+            {
+                for (int y = 0; y < accessor.Height; y++)
+                {
+                    Span<Rgba32> row = accessor.GetRowSpan(y);
+                    for (int x = 0; x < row.Length; x++)
+                    {
+                        var pixel = row[x];
+                        uint colorKey = ((uint)pixel.R << 24) | ((uint)pixel.G << 16) | ((uint)pixel.B << 8) | pixel.A;
+
+                        if (colorCounts.ContainsKey(colorKey))
+                            colorCounts[colorKey]++;
+                        else
+                            colorCounts[colorKey] = 1;
+                    }
+                }
+            });
+
+            // Находим цвет с максимальным количеством пикселей
+            uint dominantKey = colorCounts.OrderByDescending(kv => kv.Value).First().Key;
+
+            byte r = (byte)((dominantKey >> 24) & 0xFF);
+            byte g = (byte)((dominantKey >> 16) & 0xFF);
+            byte b = (byte)((dominantKey >> 8) & 0xFF);
+            byte a = (byte)(dominantKey & 0xFF);
+
+            return (r, g, b, a);
         }
 
         /// <summary>
@@ -169,7 +246,8 @@ namespace AGR_Project_Manager.Services
                 Files16Bit = list.Count(t => t.BitsPerChannel > 8),
                 FilesWithAlpha = list.Count(t => t.HasAlpha),
                 FilesNotPng = list.Count(t => t.WrongFormat),
-                FilesNotPow2 = list.Count(t => !t.IsPowerOfTwo)
+                FilesNotPow2 = list.Count(t => !t.IsPowerOfTwo),
+                StubsNeedFlattening = list.Count(t => t.NeedsColorFlattening)
             };
         }
 
@@ -249,5 +327,6 @@ namespace AGR_Project_Manager.Services
         public int FilesWithAlpha { get; set; }
         public int FilesNotPng { get; set; }
         public int FilesNotPow2 { get; set; }
+        public int StubsNeedFlattening { get; set; }
     }
 }
