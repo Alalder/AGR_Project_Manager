@@ -108,4 +108,16 @@
     <!-- ===== СТАТУСНЫЕ ЦВЕТА ===== -->
     <SolidColorBrush x:Key="SuccessText" Color="#90EE90"/>
 
+    <!-- ===== ИНДИКАТОРЫ РАЗРЕШЕНИЯ ТЕКСТУР ===== -->
+    <SolidColorBrush x:Key="Resolution4K" Color="#10b981"/>
+    <!-- Зеленый -->
+    <SolidColorBrush x:Key="Resolution2K" Color="#3b82f6"/>
+    <!-- Синий -->
+    <SolidColorBrush x:Key="Resolution1K" Color="#f59e0b"/>
+    <!-- Оранжевый -->
+    <SolidColorBrush x:Key="Resolution512" Color="#f59e0b"/>
+    <!-- Оранжевый -->
+    <SolidColorBrush x:Key="Resolution256" Color="#ef4444"/>
+    <!-- Красный -->
+
 </ResourceDictionary>

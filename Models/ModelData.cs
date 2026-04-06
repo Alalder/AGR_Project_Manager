@@ -8,7 +8,10 @@ namespace AGR_Project_Manager.Models
     {
         private string _name;
         private ObservableCollection<ObservableCollection<UdimTile>> _udimRows;
-
+        private string _coordX;
+        private string _coordY;
+        private string _base64Image;
+        private ObservableCollection<GlassMaterial> _glasses;
         public string Name
         {
             get => _name;
@@ -22,6 +25,32 @@ namespace AGR_Project_Manager.Models
             set { _udimRows = value; OnPropertyChanged(); }
         }
 
+        public string CoordX
+        {
+            get => _coordX;
+            set { _coordX = value; OnPropertyChanged(); }
+        }
+
+        public string CoordY
+        {
+            get => _coordY;
+            set { _coordY = value; OnPropertyChanged(); }
+        }
+
+        // Base64 изображение модели
+        public string Base64Image
+        {
+            get => _base64Image;
+            set { _base64Image = value; OnPropertyChanged(); }
+        }
+
+        // Стёкла модели
+        public ObservableCollection<GlassMaterial> Glasses
+        {
+            get => _glasses;
+            set { _glasses = value; OnPropertyChanged(); }
+        }
+
         public ModelData(string name)
         {
             Name = name;
@@ -29,6 +58,10 @@ namespace AGR_Project_Manager.Models
 
             // Начальный ряд 1001-1010
             AddRow();
+            CoordX = "";
+            CoordY = "";
+            Base64Image = null;
+            Glasses = new ObservableCollection<GlassMaterial>();
         }
 
         public void AddRow()
@@ -68,6 +101,28 @@ namespace AGR_Project_Manager.Models
                     newRow.Add(tile.Clone());
                 }
                 clone.UdimRows.Add(newRow);
+            }
+
+            // Копируем данные GeoJSON
+            clone.CoordX = this.CoordX;
+            clone.CoordY = this.CoordY;
+            clone.Base64Image = this.Base64Image;
+
+            // Копируем стёкла
+            clone.Glasses.Clear();
+            foreach (var glass in this.Glasses)
+            {
+                clone.Glasses.Add(new GlassMaterial
+                {
+                    Name = glass.Name,
+                    Red = glass.Red,
+                    Green = glass.Green,
+                    Blue = glass.Blue,
+                    Transparency = glass.Transparency,
+                    Refraction = glass.Refraction,
+                    Roughness = glass.Roughness,
+                    Metallicity = glass.Metallicity
+                });
             }
 
             return clone;

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using AGR_Project_Manager.Services;
 
 namespace AGR_Project_Manager.Models
 {
@@ -9,6 +10,9 @@ namespace AGR_Project_Manager.Models
         private string _diffusePath;
         private string _ermPath;
         private string _normalPath;
+        private string _diffuseResolution;
+        private string _ermResolution;
+        private string _normalResolution;
 
         public int UdimNumber { get; set; }
 
@@ -23,19 +27,55 @@ namespace AGR_Project_Manager.Models
         public string DiffusePath
         {
             get => _diffusePath;
-            set { _diffusePath = value; OnPropertyChanged(); OnPropertyChanged(nameof(HasDiffuse)); }
+            set
+            {
+                _diffusePath = value;
+                DiffuseResolution = TextureResolutionHelper.GetResolutionLabel(value);
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasDiffuse));
+            }
         }
 
         public string ErmPath
         {
             get => _ermPath;
-            set { _ermPath = value; OnPropertyChanged(); OnPropertyChanged(nameof(HasErm)); }
+            set
+            {
+                _ermPath = value;
+                ErmResolution = TextureResolutionHelper.GetResolutionLabel(value);
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasErm));
+            }
         }
 
         public string NormalPath
         {
             get => _normalPath;
-            set { _normalPath = value; OnPropertyChanged(); OnPropertyChanged(nameof(HasNormal)); }
+            set
+            {
+                _normalPath = value;
+                NormalResolution = TextureResolutionHelper.GetResolutionLabel(value);
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasNormal));
+            }
+        }
+
+        public string DiffuseResolution
+        {
+            get => _diffuseResolution;
+            private set { _diffuseResolution = value; OnPropertyChanged(); }
+        }
+
+        public string ErmResolution
+        {
+            get => _ermResolution;
+            private set { _ermResolution = value; OnPropertyChanged(); }
+        }
+
+        public string NormalResolution
+        {
+            get => _normalResolution;
+            private set { _normalResolution = value; OnPropertyChanged(); }
         }
 
         public bool HasDiffuse => !string.IsNullOrEmpty(DiffusePath);

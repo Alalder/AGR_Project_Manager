@@ -519,6 +519,38 @@ namespace AGR_Project_Manager
             }
         }
 
+        private void ClearTile_Click(object sender, RoutedEventArgs e)
+        {
+            if (_selectedTile == null)
+            {
+                MessageBox.Show("Сначала выберите UDIM тайл для очистки", "Информация",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if (!_selectedTile.HasAnyTexture && string.IsNullOrEmpty(_selectedTile.Name))
+            {
+                MessageBox.Show("Выбранный тайл уже пустой", "Информация",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var result = MessageBox.Show(
+                $"Очистить UDIM {_selectedTile.UdimNumber}?\nВсе текстуры и название будут удалены.",
+                "Подтверждение",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                _selectedTile.Clear();
+                _projectService.UpdateProject(_selectedProject);
+
+                MessageBox.Show("Тайл очищен!", "Успех",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
         private ModelData GetCurrentModel()
         {
             return (ModelsTabControl.SelectedItem as TabItem)?.Tag as ModelData;

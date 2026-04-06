@@ -61,6 +61,16 @@ namespace AGR_Project_Manager.Models
             set { _districtCode = value; OnPropertyChanged(); }
         }
 
+
+        private GeoJsonProjectData _geoJsonData;
+
+        // Данные GeoJSON для всего проекта
+        public GeoJsonProjectData GeoJsonData
+        {
+            get => _geoJsonData;
+            set { _geoJsonData = value; OnPropertyChanged(); }
+        }
+
         public Project()
         {
             Models = new ObservableCollection<ModelData>();
@@ -68,6 +78,7 @@ namespace AGR_Project_Manager.Models
             Models.Add(new ModelData("Ground"));
             SelectedModelIndex = 0;
             DistrictCode = "";
+            GeoJsonData = new GeoJsonProjectData();
         }
 
         public void AddModel()

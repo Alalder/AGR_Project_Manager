@@ -22,8 +22,7 @@ namespace AGR_Project_Manager.Windows
         private readonly ProjectService _projectService;
         private readonly GlassPresetService _glassPresetService;
         private Project _currentProject;
-        private Dictionary<string, GeoJsonData> _modelDataMap;
-        private string _currentModelName;
+        private ModelData _currentModel;
         private bool _isLoading = false;
         private int _selectedMaterialIndex = -1;
 
@@ -32,11 +31,10 @@ namespace AGR_Project_Manager.Windows
             InitializeComponent();
             _geoJsonService = new GeoJsonService();
             _projectService = projectService;
-            _glassPresetService = new GlassPresetService();  // НОВОЕ
-            _modelDataMap = new Dictionary<string, GeoJsonData>();
+            _glassPresetService = new GlassPresetService();
 
             ProjectComboBox.ItemsSource = _projectService.Projects;
-            GlassPresetComboBox.ItemsSource = _glassPresetService.Presets;  // НОВОЕ
+            GlassPresetComboBox.ItemsSource = _glassPresetService.Presets;
 
             if (selectedProject != null)
             {
@@ -53,23 +51,8 @@ namespace AGR_Project_Manager.Windows
         private void ProjectComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _currentProject = ProjectComboBox.SelectedItem as Project;
-            _modelDataMap.Clear();
 
             if (_currentProject == null) return;
-
-            // Инициализируем данные для каждой модели
-            foreach (var model in _currentProject.Models)
-            {
-                var data = new GeoJsonData();
-
-                // Для Ground устанавливаем специальные значения
-                if (model.Name.Equals("Ground", StringComparison.OrdinalIgnoreCase))
-                {
-                    data.FnoName = "Благоустройство территории";
-                }
-
-                _modelDataMap[model.Name] = data;
-            }
 
             RefreshModelTabs();
         }
@@ -85,7 +68,7 @@ namespace AGR_Project_Manager.Windows
                 var tabItem = new TabItem
                 {
                     Header = model.Name,
-                    Tag = model.Name
+                    Tag = model
                 };
                 ModelsTabControl.Items.Add(tabItem);
             }
@@ -100,15 +83,15 @@ namespace AGR_Project_Manager.Windows
         {
             if (_isLoading) return;
 
-            // Сохраняем текущие данные
+            // Сохраняем данные предыдущей модели
             SaveCurrentModelData();
 
             var tabItem = ModelsTabControl.SelectedItem as TabItem;
-            _currentModelName = tabItem?.Tag as string;
+            _currentModel = tabItem?.Tag as ModelData;
 
-            if (_currentModelName != null)
+            if (_currentModel != null)
             {
-                LoadModelData(_currentModelName);
+                LoadModelData();
                 UpdateFileNamePreview();
                 UpdateFieldsVisibility();
             }
@@ -116,9 +99,8 @@ namespace AGR_Project_Manager.Windows
 
         private void UpdateFieldsVisibility()
         {
-            bool isGround = _currentModelName?.Equals("Ground", StringComparison.OrdinalIgnoreCase) ?? false;
+            bool isGround = _currentModel?.Name.Equals("Ground", StringComparison.OrdinalIgnoreCase) ?? false;
 
-            // Для Ground скрываем/делаем readonly некоторые поля
             var disabledStyle = FindResource("DisabledFieldStyle") as Style;
             var normalStyle = FindResource("FieldInputStyle") as Style;
 
@@ -158,12 +140,12 @@ namespace AGR_Project_Manager.Windows
 
         private void UpdateFileNamePreview()
         {
-            if (_currentProject == null || string.IsNullOrEmpty(_currentModelName)) return;
+            if (_currentProject == null || _currentModel == null) return;
 
             bool needsSuffix = _currentProject.Models.Count(m =>
                 !m.Name.Equals("Ground", StringComparison.OrdinalIgnoreCase)) > 1;
 
-            string fileName = _geoJsonService.GetFileName(_currentProject.Name, _currentModelName, needsSuffix);
+            string fileName = _geoJsonService.GetFileName(_currentProject.Name, _currentModel.Name, needsSuffix);
             FileNamePreviewText.Text = fileName;
         }
 
@@ -173,100 +155,85 @@ namespace AGR_Project_Manager.Windows
 
         private void SaveCurrentModelData()
         {
-            if (string.IsNullOrEmpty(_currentModelName) || !_modelDataMap.ContainsKey(_currentModelName)) return;
+            if (_currentModel == null || _currentProject == null) return;
 
-            var data = _modelDataMap[_currentModelName];
+            // Сохраняем индивидуальные данные модели
+            _currentModel.CoordX = CoordXTextBox.Text;
+            _currentModel.CoordY = CoordYTextBox.Text;
 
-            data.Address = AddressTextBox.Text;
-            data.Okrug = OkrugTextBox.Text;
-            data.Rajon = RajonTextBox.Text;
-            data.Name = NameTextBox.Text;
-            data.Developer = DeveloperTextBox.Text;
-            data.Designer = DesignerTextBox.Text;
-            data.CadNum = CadNumTextBox.Text;
-            data.FnoCode = FnoCodeTextBox.Text;
-            data.FnoName = FnoNameTextBox.Text;
-            data.ZuArea = ZuAreaTextBox.Text;
-            data.HRelief = HReliefTextBox.Text;
-            data.HOtn = HOtnTextBox.Text;
-            data.HAbs = HAbsTextBox.Text;
-            data.SObsh = SObshTextBox.Text;
-            data.SNaz = SNazTextBox.Text;
-            data.SPodz = SPodzTextBox.Text;
-            data.SppGns = SppGnsTextBox.Text;
-            data.ActAgr = ActAgrTextBox.Text;
-            data.Other = OtherTextBox.Text;
-            data.CoordX = CoordXTextBox.Text;
-            data.CoordY = CoordYTextBox.Text;
+            // Сохраняем в проект
+            _projectService.UpdateProject(_currentProject);
         }
 
-        private void LoadModelData(string modelName)
+        private void LoadModelData()
         {
-            if (!_modelDataMap.ContainsKey(modelName)) return;
+            if (_currentModel == null || _currentProject == null) return;
 
             _isLoading = true;
-            var data = _modelDataMap[modelName];
 
-            AddressTextBox.Text = data.Address;
-            OkrugTextBox.Text = data.Okrug;
-            RajonTextBox.Text = data.Rajon;
-            NameTextBox.Text = data.Name;
-            DeveloperTextBox.Text = data.Developer;
-            DesignerTextBox.Text = data.Designer;
-            CadNumTextBox.Text = data.CadNum;
-            FnoCodeTextBox.Text = data.FnoCode;
-            FnoNameTextBox.Text = data.FnoName;
-            ZuAreaTextBox.Text = data.ZuArea;
-            HReliefTextBox.Text = data.HRelief;
-            HOtnTextBox.Text = data.HOtn;
-            HAbsTextBox.Text = data.HAbs;
-            SObshTextBox.Text = data.SObsh;
-            SNazTextBox.Text = data.SNaz;
-            SPodzTextBox.Text = data.SPodz;
-            SppGnsTextBox.Text = data.SppGns;
-            ActAgrTextBox.Text = data.ActAgr;
-            OtherTextBox.Text = data.Other;
-            CoordXTextBox.Text = data.CoordX;
-            CoordYTextBox.Text = data.CoordY;
+            // Загружаем ОБЩИЕ данные из проекта
+            var projectData = _currentProject.GeoJsonData;
+            AddressTextBox.Text = projectData.Address ?? "";
+            OkrugTextBox.Text = projectData.Okrug ?? "";
+            RajonTextBox.Text = projectData.Rajon ?? "";
+            NameTextBox.Text = projectData.Name ?? "";
+            DeveloperTextBox.Text = projectData.Developer ?? "";
+            DesignerTextBox.Text = projectData.Designer ?? "";
+            CadNumTextBox.Text = projectData.CadNum ?? "";
+            FnoCodeTextBox.Text = projectData.FnoCode ?? "";
+            FnoNameTextBox.Text = projectData.FnoName ?? "";
+            ZuAreaTextBox.Text = projectData.ZuArea ?? "";
+            HReliefTextBox.Text = projectData.HRelief ?? "";
+            HOtnTextBox.Text = projectData.HOtn ?? "";
+            HAbsTextBox.Text = projectData.HAbs ?? "";
+            SObshTextBox.Text = projectData.SObsh ?? "";
+            SNazTextBox.Text = projectData.SNaz ?? "";
+            SPodzTextBox.Text = projectData.SPodz ?? "";
+            SppGnsTextBox.Text = projectData.SppGns ?? "";
+            ActAgrTextBox.Text = projectData.ActAgr ?? "";
+            OtherTextBox.Text = projectData.Other ?? "";
+
+            // Загружаем ИНДИВИДУАЛЬНЫЕ данные модели
+            CoordXTextBox.Text = _currentModel.CoordX ?? "";
+            CoordYTextBox.Text = _currentModel.CoordY ?? "";
 
             // Загружаем стёкла
-            MaterialsListBox.Items.Clear();
-            foreach (var glass in data.Glasses)
-            {
-                MaterialsListBox.Items.Add(glass.ToString());
-            }
+            RefreshMaterialsList();
             ClearMaterialForm();
 
             // Загружаем изображение
-            LoadImagePreview(data.ImageBase64);
+            LoadImagePreview(_currentModel.Base64Image);
 
             _isLoading = false;
         }
 
         private void CommonField_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (_isLoading || string.IsNullOrEmpty(_currentModelName)) return;
+            if (_isLoading || _currentProject == null) return;
 
-            // Сохраняем текущую модель
-            SaveCurrentModelData();
+            // Сохраняем общие поля в проект
+            var projectData = _currentProject.GeoJsonData;
+            projectData.Address = AddressTextBox.Text;
+            projectData.Okrug = OkrugTextBox.Text;
+            projectData.Rajon = RajonTextBox.Text;
+            projectData.Name = NameTextBox.Text;
+            projectData.Developer = DeveloperTextBox.Text;
+            projectData.Designer = DesignerTextBox.Text;
+            projectData.CadNum = CadNumTextBox.Text;
+            projectData.FnoCode = FnoCodeTextBox.Text;
+            projectData.FnoName = FnoNameTextBox.Text;
+            projectData.ZuArea = ZuAreaTextBox.Text;
+            projectData.HRelief = HReliefTextBox.Text;
+            projectData.HOtn = HOtnTextBox.Text;
+            projectData.HAbs = HAbsTextBox.Text;
+            projectData.SObsh = SObshTextBox.Text;
+            projectData.SNaz = SNazTextBox.Text;
+            projectData.SPodz = SPodzTextBox.Text;
+            projectData.SppGns = SppGnsTextBox.Text;
+            projectData.ActAgr = ActAgrTextBox.Text;
+            projectData.Other = OtherTextBox.Text;
 
-            // Получаем данные первой модели (не Ground)
-            var firstModel = _currentProject?.Models.FirstOrDefault(m =>
-                !m.Name.Equals("Ground", StringComparison.OrdinalIgnoreCase));
-
-            if (firstModel == null || !_modelDataMap.ContainsKey(firstModel.Name)) return;
-
-            var sourceData = _modelDataMap[firstModel.Name];
-
-            // Синхронизируем с остальными моделями
-            foreach (var model in _currentProject.Models)
-            {
-                if (model.Name == _currentModelName) continue;
-
-                var targetData = _modelDataMap[model.Name];
-                bool isGround = model.Name.Equals("Ground", StringComparison.OrdinalIgnoreCase);
-                targetData.CopyCommonFieldsFrom(sourceData, isGround);
-            }
+            _projectService.UpdateProject(_currentProject);
         }
 
         #endregion
@@ -275,7 +242,7 @@ namespace AGR_Project_Manager.Windows
 
         private void AddMaterial_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrEmpty(_currentModelName)) return;
+            if (_currentModel == null) return;
             if (string.IsNullOrWhiteSpace(MaterialNameTextBox.Text))
             {
                 MessageBox.Show("Введите название материала", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -283,27 +250,29 @@ namespace AGR_Project_Manager.Windows
             }
 
             var material = CreateMaterialFromForm();
-            _modelDataMap[_currentModelName].Glasses.Add(material);
+            _currentModel.Glasses.Add(material);
             RefreshMaterialsList();
             ClearMaterialForm();
+            _projectService.UpdateProject(_currentProject);
         }
 
         private void UpdateMaterial_Click(object sender, RoutedEventArgs e)
         {
-            if (_selectedMaterialIndex < 0 || string.IsNullOrEmpty(_currentModelName)) return;
+            if (_selectedMaterialIndex < 0 || _currentModel == null) return;
 
-            var glasses = _modelDataMap[_currentModelName].Glasses;
+            var glasses = _currentModel.Glasses;
             if (_selectedMaterialIndex >= glasses.Count) return;
 
             glasses[_selectedMaterialIndex] = CreateMaterialFromForm();
             RefreshMaterialsList();
+            _projectService.UpdateProject(_currentProject);
         }
 
         private void DeleteMaterial_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrEmpty(_currentModelName)) return;
+            if (_currentModel == null) return;
 
-            var glasses = _modelDataMap[_currentModelName].Glasses;
+            var glasses = _currentModel.Glasses;
             if (glasses.Count == 0) return;
 
             if (_selectedMaterialIndex >= 0 && _selectedMaterialIndex < glasses.Count)
@@ -318,15 +287,16 @@ namespace AGR_Project_Manager.Windows
             _selectedMaterialIndex = -1;
             RefreshMaterialsList();
             ClearMaterialForm();
+            _projectService.UpdateProject(_currentProject);
         }
 
         private void MaterialsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _selectedMaterialIndex = MaterialsListBox.SelectedIndex;
 
-            if (_selectedMaterialIndex >= 0 && !string.IsNullOrEmpty(_currentModelName))
+            if (_selectedMaterialIndex >= 0 && _currentModel != null)
             {
-                var glasses = _modelDataMap[_currentModelName].Glasses;
+                var glasses = _currentModel.Glasses;
                 if (_selectedMaterialIndex < glasses.Count)
                 {
                     LoadMaterialToForm(glasses[_selectedMaterialIndex]);
@@ -383,9 +353,9 @@ namespace AGR_Project_Manager.Windows
         private void RefreshMaterialsList()
         {
             MaterialsListBox.Items.Clear();
-            if (!string.IsNullOrEmpty(_currentModelName) && _modelDataMap.ContainsKey(_currentModelName))
+            if (_currentModel != null)
             {
-                foreach (var glass in _modelDataMap[_currentModelName].Glasses)
+                foreach (var glass in _currentModel.Glasses)
                 {
                     MaterialsListBox.Items.Add(glass.ToString());
                 }
@@ -402,7 +372,10 @@ namespace AGR_Project_Manager.Windows
             int.TryParse(RedTextBox.Text, out int r);
             int.TryParse(GreenTextBox.Text, out int g);
             int.TryParse(BlueTextBox.Text, out int b);
-            ColorPreviewBorder.Background = new SolidColorBrush(Color.FromRgb((byte)Math.Clamp(r, 0, 255), (byte)Math.Clamp(g, 0, 255), (byte)Math.Clamp(b, 0, 255)));
+            ColorPreviewBorder.Background = new SolidColorBrush(Color.FromRgb(
+                (byte)Math.Clamp(r, 0, 255),
+                (byte)Math.Clamp(g, 0, 255),
+                (byte)Math.Clamp(b, 0, 255)));
         }
 
         private void ColorPreview_Click(object sender, MouseButtonEventArgs e)
@@ -427,7 +400,6 @@ namespace AGR_Project_Manager.Windows
 
         private void SaveGlassPreset_Click(object sender, RoutedEventArgs e)
         {
-            // Проверяем, что форма заполнена
             if (string.IsNullOrWhiteSpace(RedTextBox.Text) &&
                 string.IsNullOrWhiteSpace(GreenTextBox.Text) &&
                 string.IsNullOrWhiteSpace(BlueTextBox.Text))
@@ -437,7 +409,6 @@ namespace AGR_Project_Manager.Windows
                 return;
             }
 
-            // Запрашиваем имя пресета
             var dialog = new RenameDialog("Новый пресет стекла");
             dialog.Title = "Сохранить пресет стекла";
             dialog.Owner = this;
@@ -466,7 +437,6 @@ namespace AGR_Project_Manager.Windows
                 return;
             }
 
-            // Применяем параметры пресета к форме (кроме имени материала)
             RedTextBox.Text = preset.Red.ToString();
             GreenTextBox.Text = preset.Green.ToString();
             BlueTextBox.Text = preset.Blue.ToString();
@@ -506,7 +476,7 @@ namespace AGR_Project_Manager.Windows
 
         private void AddImage_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrEmpty(_currentModelName)) return;
+            if (_currentModel == null) return;
 
             var dialog = new OpenFileDialog
             {
@@ -519,8 +489,7 @@ namespace AGR_Project_Manager.Windows
                 try
                 {
                     string base64 = _geoJsonService.ImageToBase64(dialog.FileName);
-                    _modelDataMap[_currentModelName].ImageBase64 = base64;
-                    LoadImagePreview(base64);
+                    ApplyImageToModel(base64);
                 }
                 catch (Exception ex)
                 {
@@ -531,7 +500,7 @@ namespace AGR_Project_Manager.Windows
 
         private void PasteImage_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrEmpty(_currentModelName)) return;
+            if (_currentModel == null) return;
 
             try
             {
@@ -539,7 +508,6 @@ namespace AGR_Project_Manager.Windows
                 {
                     var bitmapSource = Clipboard.GetImage();
 
-                    // Конвертируем в System.Drawing.Image
                     using (var ms = new MemoryStream())
                     {
                         var encoder = new PngBitmapEncoder();
@@ -550,27 +518,61 @@ namespace AGR_Project_Manager.Windows
                         using (var image = System.Drawing.Image.FromStream(ms))
                         {
                             string base64 = _geoJsonService.ImageToBase64(image);
-                            _modelDataMap[_currentModelName].ImageBase64 = base64;
-                            LoadImagePreview(base64);
+                            ApplyImageToModel(base64);
                         }
                     }
                 }
                 else
                 {
-                    MessageBox.Show("В буфере обмена нет изображения", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show("В буфере обмена нет изображения", "Информация",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка вставки: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка вставки: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        /// <summary>
+        /// Применяет изображение к модели. 
+        /// Если это первая модель (не Ground) - копирует на все модели проекта
+        /// </summary>
+        private void ApplyImageToModel(string base64)
+        {
+            if (_currentModel == null || _currentProject == null) return;
+
+            // Находим первую модель (не Ground)
+            var firstModel = _currentProject.Models.FirstOrDefault(m =>
+                !m.Name.Equals("Ground", StringComparison.OrdinalIgnoreCase));
+
+            // Если редактируем первую модель - копируем на все
+            if (firstModel == _currentModel)
+            {
+                foreach (var model in _currentProject.Models)
+                {
+                    model.Base64Image = base64;
+                }
+                MessageBox.Show("Изображение установлено для всех моделей проекта", "Информация",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else
+            {
+                // Иначе - только для текущей модели
+                _currentModel.Base64Image = base64;
+            }
+
+            LoadImagePreview(base64);
+            _projectService.UpdateProject(_currentProject);
         }
 
         private void DeleteImage_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrEmpty(_currentModelName)) return;
-            _modelDataMap[_currentModelName].ImageBase64 = null;
+            if (_currentModel == null) return;
+            _currentModel.Base64Image = null;
             ImagePreview.Source = null;
+            _projectService.UpdateProject(_currentProject);
         }
 
         private void LoadImagePreview(string base64)
@@ -603,7 +605,7 @@ namespace AGR_Project_Manager.Windows
 
         private void OpenGeoJson_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrEmpty(_currentModelName)) return;
+            if (_currentModel == null) return;
 
             var dialog = new OpenFileDialog
             {
@@ -617,8 +619,10 @@ namespace AGR_Project_Manager.Windows
                 {
                     string json = _geoJsonService.LoadFromFile(dialog.FileName);
                     var data = _geoJsonService.ParseGeoJson(json);
-                    _modelDataMap[_currentModelName] = data;
-                    LoadModelData(_currentModelName);
+
+                    // Импортируем данные в модель
+                    ImportGeoJsonData(data);
+
                     MessageBox.Show("Файл загружен!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
@@ -628,12 +632,58 @@ namespace AGR_Project_Manager.Windows
             }
         }
 
+        private void ImportGeoJsonData(GeoJsonData data)
+        {
+            if (_currentModel == null || _currentProject == null) return;
+
+            _isLoading = true;
+
+            // Импортируем общие данные в проект
+            var projectData = _currentProject.GeoJsonData;
+            projectData.Address = data.Address;
+            projectData.Okrug = data.Okrug;
+            projectData.Rajon = data.Rajon;
+            projectData.Name = data.Name;
+            projectData.Developer = data.Developer;
+            projectData.Designer = data.Designer;
+            projectData.CadNum = data.CadNum;
+            projectData.FnoCode = data.FnoCode;
+            projectData.FnoName = data.FnoName;
+            projectData.ZuArea = data.ZuArea;
+            projectData.HRelief = data.HRelief;
+            projectData.HOtn = data.HOtn;
+            projectData.HAbs = data.HAbs;
+            projectData.SObsh = data.SObsh;
+            projectData.SNaz = data.SNaz;
+            projectData.SPodz = data.SPodz;
+            projectData.SppGns = data.SppGns;
+            projectData.ActAgr = data.ActAgr;
+            projectData.Other = data.Other;
+
+            // Импортируем индивидуальные данные модели
+            _currentModel.CoordX = data.CoordX;
+            _currentModel.CoordY = data.CoordY;
+            _currentModel.Base64Image = data.ImageBase64;
+
+            // Импортируем стёкла
+            _currentModel.Glasses.Clear();
+            foreach (var glass in data.Glasses)
+            {
+                _currentModel.Glasses.Add(glass);
+            }
+
+            _projectService.UpdateProject(_currentProject);
+            LoadModelData();
+
+            _isLoading = false;
+        }
+
         private void PreviewGeoJson_Click(object sender, RoutedEventArgs e)
         {
             SaveCurrentModelData();
-            if (string.IsNullOrEmpty(_currentModelName)) return;
+            if (_currentModel == null) return;
 
-            var data = _modelDataMap[_currentModelName];
+            var data = BuildGeoJsonData();
             string json = _geoJsonService.GenerateGeoJson(data);
 
             var previewWindow = new Window
@@ -668,10 +718,11 @@ namespace AGR_Project_Manager.Windows
         private void ExportCurrentGeoJson_Click(object sender, RoutedEventArgs e)
         {
             SaveCurrentModelData();
-            if (_currentProject == null || string.IsNullOrEmpty(_currentModelName)) return;
+            if (_currentProject == null || _currentModel == null) return;
 
-            bool needsSuffix = _currentProject.Models.Count(m => !m.Name.Equals("Ground", StringComparison.OrdinalIgnoreCase)) > 1;
-            string fileName = _geoJsonService.GetFileName(_currentProject.Name, _currentModelName, needsSuffix);
+            bool needsSuffix = _currentProject.Models.Count(m =>
+                !m.Name.Equals("Ground", StringComparison.OrdinalIgnoreCase)) > 1;
+            string fileName = _geoJsonService.GetFileName(_currentProject.Name, _currentModel.Name, needsSuffix);
 
             var dialog = new SaveFileDialog
             {
@@ -684,14 +735,16 @@ namespace AGR_Project_Manager.Windows
             {
                 try
                 {
-                    var data = _modelDataMap[_currentModelName];
+                    var data = BuildGeoJsonData();
                     string json = _geoJsonService.GenerateGeoJson(data);
                     _geoJsonService.ExportToFile(json, dialog.FileName);
-                    MessageBox.Show($"Сохранено: {dialog.FileName}", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show($"Сохранено: {dialog.FileName}", "Успех",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -712,18 +765,17 @@ namespace AGR_Project_Manager.Windows
                 try
                 {
                     int count = 0;
-                    bool needsSuffix = _currentProject.Models.Count(m => !m.Name.Equals("Ground", StringComparison.OrdinalIgnoreCase)) > 1;
+                    bool needsSuffix = _currentProject.Models.Count(m =>
+                        !m.Name.Equals("Ground", StringComparison.OrdinalIgnoreCase)) > 1;
 
                     foreach (var model in _currentProject.Models)
                     {
-                        if (!_modelDataMap.ContainsKey(model.Name)) continue;
-
                         // Создаём папку для модели
                         string modelFolder = Path.Combine(dialog.SelectedPath, model.Name);
                         Directory.CreateDirectory(modelFolder);
 
                         // Генерируем и сохраняем файл
-                        var data = _modelDataMap[model.Name];
+                        var data = BuildGeoJsonDataForModel(model);
                         string fileName = _geoJsonService.GetFileName(_currentProject.Name, model.Name, needsSuffix);
                         string filePath = Path.Combine(modelFolder, fileName);
                         string json = _geoJsonService.GenerateGeoJson(data);
@@ -731,13 +783,72 @@ namespace AGR_Project_Manager.Windows
                         count++;
                     }
 
-                    MessageBox.Show($"Экспортировано {count} файлов!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show($"Экспортировано {count} файлов!", "Успех",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+        }
+
+        /// <summary>
+        /// Строит GeoJsonData для текущей модели
+        /// </summary>
+        private GeoJsonData BuildGeoJsonData()
+        {
+            return BuildGeoJsonDataForModel(_currentModel);
+        }
+
+        /// <summary>
+        /// Строит GeoJsonData для указанной модели
+        /// </summary>
+        private GeoJsonData BuildGeoJsonDataForModel(ModelData model)
+        {
+            if (model == null || _currentProject == null) return new GeoJsonData();
+
+            var projectData = _currentProject.GeoJsonData;
+            bool isGround = model.Name.Equals("Ground", StringComparison.OrdinalIgnoreCase);
+
+            var data = new GeoJsonData
+            {
+                // Общие данные из проекта
+                Address = projectData.Address,
+                Okrug = projectData.Okrug,
+                Rajon = projectData.Rajon,
+                Name = projectData.Name,
+                Developer = projectData.Developer,
+                Designer = projectData.Designer,
+                CadNum = projectData.CadNum,
+                FnoCode = projectData.FnoCode,
+                FnoName = isGround ? "Благоустройство территории" : projectData.FnoName,
+                ZuArea = projectData.ZuArea,
+                HRelief = projectData.HRelief,
+                HOtn = isGround ? "" : projectData.HOtn,
+                HAbs = isGround ? "" : projectData.HAbs,
+                SObsh = isGround ? "" : projectData.SObsh,
+                SNaz = isGround ? "" : projectData.SNaz,
+                SPodz = isGround ? "" : projectData.SPodz,
+                SppGns = isGround ? "" : projectData.SppGns,
+                ActAgr = projectData.ActAgr,
+                Other = projectData.Other,
+
+                // Индивидуальные данные модели
+                CoordX = model.CoordX,
+                CoordY = model.CoordY,
+                ImageBase64 = model.Base64Image
+            };
+
+            // Копируем стёкла
+            data.Glasses.Clear();
+            foreach (var glass in model.Glasses)
+            {
+                data.Glasses.Add(glass);
+            }
+
+            return data;
         }
 
         #endregion
