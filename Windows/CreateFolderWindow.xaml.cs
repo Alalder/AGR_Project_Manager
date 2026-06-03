@@ -9,15 +9,133 @@ namespace AGR_Project_Manager.Windows
     public partial class CreateFolderWindow : Window
     {
         private readonly FolderStructureService _folderService;
+        private readonly TransliterationService _translitService;
+        private bool _useTranslit = true; // По умолчанию используем транслит (стрелка вправо)
 
         public CreateFolderWindow()
         {
             InitializeComponent();
-            _folderService = new FolderStructureService();
 
-            // Подписываемся на изменение текста для обновления превью
-            ProjectNameTextBox.TextChanged += (s, e) => UpdatePreview();
-            FolderPathTextBox.TextChanged += (s, e) => UpdatePreview();
+            _folderService = new FolderStructureService();
+            _translitService = new TransliterationService();
+
+            this.Loaded += OnWindowLoaded;
+        }
+
+        private void OnWindowLoaded(object sender, RoutedEventArgs e)
+        {
+            if (ProjectNameTextBox != null)
+            {
+                ProjectNameTextBox.TextChanged += OnProjectNameChanged;
+            }
+
+            if (FolderPathTextBox != null)
+            {
+                FolderPathTextBox.TextChanged += (s, ev) => UpdatePreview();
+            }
+
+            UpdatePreview();
+            UpdateArrowIcon();
+        }
+
+        private void OnProjectNameChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (ProjectNameTextBox == null || TranslitTextBox == null)
+                return;
+
+            // Автоматически обновляем поле транслита
+            string input = ProjectNameTextBox.Text?.Trim() ?? "";
+            string transliterated = _translitService.Transliterate(input);
+
+            TranslitTextBox.TextChanged -= TranslitTextBox_TextChanged;
+            TranslitTextBox.Text = transliterated;
+            TranslitTextBox.TextChanged += TranslitTextBox_TextChanged;
+
+            UpdatePreview();
+        }
+
+        private void TranslitTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            UpdatePreview();
+        }
+
+        private void ToggleSourceButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Переключаем источник названия папки
+            _useTranslit = !_useTranslit;
+            UpdateArrowIcon();
+            UpdatePreview();
+        }
+
+        private void UpdateArrowIcon()
+        {
+            if (ArrowIcon == null || ToggleSourceButton == null)
+                return;
+
+            if (_useTranslit)
+            {
+                ArrowIcon.Text = "→"; // Стрелка вправо - используем транслит
+                ToggleSourceButton.ToolTip = "Используется транслит (→)\nНажмите для переключения на оригинал";
+            }
+            else
+            {
+                ArrowIcon.Text = "←"; // Стрелка влево - используем оригинал
+                ToggleSourceButton.ToolTip = "Используется оригинал (←)\nНажмите для переключения на транслит";
+            }
+        }
+
+        private void UpdatePreview()
+        {
+            if (RootFolderName == null || FullPathPreview == null ||
+                ProjectNameTextBox == null || TranslitTextBox == null || FolderPathTextBox == null)
+                return;
+
+            string projectName = GetFinalProjectName();
+            string folderPath = FolderPathTextBox.Text?.Trim() ?? "";
+
+            // Обновляем название корневой папки в дереве
+            if (!string.IsNullOrEmpty(projectName))
+            {
+                RootFolderName.Text = $"📁 {projectName}";
+            }
+            else
+            {
+                RootFolderName.Text = "📁 [Название проекта]";
+            }
+
+            // Обновляем полный путь
+            if (!string.IsNullOrEmpty(folderPath) && !string.IsNullOrEmpty(projectName))
+            {
+                FullPathPreview.Text = Path.Combine(folderPath, projectName);
+            }
+            else if (!string.IsNullOrEmpty(folderPath))
+            {
+                FullPathPreview.Text = folderPath + "\\...";
+            }
+            else
+            {
+                FullPathPreview.Text = "";
+            }
+        }
+
+        /// <summary>
+        /// Получает финальное название проекта в зависимости от выбранного источника
+        /// </summary>
+        private string GetFinalProjectName()
+        {
+            if (ProjectNameTextBox == null || TranslitTextBox == null)
+                return "";
+
+            if (_useTranslit)
+            {
+                // Используем транслит (стрелка вправо →)
+                return TranslitTextBox.Text?.Trim() ?? "";
+            }
+            else
+            {
+                // Используем оригинал (стрелка влево ←)
+                return ProjectNameTextBox.Text?.Trim() ?? "";
+            }
         }
 
         private void BrowseFolder_Click(object sender, RoutedEventArgs e)
@@ -34,45 +152,36 @@ namespace AGR_Project_Manager.Windows
             }
         }
 
-        private void UpdatePreview()
-        {
-            string projectName = ProjectNameTextBox.Text?.Trim() ?? "";
-            string folderPath = FolderPathTextBox.Text?.Trim() ?? "";
-
-            if (!string.IsNullOrEmpty(projectName))
-            {
-                RootFolderName.Text = $"📁 {projectName}";
-            }
-            else
-            {
-                RootFolderName.Text = "📁 [Название проекта]";
-            }
-
-            if (!string.IsNullOrEmpty(folderPath) && !string.IsNullOrEmpty(projectName))
-            {
-                FullPathPreview.Text = Path.Combine(folderPath, projectName);
-            }
-            else if (!string.IsNullOrEmpty(folderPath))
-            {
-                FullPathPreview.Text = folderPath + "\\...";
-            }
-            else
-            {
-                FullPathPreview.Text = "";
-            }
-        }
-
         private void Create_Click(object sender, RoutedEventArgs e)
         {
-            string projectName = ProjectNameTextBox.Text?.Trim() ?? "";
+            if (ProjectNameTextBox == null || FolderPathTextBox == null || TranslitTextBox == null)
+            {
+                MessageBox.Show("Ошибка инициализации окна", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            string originalName = ProjectNameTextBox.Text?.Trim() ?? "";
+            string translitName = TranslitTextBox.Text?.Trim() ?? "";
+            string projectName = GetFinalProjectName();
             string folderPath = FolderPathTextBox.Text?.Trim() ?? "";
 
             // Валидация
-            if (string.IsNullOrEmpty(projectName))
+            if (string.IsNullOrEmpty(originalName))
             {
-                MessageBox.Show("Введите название папки проекта", "Ошибка",
+                MessageBox.Show("Введите название проекта", "Ошибка",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 ProjectNameTextBox.Focus();
+                return;
+            }
+
+            if (string.IsNullOrEmpty(projectName))
+            {
+                string message = _useTranslit
+                    ? "Поле транслитерации пустое"
+                    : "Поле названия проекта пустое";
+                MessageBox.Show(message, "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -90,13 +199,14 @@ namespace AGR_Project_Manager.Windows
                 return;
             }
 
-            // Проверяем недопустимые символы в имени
+            // Проверяем недопустимые символы
             char[] invalidChars = Path.GetInvalidFileNameChars();
             foreach (char c in invalidChars)
             {
                 if (projectName.Contains(c))
                 {
-                    MessageBox.Show($"Название содержит недопустимый символ: {c}", "Ошибка",
+                    MessageBox.Show($"Название папки содержит недопустимый символ: {c}\n\nИспользуйте только допустимые символы для имени папки.",
+                        "Ошибка",
                         MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
@@ -107,7 +217,7 @@ namespace AGR_Project_Manager.Windows
             if (Directory.Exists(fullPath))
             {
                 var result = MessageBox.Show(
-                    $"Папка \"{projectName}\" уже существует.\nПерезаписать структуру?",
+                    $"Папка \"{projectName}\" уже существует.\n\nСоздать недостающие папки в структуре?",
                     "Папка существует",
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Question);
@@ -125,9 +235,13 @@ namespace AGR_Project_Manager.Windows
 
                 if (success)
                 {
+                    string sourceInfo = _useTranslit
+                        ? $"📝 Оригинал: {originalName}\n📁 Транслит: {translitName}"
+                        : $"📝 Название: {originalName}";
+
                     var openFolder = MessageBox.Show(
-                        $"Структура папок успешно создана!\n\n{fullPath}\n\nОткрыть папку в проводнике?",
-                        "Успех",
+                        $"Структура папок успешно создана!\n\n{sourceInfo}\n\n📂 {fullPath}\n\nОткрыть папку в проводнике?",
+                        "✅ Успех",
                         MessageBoxButton.YesNo,
                         MessageBoxImage.Information);
 
@@ -136,11 +250,11 @@ namespace AGR_Project_Manager.Windows
                         System.Diagnostics.Process.Start("explorer.exe", fullPath);
                     }
 
-                    Close();  // Просто закрываем без DialogResult
+                    Close();
                 }
                 else
                 {
-                    MessageBox.Show("Не удалось создать структуру папок.\nВозможно, папка уже существует.",
+                    MessageBox.Show("Не удалось создать структуру папок.",
                         "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
@@ -153,7 +267,7 @@ namespace AGR_Project_Manager.Windows
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
-            Close();  // Просто закрываем без DialogResult
+            Close();
         }
     }
 }

@@ -6,7 +6,7 @@ namespace AGR_Project_Manager.Services
     public class FolderStructureService
     {
         /// <summary>
-        /// Создаёт структуру папок проекта
+        /// Создаёт структуру папок проекта (или дополняет существующую)
         /// </summary>
         public bool CreateProjectStructure(string basePath, string projectName)
         {
@@ -14,13 +14,7 @@ namespace AGR_Project_Manager.Services
             {
                 string projectPath = Path.Combine(basePath, projectName);
 
-                // Проверяем, не существует ли уже папка
-                if (Directory.Exists(projectPath))
-                {
-                    return false;
-                }
-
-                // Создаём основную папку
+                // Создаём основную папку (если не существует)
                 Directory.CreateDirectory(projectPath);
 
                 // Source - исходные данные
