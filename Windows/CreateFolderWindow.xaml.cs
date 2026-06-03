@@ -9,15 +9,14 @@ namespace AGR_Project_Manager.Windows
     public partial class CreateFolderWindow : Window
     {
         private readonly FolderStructureService _folderService;
-        private readonly TransliterationService _translitService;
-        private bool _useTranslit = true; // По умолчанию используем транслит (стрелка вправо)
+        private FolderStructureService.StructureVersion _selectedStructureVersion = FolderStructureService.StructureVersion.V1_Legacy;
+        private int _modelCount = 1;
 
         public CreateFolderWindow()
         {
             InitializeComponent();
 
             _folderService = new FolderStructureService();
-            _translitService = new TransliterationService();
 
             this.Loaded += OnWindowLoaded;
         }
@@ -34,23 +33,23 @@ namespace AGR_Project_Manager.Windows
                 FolderPathTextBox.TextChanged += (s, ev) => UpdatePreview();
             }
 
+            // Инициализируем структуру версионирования
+            if (StructureVersionComboBox != null)
+            {
+                StructureVersionComboBox.SelectedIndex = 0;
+            }
+
+            if (ModelCountUpDown != null)
+            {
+                ModelCountUpDown.Text = "1";
+            }
+
             UpdatePreview();
-            UpdateArrowIcon();
+            UpdateFieldsVisibility();
         }
 
         private void OnProjectNameChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-            if (ProjectNameTextBox == null || TranslitTextBox == null)
-                return;
-
-            // Автоматически обновляем поле транслита
-            string input = ProjectNameTextBox.Text?.Trim() ?? "";
-            string transliterated = _translitService.Transliterate(input);
-
-            TranslitTextBox.TextChanged -= TranslitTextBox_TextChanged;
-            TranslitTextBox.Text = transliterated;
-            TranslitTextBox.TextChanged += TranslitTextBox_TextChanged;
-
             UpdatePreview();
         }
 
@@ -59,38 +58,62 @@ namespace AGR_Project_Manager.Windows
             UpdatePreview();
         }
 
-        private void ToggleSourceButton_Click(object sender, RoutedEventArgs e)
+        private void StructureVersionComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            // Переключаем источник названия папки
-            _useTranslit = !_useTranslit;
-            UpdateArrowIcon();
+            if (StructureVersionComboBox == null)
+                return;
+
+            int selectedIndex = StructureVersionComboBox.SelectedIndex;
+            _selectedStructureVersion = selectedIndex == 0 
+                ? FolderStructureService.StructureVersion.V1_Legacy 
+                : FolderStructureService.StructureVersion.V2_New;
+
+            UpdateFieldsVisibility();
             UpdatePreview();
         }
 
-        private void UpdateArrowIcon()
+        private void UpdateFieldsVisibility()
         {
-            if (ArrowIcon == null || ToggleSourceButton == null)
+            if (ModelCountPanel == null)
                 return;
 
-            if (_useTranslit)
+            // Поле "Количество моделей" видимо только для V2
+            bool isV2 = _selectedStructureVersion == FolderStructureService.StructureVersion.V2_New;
+            ModelCountPanel.Visibility = isV2 ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void ModelCountUp_Click(object sender, RoutedEventArgs e)
+        {
+            if (ModelCountUpDown != null && int.TryParse(ModelCountUpDown.Text, out int value))
             {
-                ArrowIcon.Text = "→"; // Стрелка вправо - используем транслит
-                ToggleSourceButton.ToolTip = "Используется транслит (→)\nНажмите для переключения на оригинал";
+                _modelCount = value + 1;
+                ModelCountUpDown.Text = _modelCount.ToString();
+                UpdatePreview();
             }
-            else
+        }
+
+        private void ModelCountDown_Click(object sender, RoutedEventArgs e)
+        {
+            if (ModelCountUpDown != null && int.TryParse(ModelCountUpDown.Text, out int value) && value > 1)
             {
-                ArrowIcon.Text = "←"; // Стрелка влево - используем оригинал
-                ToggleSourceButton.ToolTip = "Используется оригинал (←)\nНажмите для переключения на транслит";
+                _modelCount = value - 1;
+                ModelCountUpDown.Text = _modelCount.ToString();
+                UpdatePreview();
             }
+        }
+
+        private void ModelCountUpDown_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        {
+            // Разрешаем только цифры
+            e.Handled = !int.TryParse(e.Text, out _);
         }
 
         private void UpdatePreview()
         {
-            if (RootFolderName == null || FullPathPreview == null ||
-                ProjectNameTextBox == null || TranslitTextBox == null || FolderPathTextBox == null)
+            if (RootFolderName == null || FullPathPreview == null || ProjectNameTextBox == null || FolderPathTextBox == null)
                 return;
 
-            string projectName = GetFinalProjectName();
+            string projectName = ProjectNameTextBox.Text?.Trim() ?? "";
             string folderPath = FolderPathTextBox.Text?.Trim() ?? "";
 
             // Обновляем название корневой папки в дереве
@@ -116,26 +139,24 @@ namespace AGR_Project_Manager.Windows
             {
                 FullPathPreview.Text = "";
             }
+
+            UpdateFolderTreePreview();
         }
 
-        /// <summary>
-        /// Получает финальное название проекта в зависимости от выбранного источника
-        /// </summary>
-        private string GetFinalProjectName()
+        private void UpdateFolderTreePreview()
         {
-            if (ProjectNameTextBox == null || TranslitTextBox == null)
-                return "";
+            // Обновляем дерево папок в зависимости от выбранной версии
+            if (FolderTreeStackPanel == null)
+                return;
 
-            if (_useTranslit)
-            {
-                // Используем транслит (стрелка вправо →)
-                return TranslitTextBox.Text?.Trim() ?? "";
-            }
-            else
-            {
-                // Используем оригинал (стрелка влево ←)
-                return ProjectNameTextBox.Text?.Trim() ?? "";
-            }
+            bool isV2 = _selectedStructureVersion == FolderStructureService.StructureVersion.V2_New;
+
+            // Для V2 показываем новую структуру, для V1 - старую
+            if (FolderTreeV1 != null)
+                FolderTreeV1.Visibility = isV2 ? Visibility.Collapsed : Visibility.Visible;
+
+            if (FolderTreeV2 != null)
+                FolderTreeV2.Visibility = isV2 ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void BrowseFolder_Click(object sender, RoutedEventArgs e)
@@ -154,34 +175,22 @@ namespace AGR_Project_Manager.Windows
 
         private void Create_Click(object sender, RoutedEventArgs e)
         {
-            if (ProjectNameTextBox == null || FolderPathTextBox == null || TranslitTextBox == null)
+            if (ProjectNameTextBox == null || FolderPathTextBox == null)
             {
                 MessageBox.Show("Ошибка инициализации окна", "Ошибка",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            string originalName = ProjectNameTextBox.Text?.Trim() ?? "";
-            string translitName = TranslitTextBox.Text?.Trim() ?? "";
-            string projectName = GetFinalProjectName();
+            string projectName = ProjectNameTextBox.Text?.Trim() ?? "";
             string folderPath = FolderPathTextBox.Text?.Trim() ?? "";
 
             // Валидация
-            if (string.IsNullOrEmpty(originalName))
+            if (string.IsNullOrEmpty(projectName))
             {
                 MessageBox.Show("Введите название проекта", "Ошибка",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 ProjectNameTextBox.Focus();
-                return;
-            }
-
-            if (string.IsNullOrEmpty(projectName))
-            {
-                string message = _useTranslit
-                    ? "Поле транслитерации пустое"
-                    : "Поле названия проекта пустое";
-                MessageBox.Show(message, "Ошибка",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -231,16 +240,16 @@ namespace AGR_Project_Manager.Windows
             // Создаём структуру
             try
             {
-                bool success = _folderService.CreateProjectStructure(folderPath, projectName);
+                bool success = _folderService.CreateProjectStructure(folderPath, projectName, _selectedStructureVersion, _modelCount);
 
                 if (success)
                 {
-                    string sourceInfo = _useTranslit
-                        ? $"📝 Оригинал: {originalName}\n📁 Транслит: {translitName}"
-                        : $"📝 Название: {originalName}";
+                    string versionInfo = _selectedStructureVersion == FolderStructureService.StructureVersion.V2_New
+                        ? $"структура V2 (моделей: {_modelCount})"
+                        : "структура V1";
 
                     var openFolder = MessageBox.Show(
-                        $"Структура папок успешно создана!\n\n{sourceInfo}\n\n📂 {fullPath}\n\nОткрыть папку в проводнике?",
+                        $"Структура папок успешно создана!\n\n📝 Название: {projectName}\n📊 {versionInfo}\n\n📂 {fullPath}\n\nОткрыть папку в проводнике?",
                         "✅ Успех",
                         MessageBoxButton.YesNo,
                         MessageBoxImage.Information);

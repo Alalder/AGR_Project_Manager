@@ -148,17 +148,18 @@ namespace AGR_Project_Manager.Services
 
             var result = new List<string>();
             string addr = project.Name;
-            bool needsSuffix = NeedsModelSuffix(project);
             var models = GetModelNumbers(project);
             string[] suffixes = { "d", "r", "m", "n", "o" };
 
+            int modelIndex = 1;
             foreach (var model in models)
             {
-                string modelSuffix = needsSuffix ? $"_{model}" : "";
+                string modelNumber = $"{modelIndex:D3}";
                 foreach (var s in suffixes)
                 {
-                    result.Add($"T_{addr}{modelSuffix}_Main_{s}_1");
+                    result.Add($"T_{addr}_{modelNumber}_Main_{s}_1");
                 }
+                modelIndex++;
             }
 
             foreach (var s in suffixes)

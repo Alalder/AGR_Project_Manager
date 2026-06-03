@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -138,6 +139,21 @@ namespace AGR_Project_Manager.Models
         public bool IsPowerOfTwo => IsPow2(Width) && IsPow2(Height);
 
         /// <summary>
+        /// Разрешения, которые считаются валидными для текстур
+        /// </summary>
+        private static readonly HashSet<int> ValidResolutions = new() { 128, 256, 512, 2048, 4096 };
+
+        /// <summary>
+        /// Является ли разрешение валидным
+        /// </summary>
+        public bool IsValidResolution => ValidResolutions.Contains(Width) && ValidResolutions.Contains(Height);
+
+        /// <summary>
+        /// Текстура квадратная и с валидным разрешением
+        /// </summary>
+        public bool HasValidSquareResolution => IsSquare && ValidResolutions.Contains(Width);
+
+        /// <summary>
         /// Ошибка при загрузке
         /// </summary>
         public bool HasError { get; set; }
@@ -224,6 +240,12 @@ namespace AGR_Project_Manager.Models
 
             if (WrongFormat)
                 errors.Add($"Формат {Format} → нужен PNG");
+
+            // Проверка разрешения
+            if (!IsValidResolution)
+            {
+                errors.Add($"Разрешение {Width}×{Height} → нужно 128, 256, 512, 2048 или 4096");
+            }
 
             // Проблема с заглушкой (много цветов)
             if (NeedsColorFlattening)

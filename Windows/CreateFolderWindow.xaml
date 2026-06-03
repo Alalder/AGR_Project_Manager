@@ -1,15 +1,17 @@
-﻿<Window x:Class="AGR_Project_Manager.Windows.CreateFolderWindow"
+<Window x:Class="AGR_Project_Manager.Windows.CreateFolderWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="📁 Создать папку проекта" 
-        Height="750" Width="850"
-        MinHeight="700" MinWidth="800"
+        Height="800" Width="950"
+        MinHeight="750" MinWidth="900"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource BackgroundPrimary}"
         ResizeMode="CanResizeWithGrip">
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="15"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="15"/>
             <RowDefinition Height="*"/>
@@ -19,101 +21,89 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Верхняя панель: Поля ввода с кнопкой переключения -->
-        <Grid Grid.Row="0">
+        <!-- Верхняя панель: Название проекта -->
+        <StackPanel Grid.Row="0">
+            <TextBlock Text="Название проекта" 
+                       Foreground="{DynamicResource ForegroundSecondary}" 
+                       FontSize="12" 
+                       Margin="0,0,0,8"/>
+            <TextBox x:Name="ProjectNameTextBox" 
+                     Background="{DynamicResource BackgroundTertiary}" 
+                     Foreground="{DynamicResource ForegroundPrimary}" 
+                     BorderBrush="{DynamicResource BorderPrimary}"
+                     Padding="12,10"
+                     FontSize="14"
+                     CaretBrush="{DynamicResource ForegroundPrimary}"/>
+        </StackPanel>
+
+        <!-- Выбор версии структуры и количество моделей -->
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="15"/>
-                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="15"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Поле 1: Название проекта -->
+            <!-- Выбор версии структуры -->
             <StackPanel Grid.Column="0">
-                <TextBlock Text="Название проекта" 
+                <TextBlock Text="Версия структуры папок" 
                            Foreground="{DynamicResource ForegroundSecondary}" 
                            FontSize="12" 
                            Margin="0,0,0,8"/>
-                <TextBox x:Name="ProjectNameTextBox" 
-                         Background="{DynamicResource BackgroundTertiary}" 
-                         Foreground="{DynamicResource ForegroundPrimary}" 
-                         BorderBrush="{DynamicResource BorderPrimary}"
-                         Padding="12,10"
-                         FontSize="14"
-                         CaretBrush="{DynamicResource ForegroundPrimary}"/>
+                <ComboBox x:Name="StructureVersionComboBox" 
+                          Background="{DynamicResource BackgroundTertiary}" 
+                          Foreground="{DynamicResource ForegroundPrimary}" 
+                          BorderBrush="{DynamicResource BorderPrimary}"
+                          Padding="12,10"
+                          FontSize="14"
+                          SelectionChanged="StructureVersionComboBox_SelectionChanged">
+                    <ComboBoxItem Content="V1 (Старая версия)" IsSelected="True"/>
+                    <ComboBoxItem Content="V2 (Новая версия)"/>
+                </ComboBox>
             </StackPanel>
 
-            <!-- Кнопка переключения с подписью "Название папки" -->
-            <StackPanel Grid.Column="2" VerticalAlignment="Bottom" Margin="0,0,0,5">
-                <TextBlock Text="Название папки" 
-                           FontSize="10" 
-                           Foreground="{DynamicResource ForegroundSecondary}"
-                           HorizontalAlignment="Center"
-                           Margin="0,0,0,8"/>
-                <Button x:Name="ToggleSourceButton"
-                        Width="50"
-                        Height="50"
-                        Background="{DynamicResource AccentPrimary}"
-                        BorderBrush="{DynamicResource BorderPrimary}"
-                        BorderThickness="2"
-                        Cursor="Hand"
-                        Click="ToggleSourceButton_Click"
-                        ToolTip="Переключить источник названия папки">
-                    <Grid>
-                        <TextBlock x:Name="ArrowIcon" 
-                                   Text="→" 
-                                   FontSize="24" 
-                                   FontWeight="Bold"
-                                   Foreground="White"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"/>
-                    </Grid>
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="{TemplateBinding Background}"
-                                                BorderBrush="{TemplateBinding BorderBrush}"
-                                                BorderThickness="{TemplateBinding BorderThickness}"
-                                                CornerRadius="25">
-                                            <ContentPresenter HorizontalAlignment="Center" 
-                                                            VerticalAlignment="Center"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Opacity" Value="0.8"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-            </StackPanel>
-
-            <!-- Поле 2: Транслитерация -->
-            <StackPanel Grid.Column="4">
-                <TextBlock Text="Название транслитом" 
+            <!-- Количество моделей (видимо только для V2) -->
+            <StackPanel Grid.Column="2" x:Name="ModelCountPanel" Visibility="Collapsed">
+                <TextBlock x:Name="ModelCountLabel" 
+                           Text="Количество моделей" 
                            Foreground="{DynamicResource ForegroundSecondary}" 
                            FontSize="12" 
                            Margin="0,0,0,8"/>
-                <TextBox x:Name="TranslitTextBox" 
-                         Background="{DynamicResource BackgroundTertiary}" 
-                         Foreground="{DynamicResource CodeText}" 
-                         BorderBrush="{DynamicResource BorderPrimary}"
-                         Padding="12,10"
-                         FontSize="14"
-                         FontFamily="Consolas"
-                         CaretBrush="{DynamicResource ForegroundPrimary}"
-                         TextChanged="TranslitTextBox_TextChanged"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="ModelCountUpDown" 
+                             Background="{DynamicResource BackgroundTertiary}" 
+                             Foreground="{DynamicResource ForegroundPrimary}" 
+                             BorderBrush="{DynamicResource BorderPrimary}"
+                             Padding="12,10"
+                             FontSize="14"
+                             Text="1"
+                             PreviewTextInput="ModelCountUpDown_PreviewTextInput"
+                             CaretBrush="{DynamicResource ForegroundPrimary}"/>
+                    <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                        <Button Content="▲" 
+                                Background="{DynamicResource ButtonBackground}" 
+                                Foreground="{DynamicResource ForegroundPrimary}"
+                                Padding="8,0"
+                                Height="18"
+                                Click="ModelCountUp_Click"
+                                Margin="0,0,0,1"/>
+                        <Button Content="▼" 
+                                Background="{DynamicResource ButtonBackground}" 
+                                Foreground="{DynamicResource ForegroundPrimary}"
+                                Padding="8,0"
+                                Height="18"
+                                Click="ModelCountDown_Click"/>
+                    </StackPanel>
+                </Grid>
             </StackPanel>
         </Grid>
 
         <!-- Структура папок и описание -->
-        <Border Grid.Row="2" 
+        <Border Grid.Row="4" 
                 Background="{DynamicResource BackgroundSecondary}" 
                 CornerRadius="8" 
                 Padding="20">
@@ -135,59 +125,140 @@
                     <Border Background="{DynamicResource BackgroundPrimary}" 
                             CornerRadius="6" 
                             Padding="15">
-                        <StackPanel>
-                            <TextBlock x:Name="RootFolderName" 
-                                       Text="📁 [Название проекта]" 
-                                       Foreground="{DynamicResource CodeText}" 
-                                       FontFamily="Consolas" 
-                                       FontSize="13"
-                                       FontWeight="Bold"/>
+                        <ScrollViewer MaxHeight="300" VerticalScrollBarVisibility="Auto">
+                            <StackPanel x:Name="FolderTreeStackPanel">
+                                <TextBlock x:Name="RootFolderName" 
+                                           Text="📁 [Название проекта]" 
+                                           Foreground="{DynamicResource CodeText}" 
+                                           FontFamily="Consolas" 
+                                           FontSize="13"
+                                           FontWeight="Bold"/>
 
-                            <!-- Source -->
-                            <StackPanel Margin="20,8,0,0">
-                                <TextBlock Text="📁 source" 
-                                           Foreground="{DynamicResource ForegroundQuaternary}" 
-                                           FontFamily="Consolas" FontSize="12"/>
-                                <StackPanel Margin="20,4,0,0">
-                                    <TextBlock Text="📁 maps" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
-                                    <TextBlock Text="📁 mesh" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
-                                    <TextBlock Text="📁 dwg" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
-                                    <TextBlock Text="📁 pln" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
-                                    <TextBlock Text="📁 pdf" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
-                                    <TextBlock Text="📁 skp" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
-                                </StackPanel>
-                            </StackPanel>
-
-                            <!-- Export -->
-                            <StackPanel Margin="20,8,0,0">
-                                <TextBlock Text="📁 export" 
-                                           Foreground="{DynamicResource ForegroundQuaternary}" 
-                                           FontFamily="Consolas" FontSize="12"/>
-                                <StackPanel Margin="20,4,0,0">
-                                    <TextBlock Text="📁 HP" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
-                                    <TextBlock Text="📁 LP" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
-                                </StackPanel>
-                            </StackPanel>
-
-                            <!-- Work -->
-                            <StackPanel Margin="20,8,0,0">
-                                <TextBlock Text="📁 work" 
-                                           Foreground="{DynamicResource ForegroundQuaternary}" 
-                                           FontFamily="Consolas" FontSize="12"/>
-                                <StackPanel Margin="20,4,0,0">
-                                    <TextBlock Text="📁 texture" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
-                                    <TextBlock Text="📁 mesh" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
-                                    <TextBlock Text="📁 bake" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
-                                    <StackPanel Margin="0,4,0,0">
-                                        <TextBlock Text="📁 AGR_Check" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                <!-- V1 структура (старая) -->
+                                <StackPanel x:Name="FolderTreeV1">
+                                    <!-- Source -->
+                                    <StackPanel Margin="20,8,0,0">
+                                        <TextBlock Text="📁 source" 
+                                                   Foreground="{DynamicResource ForegroundQuaternary}" 
+                                                   FontFamily="Consolas" FontSize="12"/>
                                         <StackPanel Margin="20,4,0,0">
-                                            <TextBlock Text="📁 HP" Foreground="{DynamicResource ForegroundDisabled}" FontFamily="Consolas" FontSize="11"/>
-                                            <TextBlock Text="📁 LP" Foreground="{DynamicResource ForegroundDisabled}" FontFamily="Consolas" FontSize="11"/>
+                                            <TextBlock Text="📁 maps" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                            <TextBlock Text="📁 mesh" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                            <TextBlock Text="📁 dwg" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                            <TextBlock Text="📁 pln" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                            <TextBlock Text="📁 pdf" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                            <TextBlock Text="📁 skp" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <!-- Export -->
+                                    <StackPanel Margin="20,8,0,0">
+                                        <TextBlock Text="📁 export" 
+                                                   Foreground="{DynamicResource ForegroundQuaternary}" 
+                                                   FontFamily="Consolas" FontSize="12"/>
+                                        <StackPanel Margin="20,4,0,0">
+                                            <TextBlock Text="📁 HP" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                            <TextBlock Text="📁 LP" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <!-- Work (V1) -->
+                                    <StackPanel Margin="20,8,0,0">
+                                        <TextBlock Text="📁 work" 
+                                                   Foreground="{DynamicResource ForegroundQuaternary}" 
+                                                   FontFamily="Consolas" FontSize="12"/>
+                                        <StackPanel Margin="20,4,0,0">
+                                            <TextBlock Text="📁 texture" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                            <TextBlock Text="📁 mesh" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                            <TextBlock Text="📁 bake" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                            <StackPanel Margin="0,4,0,0">
+                                                <TextBlock Text="📁 AGR_Check" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                                <StackPanel Margin="20,4,0,0">
+                                                    <TextBlock Text="📁 HP" Foreground="{DynamicResource ForegroundDisabled}" FontFamily="Consolas" FontSize="11"/>
+                                                    <TextBlock Text="📁 LP" Foreground="{DynamicResource ForegroundDisabled}" FontFamily="Consolas" FontSize="11"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- V2 структура (новая) -->
+                                <StackPanel x:Name="FolderTreeV2" Visibility="Collapsed">
+                                    <!-- Source -->
+                                    <StackPanel Margin="20,8,0,0">
+                                        <TextBlock Text="📁 source" 
+                                                   Foreground="{DynamicResource ForegroundQuaternary}" 
+                                                   FontFamily="Consolas" FontSize="12"/>
+                                        <StackPanel Margin="20,4,0,0">
+                                            <TextBlock Text="📁 maps" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                            <TextBlock Text="📁 mesh" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                            <TextBlock Text="📁 dwg" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                            <TextBlock Text="📁 pln" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                            <TextBlock Text="📁 pdf" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                            <TextBlock Text="📁 skp" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <!-- Export (V2) -->
+                                    <StackPanel Margin="20,8,0,0">
+                                        <TextBlock Text="📁 export" 
+                                                   Foreground="{DynamicResource ForegroundQuaternary}" 
+                                                   FontFamily="Consolas" FontSize="12"/>
+                                        <StackPanel Margin="20,4,0,0">
+                                            <TextBlock Text="📁 HP_FBX" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                            <TextBlock Text="📁 LP_FBX" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                            <TextBlock Text="📁 GeoJSON" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                            <TextBlock Text="📁 Archives" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <!-- Work (V2) -->
+                                    <StackPanel Margin="20,8,0,0">
+                                        <TextBlock Text="📁 work" 
+                                                   Foreground="{DynamicResource ForegroundQuaternary}" 
+                                                   FontFamily="Consolas" FontSize="12"/>
+                                        <StackPanel Margin="20,4,0,0">
+                                            <!-- Mesh -->
+                                            <TextBlock Text="📁 Mesh" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                            <StackPanel Margin="20,4,0,4">
+                                                <TextBlock Text="📁 LP_mesh" Foreground="{DynamicResource ForegroundDisabled}" FontFamily="Consolas" FontSize="11"/>
+                                                <TextBlock Text="📁 HP_mesh" Foreground="{DynamicResource ForegroundDisabled}" FontFamily="Consolas" FontSize="11"/>
+                                            </StackPanel>
+
+                                            <!-- Textures -->
+                                            <TextBlock Text="📁 Textures" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+                                            <StackPanel Margin="20,4,0,4">
+                                                <TextBlock Text="📁 HP_textures" Foreground="{DynamicResource ForegroundDisabled}" FontFamily="Consolas" FontSize="10"/>
+                                                <StackPanel Margin="20,2,0,2">
+                                                    <TextBlock Text="📁 HP_001" Foreground="{DynamicResource ForegroundDisabled}" FontFamily="Consolas" FontSize="9" Opacity="0.7"/>
+                                                    <TextBlock Text="📁 HP_002" Foreground="{DynamicResource ForegroundDisabled}" FontFamily="Consolas" FontSize="9" Opacity="0.7"/>
+                                                    <TextBlock Text="📁 ..." Foreground="{DynamicResource ForegroundDisabled}" FontFamily="Consolas" FontSize="9" Opacity="0.5"/>
+                                                    <TextBlock Text="📁 HP_Ground" Foreground="{DynamicResource ForegroundDisabled}" FontFamily="Consolas" FontSize="9" Opacity="0.7"/>
+                                                </StackPanel>
+
+                                                <TextBlock Text="📁 LP_textures" Foreground="{DynamicResource ForegroundDisabled}" FontFamily="Consolas" FontSize="10"/>
+                                                <StackPanel Margin="20,2,0,0">
+                                                    <TextBlock Text="📁 LP_001" Foreground="{DynamicResource ForegroundDisabled}" FontFamily="Consolas" FontSize="9" Opacity="0.7"/>
+                                                    <TextBlock Text="📁 LP_002" Foreground="{DynamicResource ForegroundDisabled}" FontFamily="Consolas" FontSize="9" Opacity="0.7"/>
+                                                    <TextBlock Text="📁 ..." Foreground="{DynamicResource ForegroundDisabled}" FontFamily="Consolas" FontSize="9" Opacity="0.5"/>
+                                                    <TextBlock Text="📁 LP_Ground" Foreground="{DynamicResource ForegroundDisabled}" FontFamily="Consolas" FontSize="9" Opacity="0.7"/>
+                                                </StackPanel>
+                                            </StackPanel>
+
+                                            <!-- Bake -->
+                                            <TextBlock Text="📁 Bake" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11"/>
+
+                                            <!-- AGR_Check -->
+                                            <TextBlock Text="📁 AGR_Check" Foreground="{DynamicResource ForegroundTertiary}" FontFamily="Consolas" FontSize="11" Margin="0,4,0,0"/>
+                                            <StackPanel Margin="20,4,0,0">
+                                                <TextBlock Text="📁 HP" Foreground="{DynamicResource ForegroundDisabled}" FontFamily="Consolas" FontSize="11"/>
+                                                <TextBlock Text="📁 LP" Foreground="{DynamicResource ForegroundDisabled}" FontFamily="Consolas" FontSize="11"/>
+                                            </StackPanel>
                                         </StackPanel>
                                     </StackPanel>
                                 </StackPanel>
                             </StackPanel>
-                        </StackPanel>
+                        </ScrollViewer>
                     </Border>
                 </StackPanel>
 
@@ -232,8 +303,14 @@
                                            Foreground="{DynamicResource ForegroundSecondary}" 
                                            FontSize="12" Margin="0,5,0,0" TextWrapping="Wrap"/>
                                 <StackPanel Margin="10,8,0,0">
-                                    <TextBlock Text="• HP — High-Poly модели и архивы" Foreground="{DynamicResource ForegroundTertiary}" FontSize="11"/>
-                                    <TextBlock Text="• LP — Low-Poly модели и архивы" Foreground="{DynamicResource ForegroundTertiary}" FontSize="11"/>
+                                    <TextBlock Text="V1:" Foreground="{DynamicResource ForegroundTertiary}" FontSize="10" FontWeight="Bold"/>
+                                    <TextBlock Text="• HP — High-Poly модели и архивы" Foreground="{DynamicResource ForegroundTertiary}" FontSize="10" Margin="10,2,0,0"/>
+                                    <TextBlock Text="• LP — Low-Poly модели и архивы" Foreground="{DynamicResource ForegroundTertiary}" FontSize="10"/>
+                                    <TextBlock Text="V2:" Foreground="{DynamicResource ForegroundTertiary}" FontSize="10" FontWeight="Bold" Margin="0,5,0,0"/>
+                                    <TextBlock Text="• HP_FBX — High-Poly FBX файлы" Foreground="{DynamicResource ForegroundTertiary}" FontSize="10" Margin="10,2,0,0"/>
+                                    <TextBlock Text="• LP_FBX — Low-Poly FBX файлы" Foreground="{DynamicResource ForegroundTertiary}" FontSize="10"/>
+                                    <TextBlock Text="• GeoJSON — Карты GeoJSON" Foreground="{DynamicResource ForegroundTertiary}" FontSize="10"/>
+                                    <TextBlock Text="• Archives — Архивы проекта" Foreground="{DynamicResource ForegroundTertiary}" FontSize="10"/>
                                 </StackPanel>
                             </StackPanel>
                         </Border>
@@ -249,9 +326,8 @@
                                            Foreground="{DynamicResource ForegroundSecondary}" 
                                            FontSize="12" Margin="0,5,0,0" TextWrapping="Wrap"/>
                                 <StackPanel Margin="10,8,0,0">
-                                    <TextBlock Text="• texture — текстуры (PSD, PNG)" Foreground="{DynamicResource ForegroundTertiary}" FontSize="11"/>
-                                    <TextBlock Text="• mesh — рабочие 3D файлы" Foreground="{DynamicResource ForegroundTertiary}" FontSize="11"/>
-                                    <TextBlock Text="• bake — файлы запечки" Foreground="{DynamicResource ForegroundTertiary}" FontSize="11"/>
+                                    <TextBlock Text="• V1: texture, mesh, bake" Foreground="{DynamicResource ForegroundTertiary}" FontSize="11"/>
+                                    <TextBlock Text="• V2: Mesh, Textures, Bake" Foreground="{DynamicResource ForegroundTertiary}" FontSize="11"/>
                                     <TextBlock Text="• AGR_Check — архивы для проверки" Foreground="{DynamicResource ForegroundTertiary}" FontSize="11"/>
                                 </StackPanel>
                             </StackPanel>
@@ -262,7 +338,7 @@
         </Border>
 
         <!-- Выбор рабочей папки -->
-        <StackPanel Grid.Row="4">
+        <StackPanel Grid.Row="6">
             <TextBlock Text="Рабочая папка (где будет создана структура)" 
                        Foreground="{DynamicResource ForegroundSecondary}" 
                        FontSize="12" 
@@ -292,7 +368,7 @@
         </StackPanel>
 
         <!-- Кнопки -->
-        <Grid Grid.Row="6">
+        <Grid Grid.Row="8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>

@@ -106,35 +106,53 @@ namespace AGR_Project_Manager.Windows
 
             if (isGround)
             {
+                // Для Ground модели: устанавливаем заголовок и запрещаем редактирование
                 FnoNameTextBox.Text = "Благоустройство территории";
                 FnoNameTextBox.IsReadOnly = true;
                 FnoNameTextBox.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#252525"));
 
+                // Отключаем редактирование, но НЕ стираем текст
                 HOtnTextBox.Style = disabledStyle;
-                HAbsTextBox.Style = disabledStyle;
-                SObshTextBox.Style = disabledStyle;
-                SNazTextBox.Style = disabledStyle;
-                SPodzTextBox.Style = disabledStyle;
-                SppGnsTextBox.Style = disabledStyle;
+                HOtnTextBox.IsEnabled = false;
 
-                HOtnTextBox.Text = "";
-                HAbsTextBox.Text = "";
-                SObshTextBox.Text = "";
-                SNazTextBox.Text = "";
-                SPodzTextBox.Text = "";
-                SppGnsTextBox.Text = "";
+                HAbsTextBox.Style = disabledStyle;
+                HAbsTextBox.IsEnabled = false;
+
+                SObshTextBox.Style = disabledStyle;
+                SObshTextBox.IsEnabled = false;
+
+                SNazTextBox.Style = disabledStyle;
+                SNazTextBox.IsEnabled = false;
+
+                SPodzTextBox.Style = disabledStyle;
+                SPodzTextBox.IsEnabled = false;
+
+                SppGnsTextBox.Style = disabledStyle;
+                SppGnsTextBox.IsEnabled = false;
             }
             else
             {
+                // Для обычных моделей: разрешаем редактирование и восстанавливаем стиль
                 FnoNameTextBox.IsReadOnly = false;
                 FnoNameTextBox.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2d2c35"));
 
                 HOtnTextBox.Style = normalStyle;
+                HOtnTextBox.IsEnabled = true;
+
                 HAbsTextBox.Style = normalStyle;
+                HAbsTextBox.IsEnabled = true;
+
                 SObshTextBox.Style = normalStyle;
+                SObshTextBox.IsEnabled = true;
+
                 SNazTextBox.Style = normalStyle;
+                SNazTextBox.IsEnabled = true;
+
                 SPodzTextBox.Style = normalStyle;
+                SPodzTextBox.IsEnabled = true;
+
                 SppGnsTextBox.Style = normalStyle;
+                SppGnsTextBox.IsEnabled = true;
             }
         }
 
@@ -211,29 +229,40 @@ namespace AGR_Project_Manager.Windows
         {
             if (_isLoading || _currentProject == null) return;
 
-            // Сохраняем общие поля в проект
+            // Сохраняем общие поля в проект с заменой двойных кавычек на одинарные
             var projectData = _currentProject.GeoJsonData;
-            projectData.Address = AddressTextBox.Text;
-            projectData.Okrug = OkrugTextBox.Text;
-            projectData.Rajon = RajonTextBox.Text;
-            projectData.Name = NameTextBox.Text;
-            projectData.Developer = DeveloperTextBox.Text;
-            projectData.Designer = DesignerTextBox.Text;
-            projectData.CadNum = CadNumTextBox.Text;
-            projectData.FnoCode = FnoCodeTextBox.Text;
-            projectData.FnoName = FnoNameTextBox.Text;
-            projectData.ZuArea = ZuAreaTextBox.Text;
-            projectData.HRelief = HReliefTextBox.Text;
-            projectData.HOtn = HOtnTextBox.Text;
-            projectData.HAbs = HAbsTextBox.Text;
-            projectData.SObsh = SObshTextBox.Text;
-            projectData.SNaz = SNazTextBox.Text;
-            projectData.SPodz = SPodzTextBox.Text;
-            projectData.SppGns = SppGnsTextBox.Text;
-            projectData.ActAgr = ActAgrTextBox.Text;
-            projectData.Other = OtherTextBox.Text;
+            projectData.Address = ReplaceQuotes(AddressTextBox.Text);
+            projectData.Okrug = ReplaceQuotes(OkrugTextBox.Text);
+            projectData.Rajon = ReplaceQuotes(RajonTextBox.Text);
+            projectData.Name = ReplaceQuotes(NameTextBox.Text);
+            projectData.Developer = ReplaceQuotes(DeveloperTextBox.Text);
+            projectData.Designer = ReplaceQuotes(DesignerTextBox.Text);
+            projectData.CadNum = ReplaceQuotes(CadNumTextBox.Text);
+            projectData.FnoCode = ReplaceQuotes(FnoCodeTextBox.Text);
+            projectData.FnoName = ReplaceQuotes(FnoNameTextBox.Text);
+            projectData.ZuArea = ReplaceQuotes(ZuAreaTextBox.Text);
+            projectData.HRelief = ReplaceQuotes(HReliefTextBox.Text);
+            projectData.HOtn = ReplaceQuotes(HOtnTextBox.Text);
+            projectData.HAbs = ReplaceQuotes(HAbsTextBox.Text);
+            projectData.SObsh = ReplaceQuotes(SObshTextBox.Text);
+            projectData.SNaz = ReplaceQuotes(SNazTextBox.Text);
+            projectData.SPodz = ReplaceQuotes(SPodzTextBox.Text);
+            projectData.SppGns = ReplaceQuotes(SppGnsTextBox.Text);
+            projectData.ActAgr = ReplaceQuotes(ActAgrTextBox.Text);
+            projectData.Other = ReplaceQuotes(OtherTextBox.Text);
 
             _projectService.UpdateProject(_currentProject);
+        }
+
+        /// <summary>
+        /// Заменяет двойные кавычки на одинарные
+        /// </summary>
+        private string ReplaceQuotes(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+
+            return text.Replace("\"", "'");
         }
 
         #endregion
