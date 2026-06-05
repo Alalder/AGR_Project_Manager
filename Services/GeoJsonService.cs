@@ -18,7 +18,8 @@ namespace AGR_Project_Manager.Services
             var sb = new StringBuilder();
             sb.AppendLine("{");
             sb.AppendLine("  \"type\": \"FeatureCollection\",");
-            sb.AppendLine("  \"features\": [{");
+            sb.AppendLine("  \"features\" : [");
+            sb.AppendLine("      {");
             sb.AppendLine("    \"type\": \"ObjectFeature\",");
             sb.AppendLine("    \"properties\": {");
 
@@ -91,7 +92,8 @@ namespace AGR_Project_Manager.Services
                 sb.AppendLine("      }");
             }
             sb.AppendLine("    ]");
-            sb.AppendLine("  }]");
+            sb.AppendLine("  }");
+            sb.AppendLine(" ]");
             sb.AppendLine("}");
 
             return sb.ToString();

@@ -107,7 +107,11 @@ namespace AGR_Project_Manager.Windows
             if (isGround)
             {
                 // Для Ground модели: устанавливаем заголовок и запрещаем редактирование
-                FnoNameTextBox.Text = "Благоустройство территории";
+                // Если поле было пусто, заполняем его значением по умолчанию
+                if (string.IsNullOrEmpty(FnoNameTextBox.Text))
+                {
+                    FnoNameTextBox.Text = "Благоустройство территории";
+                }
                 FnoNameTextBox.IsReadOnly = true;
                 FnoNameTextBox.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#252525"));
 
@@ -178,6 +182,9 @@ namespace AGR_Project_Manager.Windows
             // Сохраняем индивидуальные данные модели
             _currentModel.CoordX = CoordXTextBox.Text;
             _currentModel.CoordY = CoordYTextBox.Text;
+            // FnoName уже сохраняется в CommonField_TextChanged через ApplyFnoNameToModels
+            // здесь дополнительно убеждаемся, что сохранили текущее значение
+            ApplyFnoNameToModels(FnoNameTextBox.Text);
 
             // Сохраняем в проект
             _projectService.UpdateProject(_currentProject);
@@ -199,7 +206,6 @@ namespace AGR_Project_Manager.Windows
             DesignerTextBox.Text = projectData.Designer ?? "";
             CadNumTextBox.Text = projectData.CadNum ?? "";
             FnoCodeTextBox.Text = projectData.FnoCode ?? "";
-            FnoNameTextBox.Text = projectData.FnoName ?? "";
             ZuAreaTextBox.Text = projectData.ZuArea ?? "";
             HReliefTextBox.Text = projectData.HRelief ?? "";
             HOtnTextBox.Text = projectData.HOtn ?? "";
@@ -214,6 +220,7 @@ namespace AGR_Project_Manager.Windows
             // Загружаем ИНДИВИДУАЛЬНЫЕ данные модели
             CoordXTextBox.Text = _currentModel.CoordX ?? "";
             CoordYTextBox.Text = _currentModel.CoordY ?? "";
+            FnoNameTextBox.Text = _currentModel.FnoName ?? "";
 
             // Загружаем стёкла
             RefreshMaterialsList();
@@ -239,7 +246,6 @@ namespace AGR_Project_Manager.Windows
             projectData.Designer = ReplaceQuotes(DesignerTextBox.Text);
             projectData.CadNum = ReplaceQuotes(CadNumTextBox.Text);
             projectData.FnoCode = ReplaceQuotes(FnoCodeTextBox.Text);
-            projectData.FnoName = ReplaceQuotes(FnoNameTextBox.Text);
             projectData.ZuArea = ReplaceQuotes(ZuAreaTextBox.Text);
             projectData.HRelief = ReplaceQuotes(HReliefTextBox.Text);
             projectData.HOtn = ReplaceQuotes(HOtnTextBox.Text);
@@ -250,6 +256,12 @@ namespace AGR_Project_Manager.Windows
             projectData.SppGns = ReplaceQuotes(SppGnsTextBox.Text);
             projectData.ActAgr = ReplaceQuotes(ActAgrTextBox.Text);
             projectData.Other = ReplaceQuotes(OtherTextBox.Text);
+
+            // Сохраняем FnoName в текущую модель и дублируем на остальные (кроме Ground)
+            if (_currentModel != null)
+            {
+                ApplyFnoNameToModels(ReplaceQuotes(FnoNameTextBox.Text));
+            }
 
             _projectService.UpdateProject(_currentProject);
         }
@@ -596,6 +608,37 @@ namespace AGR_Project_Manager.Windows
             _projectService.UpdateProject(_currentProject);
         }
 
+        /// <summary>
+        /// Применяет FNO_name к модели. 
+        /// Если это первая модель (не Ground) - копирует на все модели проекта (кроме Ground)
+        /// </summary>
+        private void ApplyFnoNameToModels(string fnoName)
+        {
+            if (_currentModel == null || _currentProject == null) return;
+
+            // Находим первую модель (не Ground)
+            var firstModel = _currentProject.Models.FirstOrDefault(m =>
+                !m.Name.Equals("Ground", StringComparison.OrdinalIgnoreCase));
+
+            // Если редактируем первую модель - копируем на все модели (кроме Ground)
+            if (firstModel == _currentModel)
+            {
+                foreach (var model in _currentProject.Models)
+                {
+                    // Пропускаем Ground модель
+                    if (!model.Name.Equals("Ground", StringComparison.OrdinalIgnoreCase))
+                    {
+                        model.FnoName = fnoName;
+                    }
+                }
+            }
+            else
+            {
+                // Иначе - только для текущей модели
+                _currentModel.FnoName = fnoName;
+            }
+        }
+
         private void DeleteImage_Click(object sender, RoutedEventArgs e)
         {
             if (_currentModel == null) return;
@@ -677,7 +720,6 @@ namespace AGR_Project_Manager.Windows
             projectData.Designer = data.Designer;
             projectData.CadNum = data.CadNum;
             projectData.FnoCode = data.FnoCode;
-            projectData.FnoName = data.FnoName;
             projectData.ZuArea = data.ZuArea;
             projectData.HRelief = data.HRelief;
             projectData.HOtn = data.HOtn;
@@ -693,6 +735,7 @@ namespace AGR_Project_Manager.Windows
             _currentModel.CoordX = data.CoordX;
             _currentModel.CoordY = data.CoordY;
             _currentModel.Base64Image = data.ImageBase64;
+            _currentModel.FnoName = data.FnoName;
 
             // Импортируем стёкла
             _currentModel.Glasses.Clear();
@@ -852,7 +895,10 @@ namespace AGR_Project_Manager.Windows
                 Designer = projectData.Designer,
                 CadNum = projectData.CadNum,
                 FnoCode = projectData.FnoCode,
-                FnoName = isGround ? "Благоустройство территории" : projectData.FnoName,
+                // FnoName берём из модели, для Ground если пусто - используем значение по умолчанию
+                FnoName = string.IsNullOrEmpty(model.FnoName) && isGround 
+                    ? "Благоустройство территории" 
+                    : model.FnoName,
                 ZuArea = projectData.ZuArea,
                 HRelief = projectData.HRelief,
                 HOtn = isGround ? "" : projectData.HOtn,

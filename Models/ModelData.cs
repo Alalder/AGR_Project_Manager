@@ -12,6 +12,7 @@ namespace AGR_Project_Manager.Models
         private string _coordY;
         private string _base64Image;
         private ObservableCollection<GlassMaterial> _glasses;
+        private string _fnoName;
         public string Name
         {
             get => _name;
@@ -51,6 +52,13 @@ namespace AGR_Project_Manager.Models
             set { _glasses = value; OnPropertyChanged(); }
         }
 
+        // FNO_name для каждой модели
+        public string FnoName
+        {
+            get => _fnoName;
+            set { _fnoName = value; OnPropertyChanged(); }
+        }
+
         public ModelData(string name)
         {
             Name = name;
@@ -62,6 +70,7 @@ namespace AGR_Project_Manager.Models
             CoordY = "";
             Base64Image = null;
             Glasses = new ObservableCollection<GlassMaterial>();
+            FnoName = "";
         }
 
         public void AddRow()
@@ -107,6 +116,7 @@ namespace AGR_Project_Manager.Models
             clone.CoordX = this.CoordX;
             clone.CoordY = this.CoordY;
             clone.Base64Image = this.Base64Image;
+            clone.FnoName = this.FnoName;
 
             // Копируем стёкла
             clone.Glasses.Clear();
