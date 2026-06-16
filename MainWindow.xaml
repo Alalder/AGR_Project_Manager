@@ -675,6 +675,13 @@
                                         Foreground="{DynamicResource ForegroundPrimary}" 
                                         Padding="15,8" Margin="0,0,10,0" FontWeight="SemiBold"
                                         Click="ExportCurrentModel_Click"/>
+                                <Button x:Name="ExportSelectedUdimBtn"
+                                        Content="📤 Экспорт выбранного UDIM" 
+                                        Background="{DynamicResource AccentTertiary}" 
+                                        Foreground="{DynamicResource ForegroundPrimary}" 
+                                        Padding="15,8" Margin="0,0,10,0" FontWeight="SemiBold"
+                                        Click="ExportSelectedUdim_Click"
+                                        IsEnabled="False"/>
                                 <Button Content="📤 Экспорт всех моделей" 
                                         Background="{DynamicResource AccentSecondary}" 
                                         Foreground="{DynamicResource ForegroundPrimary}" 

@@ -91,6 +91,22 @@ namespace AGR_Project_Manager.Services
             return exportedCount;
         }
 
+        /// <summary>
+        /// Экспорт одного UDIM выбранной модели
+        /// </summary>
+        public async Task<int> ExportUdimAsync(Project project, ModelData model, UdimTile udim, string outputFolder)
+        {
+            int exportedCount = 0;
+            bool needsSuffix = NeedsModelSuffix(project);
+
+            await Task.Run(() =>
+            {
+                exportedCount = ExportTile(project.Name, model.Name, udim, outputFolder, needsSuffix);
+            });
+
+            return exportedCount;
+        }
+
         private int ExportTile(string projectName, string modelName, UdimTile tile, string outputFolder, bool includeModelName)
         {
             int count = 0;

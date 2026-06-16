@@ -232,7 +232,7 @@ namespace AGR_Project_Manager.Services
 
         public void ExportToFile(string json, string filePath)
         {
-            File.WriteAllText(filePath, json, Encoding.UTF8);
+            File.WriteAllText(filePath, json, new UTF8Encoding(false));
         }
 
         public string LoadFromFile(string filePath)

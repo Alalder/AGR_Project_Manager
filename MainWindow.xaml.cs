@@ -451,6 +451,9 @@ namespace AGR_Project_Manager
 
                 // Активируем кнопку применения пресета если есть выбранный пресет
                 ApplyPresetBtn.IsEnabled = PresetComboBox.SelectedItem != null;
+
+                // Активируем кнопку экспорта выбранного UDIM
+                ExportSelectedUdimBtn.IsEnabled = true;
             }
         }
 
@@ -616,6 +619,33 @@ namespace AGR_Project_Manager
             {
                 int count = await _exportService.ExportAllModelsAsync(_selectedProject, ExportPathTextBox.Text);
                 MessageBox.Show($"Экспортировано {count} текстур для всех моделей!", "Успех",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка экспорта: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async void ExportSelectedUdim_Click(object sender, RoutedEventArgs e)
+        {
+            if (_selectedProject == null || _selectedTile == null) return;
+
+            var model = GetCurrentModel();
+            if (model == null) return;
+
+            if (string.IsNullOrEmpty(ExportPathTextBox.Text))
+            {
+                MessageBox.Show("Выберите папку для экспорта", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                int count = await _exportService.ExportUdimAsync(_selectedProject, model, _selectedTile, ExportPathTextBox.Text);
+                MessageBox.Show($"Экспортировано {count} текстур для UDIM {_selectedTile.UdimNumber}!", "Успех",
                     MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)

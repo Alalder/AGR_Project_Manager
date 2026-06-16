@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
@@ -59,6 +59,88 @@ namespace AGR_Project_Manager.Services
             // RAL 1000 -> RAL_1000_256.png
             string safeName = color.Code.Replace(" ", "_");
             return $"{safeName}_{size}.png";
+        }
+
+        /// <summary>
+        /// Парсит HEX код в RalColor объект
+        /// Поддерживает форматы: #RRGGBB, RRGGBB
+        /// </summary>
+        public RalColor ParseHexColor(string hexCode)
+        {
+            if (string.IsNullOrWhiteSpace(hexCode))
+                throw new ArgumentException("HEX код не может быть пуст");
+
+            // Удаляем # если есть
+            string cleanHex = hexCode.Trim().TrimStart('#');
+
+            // Проверяем длину
+            if (cleanHex.Length != 6)
+                throw new ArgumentException("HEX код должен содержать 6 символов (например: RRGGBB или #RRGGBB)");
+
+            // Проверяем что это шестнадцатеричные цифры
+            if (!System.Text.RegularExpressions.Regex.IsMatch(cleanHex, @"^[0-9A-Fa-f]{6}$"))
+                throw new ArgumentException("HEX код должен содержать только цифры (0-9) и буквы (A-F)");
+
+            // Парсим RGB значения
+            byte r = byte.Parse(cleanHex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber);
+            byte g = byte.Parse(cleanHex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber);
+            byte b = byte.Parse(cleanHex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber);
+
+            // Создаём RalColor с HEX кодом как "Code" и "Custom HEX Color" как Name
+            var color = new RalColor
+            {
+                Code = $"#{cleanHex.ToUpper()}",
+                Name = "Custom HEX Color",
+                Hex = $"#{cleanHex.ToUpper()}",
+                R = r,
+                G = g,
+                B = b
+            };
+
+            return color;
+        }
+
+        /// <summary>
+        /// Валидирует HEX код
+        /// </summary>
+        public bool ValidateHexCode(string hexCode)
+        {
+            if (string.IsNullOrWhiteSpace(hexCode))
+                return false;
+
+            string cleanHex = hexCode.Trim().TrimStart('#');
+
+            if (cleanHex.Length != 6)
+                return false;
+
+            return System.Text.RegularExpressions.Regex.IsMatch(cleanHex, @"^[0-9A-Fa-f]{6}$");
+        }
+
+        /// <summary>
+        /// Генерирует имя файла для HEX цвета
+        /// </summary>
+        public string GenerateFileNameForHex(string hexCode, int size)
+        {
+            // Очищаем HEX от #
+            string cleanHex = hexCode.Trim().TrimStart('#').ToUpper();
+            return $"HEX_{cleanHex}_{size}.png";
+        }
+
+        /// <summary>
+        /// Сохраняет HEX цвет как PNG
+        /// </summary>
+        public bool SaveHexColorAsPng(string hexCode, string filePath, int size)
+        {
+            try
+            {
+                var color = ParseHexColor(hexCode);
+                return SaveColorAsPng(color, filePath, size);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка сохранения HEX цвета: {ex.Message}");
+                return false;
+            }
         }
     }
 }

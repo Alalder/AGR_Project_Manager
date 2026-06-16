@@ -23,9 +23,6 @@
     <Compile Update="Windows\ProjectDialog.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Windows\RalColorsWindow.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Update="Windows\RenameDialog.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

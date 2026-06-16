@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -18,6 +18,7 @@ namespace AGR_Project_Manager.Windows
         private RalColor _currentColor;
         private List<RalColor> _searchResults;
         private int _currentResultIndex;
+        private bool _isHexMode = false;  // Флаг для отслеживания режима (RAL или HEX)
 
         public RalColorsWindow()
         {
@@ -32,6 +33,8 @@ namespace AGR_Project_Manager.Windows
                 : Visibility.Collapsed;
             SearchTextBox.Focus();
         }
+
+        #region RAL Color Operations
 
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -114,6 +117,10 @@ namespace AGR_Project_Manager.Windows
             }
         }
 
+        #endregion
+
+        #region Display & Save
+
         private void DisplayColor(RalColor color)
         {
             _currentColor = color;
@@ -137,7 +144,9 @@ namespace AGR_Project_Manager.Windows
         private void HideResult()
         {
             _currentColor = null;
-            PlaceholderText.Text = "Введите номер RAL для поиска";
+            PlaceholderText.Text = _isHexMode 
+                ? "Введите HEX код для поиска"
+                : "Введите номер RAL для поиска";
             PlaceholderText.Visibility = Visibility.Visible;
             ResultPanel.Visibility = Visibility.Collapsed;
             SavePanel.Visibility = Visibility.Collapsed;
@@ -193,7 +202,17 @@ namespace AGR_Project_Manager.Windows
 
             if (dialog.ShowDialog() == true)
             {
-                string fileName = _colorService.GenerateFileName(_currentColor, size);
+                // Генерируем имя файла в зависимости от режима
+                string fileName;
+                if (_isHexMode)
+                {
+                    fileName = _colorService.GenerateFileNameForHex(_currentColor.Hex, size);
+                }
+                else
+                {
+                    fileName = _colorService.GenerateFileName(_currentColor, size);
+                }
+
                 string filePath = System.IO.Path.Combine(dialog.SelectedPath, fileName);
 
                 if (_colorService.SaveColorAsPng(_currentColor, filePath, size))
@@ -220,5 +239,78 @@ namespace AGR_Project_Manager.Windows
                 _ => 512
             };
         }
+
+        #endregion
+
+        #region HEX Color Operations
+
+        private void ModeTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            _isHexMode = ModeTabControl.SelectedIndex == 1;
+            HideResult();
+            ClearInputs();
+        }
+
+        private void ClearInputs()
+        {
+            SearchTextBox.Clear();
+            HexInputTextBox.Clear();
+            SearchPlaceholder.Visibility = Visibility.Visible;
+            HexPlaceholder.Visibility = Visibility.Visible;
+        }
+
+        private void HexInputTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // Управление видимостью плейсхолдера
+            HexPlaceholder.Visibility = string.IsNullOrEmpty(HexInputTextBox.Text)
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        }
+
+        private void HexInputTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                ValidateAndDisplayHexColor(HexInputTextBox.Text.Trim());
+                e.Handled = true;
+            }
+        }
+
+        private void ValidateHexBtn_Click(object sender, RoutedEventArgs e)
+        {
+            ValidateAndDisplayHexColor(HexInputTextBox.Text.Trim());
+        }
+
+        private void ValidateAndDisplayHexColor(string hexCode)
+        {
+            if (string.IsNullOrWhiteSpace(hexCode))
+            {
+                HideResult();
+                PlaceholderText.Text = "Введите HEX код для поиска";
+                return;
+            }
+
+            if (!_colorService.ValidateHexCode(hexCode))
+            {
+                HideResult();
+                PlaceholderText.Text = "Некорректный HEX код. Используйте формат: #RRGGBB или RRGGBB";
+                PlaceholderText.Visibility = Visibility.Visible;
+                return;
+            }
+
+            try
+            {
+                var color = _colorService.ParseHexColor(hexCode);
+                DisplayColor(color);
+            }
+            catch (Exception ex)
+            {
+                HideResult();
+                PlaceholderText.Text = $"Ошибка: {ex.Message}";
+                PlaceholderText.Visibility = Visibility.Visible;
+            }
+        }
+
+        #endregion
     }
 }
