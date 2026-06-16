@@ -20,6 +20,7 @@ namespace AGR_Project_Manager.Services
             new ThemeInfo { Id = "Dark", DisplayName = "🌙 Тёмная", FileName = "DarkTheme" },
             new ThemeInfo { Id = "DarkBlue", DisplayName = "🌊 Тёмно-синяя", FileName = "DarkBlueTheme" },
             new ThemeInfo { Id = "DarkPurple", DisplayName = "🔮 Фиолетовая", FileName = "DarkPurpleTheme" },
+            new ThemeInfo { Id = "DarkGolden", DisplayName = "🏆 Тёмно-золотая", FileName = "DarkGoldenTheme" },
             new ThemeInfo { Id = "Light", DisplayName = "☀️ Светлая", FileName = "LightTheme" },
             new ThemeInfo { Id = "LightBlue", DisplayName = "🌤️ Светло-голубая", FileName = "LightBlueTheme" }
         };
