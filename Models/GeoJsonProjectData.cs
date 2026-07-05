@@ -15,7 +15,7 @@ namespace AGR_Project_Manager.Models
         private string _developer;
         private string _designer;
         private string _cadNum;
-        private string _fnoCode;
+        
         private string _fnoName;
         private string _zuArea;
         private string _hRelief;
@@ -70,11 +70,7 @@ namespace AGR_Project_Manager.Models
             set { _cadNum = value; OnPropertyChanged(); }
         }
 
-        public string FnoCode
-        {
-            get => _fnoCode;
-            set { _fnoCode = value; OnPropertyChanged(); }
-        }
+        
 
         public string FnoName
         {

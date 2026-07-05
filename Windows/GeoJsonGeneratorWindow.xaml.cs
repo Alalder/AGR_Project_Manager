@@ -185,6 +185,7 @@ namespace AGR_Project_Manager.Windows
             // FnoName уже сохраняется в CommonField_TextChanged через ApplyFnoNameToModels
             // здесь дополнительно убеждаемся, что сохранили текущее значение
             ApplyFnoNameToModels(FnoNameTextBox.Text);
+            ApplyFnoCodeToModels(FnoCodeTextBox.Text);
 
             // Сохраняем в проект
             _projectService.UpdateProject(_currentProject);
@@ -205,7 +206,7 @@ namespace AGR_Project_Manager.Windows
             DeveloperTextBox.Text = projectData.Developer ?? "";
             DesignerTextBox.Text = projectData.Designer ?? "";
             CadNumTextBox.Text = projectData.CadNum ?? "";
-            FnoCodeTextBox.Text = projectData.FnoCode ?? "";
+            
             ZuAreaTextBox.Text = projectData.ZuArea ?? "";
             HReliefTextBox.Text = projectData.HRelief ?? "";
             HOtnTextBox.Text = projectData.HOtn ?? "";
@@ -221,6 +222,7 @@ namespace AGR_Project_Manager.Windows
             CoordXTextBox.Text = _currentModel.CoordX ?? "";
             CoordYTextBox.Text = _currentModel.CoordY ?? "";
             FnoNameTextBox.Text = _currentModel.FnoName ?? "";
+            FnoCodeTextBox.Text = _currentModel.FnoCode ?? "";
 
             // Загружаем стёкла
             RefreshMaterialsList();
@@ -245,7 +247,7 @@ namespace AGR_Project_Manager.Windows
             projectData.Developer = ReplaceQuotes(DeveloperTextBox.Text);
             projectData.Designer = ReplaceQuotes(DesignerTextBox.Text);
             projectData.CadNum = ReplaceQuotes(CadNumTextBox.Text);
-            projectData.FnoCode = ReplaceQuotes(FnoCodeTextBox.Text);
+            
             projectData.ZuArea = ReplaceQuotes(ZuAreaTextBox.Text);
             projectData.HRelief = ReplaceQuotes(HReliefTextBox.Text);
             projectData.HOtn = ReplaceQuotes(HOtnTextBox.Text);
@@ -261,6 +263,7 @@ namespace AGR_Project_Manager.Windows
             if (_currentModel != null)
             {
                 ApplyFnoNameToModels(ReplaceQuotes(FnoNameTextBox.Text));
+                ApplyFnoCodeToModels(ReplaceQuotes(FnoCodeTextBox.Text));
             }
 
             _projectService.UpdateProject(_currentProject);
@@ -274,7 +277,16 @@ namespace AGR_Project_Manager.Windows
             if (string.IsNullOrEmpty(text))
                 return text;
 
-            return text.Replace("\"", "'");
+            // Прямые двойные + все типографские кавычки (рус./англ./нем./франц. варианты) -> одинарная '
+                       return text
+                            .Replace("\"", "'")   // прямая двойная
+                            .Replace('«', '\'')
+                            .Replace('»', '\'')
+                            .Replace('“', '\'')   // левая англ. верхняя
+                            .Replace('”', '\'')   // правая англ. верхняя
+                            .Replace('„', '\'')   // нижняя (нем./рус.)
+                            .Replace('‘', '\'')   // левая одинарная типографская
+                            .Replace('’', '\'');  // правая одинарная типографская (апостроф в Word)
         }
 
         #endregion
@@ -639,6 +651,31 @@ namespace AGR_Project_Manager.Windows
             }
         }
 
+        private void ApplyFnoCodeToModels(string fnoCode)
+        {
+            if (_currentModel == null || _currentProject == null) return;
+
+            var firstModel = _currentProject.Models.FirstOrDefault(m =>
+                !m.Name.Equals("Ground", StringComparison.OrdinalIgnoreCase));
+
+            // Правим первую модель — копируем на все обычные модели (Ground не трогаем)
+            if (firstModel == _currentModel)
+            {
+                foreach (var model in _currentProject.Models)
+                {
+                    if (!model.Name.Equals("Ground", StringComparison.OrdinalIgnoreCase))
+                    {
+                        model.FnoCode = fnoCode;
+                    }
+                }
+            }
+            else
+            {
+                // Ground или любая другая модель, кроме первой — правим только её
+                _currentModel.FnoCode = fnoCode;
+            }
+        }
+
         private void DeleteImage_Click(object sender, RoutedEventArgs e)
         {
             if (_currentModel == null) return;
@@ -719,7 +756,7 @@ namespace AGR_Project_Manager.Windows
             projectData.Developer = data.Developer;
             projectData.Designer = data.Designer;
             projectData.CadNum = data.CadNum;
-            projectData.FnoCode = data.FnoCode;
+            
             projectData.ZuArea = data.ZuArea;
             projectData.HRelief = data.HRelief;
             projectData.HOtn = data.HOtn;
@@ -736,6 +773,7 @@ namespace AGR_Project_Manager.Windows
             _currentModel.CoordY = data.CoordY;
             _currentModel.Base64Image = data.ImageBase64;
             _currentModel.FnoName = data.FnoName;
+            _currentModel.FnoCode = data.FnoCode;
 
             // Импортируем стёкла
             _currentModel.Glasses.Clear();
@@ -894,7 +932,7 @@ namespace AGR_Project_Manager.Windows
                 Developer = projectData.Developer,
                 Designer = projectData.Designer,
                 CadNum = projectData.CadNum,
-                FnoCode = projectData.FnoCode,
+               
                 // FnoName берём из модели, для Ground если пусто - используем значение по умолчанию
                 FnoName = string.IsNullOrEmpty(model.FnoName) && isGround 
                     ? "Благоустройство территории" 
