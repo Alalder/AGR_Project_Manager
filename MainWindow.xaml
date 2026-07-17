@@ -17,187 +17,298 @@
         <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
         <converters:ResolutionToBrushConverter x:Key="ResolutionToBrushConverter"/>
         <converters:ResolutionToVisibilityConverter x:Key="ResolutionToVisibilityConverter"/>
-        <!-- Стиль для кнопки Очистить -->
-        <Style x:Key="ClearButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="{DynamicResource DangerBackground}"/>
+
+        <Storyboard x:Key="ShowUtilitiesPanelStoryboard">
+            <DoubleAnimation Storyboard.TargetName="UtilitiesPanelScale" Storyboard.TargetProperty="ScaleY"
+                      From="0" To="1" Duration="0:0:0.18">
+                <DoubleAnimation.EasingFunction>
+                    <QuadraticEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="UtilitiesSidePanel" Storyboard.TargetProperty="Opacity"
+                      From="0" To="1" Duration="0:0:0.15"/>
+        </Storyboard>
+
+        <Storyboard x:Key="HideUtilitiesPanelStoryboard">
+            <DoubleAnimation Storyboard.TargetName="UtilitiesPanelScale" Storyboard.TargetProperty="ScaleY"
+                      From="1" To="0" Duration="0:0:0.15">
+                <DoubleAnimation.EasingFunction>
+                    <QuadraticEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="UtilitiesSidePanel" Storyboard.TargetProperty="Opacity"
+                      From="1" To="0" Duration="0:0:0.12"/>
+        </Storyboard>
+
+        <ContextMenu x:Key="ProjectContextMenu">
+            <MenuItem Header="✏️ Изменить" Click="EditProject_Click"
+              Tag="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                <MenuItem.Style>
+                    <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=PlacementTarget.DataContext.IsArchived, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </MenuItem.Style>
+            </MenuItem>
+            <MenuItem Header="📋 Дублировать" Click="CloneProject_Click"
+              Tag="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                <MenuItem.Style>
+                    <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=PlacementTarget.DataContext.IsArchived, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </MenuItem.Style>
+            </MenuItem>
+            <MenuItem Header="📦 В архив" Click="ArchiveProject_Click"
+              Tag="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                <MenuItem.Style>
+                    <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=PlacementTarget.DataContext.IsArchived, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </MenuItem.Style>
+            </MenuItem>
+            <MenuItem Header="♻️ Восстановить" Click="RestoreProject_Click"
+              Tag="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                <MenuItem.Style>
+                    <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=PlacementTarget.DataContext.IsArchived, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </MenuItem.Style>
+            </MenuItem>
+            <MenuItem Header="❌ Удалить навсегда" Click="DeleteProject_Click"
+              Tag="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                <MenuItem.Style>
+                    <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=PlacementTarget.DataContext.IsArchived, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </MenuItem.Style>
+            </MenuItem>
+        </ContextMenu>
+        <Style x:Key="ProjectListItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Background" Value="{DynamicResource ListItemBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundPrimary}"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="Margin" Value="0,0,0,2"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="ContextMenu" Value="{StaticResource ProjectContextMenu}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="ItemBorder"
+                        Background="{TemplateBinding Background}"
+                        BorderThickness="3,0,3,0"
+                        BorderBrush="Transparent"
+                        CornerRadius="0,4,4,0">
+                            <ContentPresenter Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource ListItemBackgroundHover}"/>
+                                <Setter TargetName="ItemBorder" Property="BorderBrush" Value="{DynamicResource BorderSecondary}"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource ListItemBackgroundSelected}"/>
+                                <Setter TargetName="ItemBorder" Property="BorderBrush" Value="{DynamicResource AccentPrimary}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль вкладки Проекты/Архив -->
+        <Style x:Key="DarkTabItemStyle" TargetType="TabItem">
+            <Setter Property="Background" Value="{DynamicResource BackgroundTertiary}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundSecondary}"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="TabBorder" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" Margin="0,0,2,0" CornerRadius="4,4,0,0">
+                            <ContentPresenter ContentSource="Header" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="TabBorder" Property="Background" Value="{DynamicResource SelectionBackground}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ForegroundPrimary}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="TabBorder" Property="Background" Value="{DynamicResource HoverBackground}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Полная замена шаблона TabControl — убирает системную белую рамку контента -->
+        <Style x:Key="DarkTabControlStyle" TargetType="TabControl">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TabPanel Grid.Row="0" IsItemsHost="True" Background="Transparent"/>
+                            <Border Grid.Row="1" Background="{DynamicResource BackgroundTertiary}"
+                            BorderBrush="{DynamicResource BorderPrimary}" BorderThickness="1" CornerRadius="0,4,4,4">
+                                <ContentPresenter ContentSource="SelectedContent"/>
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Глобальные стили ContextMenu/MenuItem/Separator под тёмную тему -->
+        <Style TargetType="ContextMenu">
+            <Setter Property="Background" Value="{DynamicResource BackgroundTertiary}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderPrimary}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="2"/>
+        </Style>
+
+        <Style TargetType="MenuItem">
             <Setter Property="Foreground" Value="{DynamicResource ForegroundPrimary}"/>
             <Setter Property="Padding" Value="10,6"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#f87171"/>
-                </Trigger>
-            </Style.Triggers>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="MenuItem">
+                        <Border x:Name="ItemBorder" Background="Transparent" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter ContentSource="Header" RecognizesAccessKey="True"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource HoverBackground}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
+
+        <Style TargetType="Separator">
+            <Setter Property="Background" Value="{DynamicResource BorderPrimary}"/>
+            <Setter Property="Height" Value="1"/>
+            <Setter Property="Margin" Value="4,2"/>
+        </Style>
+
+        <DataTemplate x:Key="ProjectItemTemplate">
+            <StackPanel Margin="2">
+                <TextBlock Text="{Binding Name}" 
+                   Foreground="{DynamicResource ForegroundPrimary}" 
+                   FontWeight="SemiBold"
+                   TextTrimming="CharacterEllipsis"/>
+                <TextBlock Text="{Binding Description}" 
+                   Foreground="{DynamicResource ForegroundTertiary}" 
+                   FontSize="11"
+                   TextTrimming="CharacterEllipsis"
+                   Visibility="{Binding Description, Converter={StaticResource NullToVisibilityConverter}}"/>
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- Для TabControl, где реальный контент вкладок не используется (переключение обрабатывается в code-behind) -->
+        <Style x:Key="HeaderOnlyTabControlStyle" TargetType="TabControl">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <TabPanel IsItemsHost="True" Background="Transparent"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </Window.Resources>
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="240"/>
+            <ColumnDefinition x:Name="ProjectsPanelColumn" Width="240"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <!-- ===== ЛЕВАЯ ПАНЕЛЬ ===== -->
-        <Border Grid.Column="0" Background="{DynamicResource BackgroundSecondary}">
+        <Border x:Name="ProjectsPanelExpanded" Grid.Column="0" Background="{DynamicResource BackgroundSecondary}"
+        BorderBrush="{DynamicResource BorderPrimary}" BorderThickness="0,0,1,0">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <Button x:Name="NewProjectBtn" 
-                        Content="➕ Новый проект" 
-                        Background="{DynamicResource AccentPrimary}" 
-                        Foreground="{DynamicResource ForegroundPrimary}" 
-                        Margin="10" 
-                        Padding="10,8"
-                        FontWeight="SemiBold"
-                        Cursor="Hand"
-                        Click="NewProjectBtn_Click"/>
+                <Grid Grid.Row="0" Margin="10,10,10,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="NewProjectBtn" 
+                    Style="{StaticResource PrimaryActionButtonStyle}"
+                    Click="NewProjectBtn_Click">
+                        ✚ Новый проект
+                    </Button>
+                    <Button Grid.Column="1" Content="◀" Width="36" Height="36" Padding="0"
+                            Style="{StaticResource DisableableButtonStyle}"
+                            Margin="6,0,0,0"
+                            FontSize="12"
+                            Click="ToggleProjectsPanel_Click"
+                            ToolTip="Свернуть панель"/>
+                </Grid>
 
-                <ListBox x:Name="ProjectsList" 
-                         Grid.Row="1" 
-                         Background="{DynamicResource BackgroundTertiary}" 
-                         BorderBrush="{DynamicResource BorderPrimary}" 
-                         BorderThickness="1" 
-                         Margin="10,0,10,10"
+                <TabControl Grid.Row="1" Margin="10"
+            Style="{StaticResource DarkTabControlStyle}"
+            ItemContainerStyle="{StaticResource DarkTabItemStyle}">
+                    <TabItem Header="Проекты">
+                        <ListBox x:Name="ActiveProjectsList"
+                         Background="{DynamicResource BackgroundTertiary}"
+                         BorderBrush="{DynamicResource BorderPrimary}"
+                         BorderThickness="1"
+                         ItemContainerStyle="{StaticResource ProjectListItemStyle}"
+                         ItemTemplate="{StaticResource ProjectItemTemplate}"
                          SelectionChanged="ProjectsList_SelectionChanged"
-                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                    <ListBox.ItemContainerStyle>
-                        <Style TargetType="ListBoxItem">
-                            <Setter Property="Background" Value="{DynamicResource ListItemBackground}"/>
-                            <Setter Property="Foreground" Value="{DynamicResource ForegroundPrimary}"/>
-                            <Setter Property="Padding" Value="8"/>
-                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                            <Style.Triggers>
-                                <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Background" Value="{DynamicResource ListItemBackgroundSelected}"/>
-                                </Trigger>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="{DynamicResource ListItemBackgroundHover}"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ListBox.ItemContainerStyle>
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="{Binding Name}" 
-                                           Foreground="{DynamicResource ForegroundPrimary}" 
-                                           VerticalAlignment="Center"
-                                           TextTrimming="CharacterEllipsis"/>
-                                <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                    <Button Content="✏️" Tag="{Binding}" 
-                                            Background="{DynamicResource ButtonBackground}" 
-                                            Foreground="{DynamicResource ForegroundPrimary}" 
-                                            Margin="2" Padding="6,4" FontSize="10"
-                                            ToolTip="Редактировать" Click="EditProject_Click"/>
-                                    <Button Content="📋" Tag="{Binding}" 
-                                            Background="{DynamicResource ButtonBackground}" 
-                                            Foreground="{DynamicResource ForegroundPrimary}" 
-                                            Margin="2" Padding="6,4" FontSize="10"
-                                            ToolTip="Дублировать" Click="CloneProject_Click"/>
-                                    <Button Content="❌" Tag="{Binding}" 
-                                            Background="{DynamicResource DangerBackground}" 
-                                            Foreground="{DynamicResource ForegroundPrimary}" 
-                                            Margin="2" Padding="6,4" FontSize="10"
-                                            ToolTip="Удалить" Click="DeleteProject_Click"/>
-                                </StackPanel>
-                            </Grid>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-
-                <!-- Блок "Утилиты" -->
-                <Border Grid.Row="2" Background="{DynamicResource BackgroundTertiary}" 
-        BorderBrush="{DynamicResource BorderPrimary}" 
-        BorderThickness="1" Margin="10,0,10,10" Padding="8">
-                    <StackPanel>
-                        <TextBlock Text="🔧 Утилиты" 
-                   Foreground="{DynamicResource ForegroundSecondary}" 
-                   FontSize="12" 
-                   FontWeight="SemiBold" Margin="0,0,0,8"/>
-
-                        <!-- Выбор темы -->
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                            <TextBlock Text="🎨 Тема:" 
-               Foreground="{DynamicResource ForegroundSecondary}"
-               VerticalAlignment="Center"
-               Margin="0,0,8,0"/>
-                            <ComboBox x:Name="ThemeComboBox"
-              Width="144"
-              SelectionChanged="ThemeComboBox_SelectionChanged">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding DisplayName}" 
-                           Foreground="{DynamicResource ForegroundPrimary}"/>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-                        </StackPanel>
-
-                        <Separator Background="{DynamicResource BorderPrimary}" Margin="0,4"/>
-
-                        <Button Content="🖼️ Texture Manager" 
-                                Background="{DynamicResource ButtonBackground}" 
-                                Foreground="{DynamicResource ForegroundPrimary}" 
-                                Margin="0,0,0,6" Padding="8,6" Cursor="Hand"
-                                FontWeight="SemiBold"
-                                Click="TextureManagerBtn_Click"/>
-
-                        <Button Content="🎨 RAL Colors" 
-                                Background="{DynamicResource ButtonBackground}" 
-                                Foreground="{DynamicResource ForegroundPrimary}" 
-                                Margin="0,0,0,6" Padding="8,6" Cursor="Hand" 
-                                Click="RalColorsBtn_Click"/>
-                        <Button Content="🔤 Name Generator" 
-                                Background="{DynamicResource ButtonBackground}" 
-                                Foreground="{DynamicResource ForegroundPrimary}" 
-                                Margin="0,0,0,6" Padding="8,6" Cursor="Hand" 
-                                Click="NameGeneratorBtn_Click"/>
-                        <Button Content="📁 Создать папку проекта" 
-                                Background="{DynamicResource ButtonBackground}" 
-                                Foreground="{DynamicResource ForegroundPrimary}" 
-                                Margin="0,0,0,6" Padding="8,6" Cursor="Hand" 
-                                Click="CreateFolderBtn_Click"/>
-                        <Button Content="🌍 GeoJSON Generator" 
-                                Background="{DynamicResource ButtonBackground}" 
-                                Foreground="{DynamicResource ForegroundPrimary}" 
-                                Margin="0,0,0,6" Padding="8,6" Cursor="Hand" 
-                                Click="GeoJsonBtn_Click"/>
-                        <Button Content="📄 PDF → Image" 
-                                Background="{DynamicResource ButtonBackground}" 
-                                Foreground="{DynamicResource ForegroundPrimary}" 
-                                Margin="0,0,0,6" Padding="8,6" Cursor="Hand"
-                                ToolTip="Конвертировать PDF в PNG изображения"
-                                Click="PdfConverterBtn_Click"/>
-                        <Button Content="🌍 WGS → МСК-77" 
-                                Background="{DynamicResource ButtonBackground}" 
-                                Foreground="{DynamicResource ForegroundPrimary}" 
-                                Margin="0,0,0,6" Padding="8,6" Cursor="Hand"
-                                ToolTip="Конвертер координат WGS84 → МСК-77"
-                                Click="CoordinateConverterBtn_Click"/>
-
-                        <Separator Background="{DynamicResource BorderPrimary}" Margin="0,4"/>
-
-                        <Button Content="📖 Справка" 
-                                Background="{DynamicResource ButtonBackground}" 
-                                Foreground="{DynamicResource ForegroundPrimary}" 
-                                Margin="0,6,0,6" Padding="8,6" Cursor="Hand" 
-                                Click="HelpBtn_Click"/>
-                        <Button Content="📋 Актуальные требования" 
-                                Background="{DynamicResource ButtonBackground}" 
-                                Foreground="{DynamicResource ForegroundPrimary}" 
-                                Margin="0,0,0,0" Padding="8,6" Cursor="Hand" 
-                                Click="RequirementsBtn_Click"/>
-                    </StackPanel>
-                </Border>
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
+                    </TabItem>
+                    <TabItem Header="Архив">
+                        <ListBox x:Name="ArchivedProjectsList"
+                         Background="{DynamicResource BackgroundTertiary}"
+                         BorderBrush="{DynamicResource BorderPrimary}"
+                         BorderThickness="1"
+                         ItemContainerStyle="{StaticResource ProjectListItemStyle}"
+                         ItemTemplate="{StaticResource ProjectItemTemplate}"
+                         SelectionChanged="ProjectsList_SelectionChanged"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
+                    </TabItem>
+                </TabControl>
             </Grid>
+        </Border>
+
+        <Border x:Name="ProjectsPanelCollapsedBar" Grid.Column="0" Background="{DynamicResource BackgroundSecondary}" 
+        BorderBrush="{DynamicResource BorderPrimary}" BorderThickness="0,0,1,0" Visibility="Collapsed">
+            <Button Content="▶" Width="36" Height="36" Padding="0" 
+                    Margin="4,10,0,0" VerticalAlignment="Top"
+                    Style="{StaticResource DisableableButtonStyle}"
+                    FontSize="12"
+                    Click="ToggleProjectsPanel_Click"
+                    ToolTip="Развернуть панель проектов"/>
         </Border>
 
         <!-- ===== ПРАВАЯ ПАНЕЛЬ ===== -->
@@ -220,33 +331,27 @@
                     </Grid.RowDefinitions>
 
                     <!-- Заголовок проекта -->
-                    <Border Grid.Row="0" Background="{DynamicResource BackgroundSecondary}" Padding="15,10">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel>
-                                <TextBlock x:Name="ProjectTitle" FontSize="20" FontWeight="Bold" 
-                                           Foreground="{DynamicResource ForegroundPrimary}"/>
-                                <TextBlock x:Name="ProjectDescription" 
-                                           Foreground="{DynamicResource ForegroundTertiary}" 
-                                           FontSize="12" Margin="0,4,0,0"/>
-                            </StackPanel>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                <Button Content="➕ Добавить модель" 
-                                        Background="{DynamicResource AccentPrimary}" 
-                                        Foreground="{DynamicResource ForegroundPrimary}" 
-                                        Padding="12,6" Margin="5,0" Click="AddModel_Click"/>
-                            </StackPanel>
-                        </Grid>
+                    <Border Grid.Row="0" Background="{DynamicResource BackgroundSecondary}" 
+                    Margin="10,10,10,0" CornerRadius="8" Padding="15,10">
+                        <StackPanel>
+                            <TextBlock x:Name="ProjectTitle" FontSize="20" FontWeight="Bold" 
+                   Foreground="{DynamicResource ForegroundPrimary}"/>
+                            <TextBlock x:Name="ProjectDescription" 
+                   Foreground="{DynamicResource ForegroundTertiary}" 
+                   FontSize="12" Margin="0,4,0,0"/>
+                        </StackPanel>
                     </Border>
 
                     <!-- Вкладки моделей -->
-                    <TabControl x:Name="ModelsTabControl" Grid.Row="1" Background="Transparent" 
-                                BorderThickness="0" Margin="10,10,10,0"
-                                SelectionChanged="ModelsTabControl_SelectionChanged">
-                        <TabControl.ItemContainerStyle>
+                    <Grid Grid.Row="1" Margin="10,10,10,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TabControl x:Name="ModelsTabControl" Grid.Column="0" 
+                                    Style="{StaticResource HeaderOnlyTabControlStyle}"
+                                    SelectionChanged="ModelsTabControl_SelectionChanged">
+                            <TabControl.ItemContainerStyle>
                             <Style TargetType="TabItem">
                                 <Setter Property="Background" Value="{DynamicResource BackgroundTertiary}"/>
                                 <Setter Property="Foreground" Value="{DynamicResource ForegroundSecondary}"/>
@@ -260,7 +365,8 @@
                                                     Padding="{TemplateBinding Padding}" 
                                                     Margin="0,0,2,0"
                                                     CornerRadius="4,4,0,0">
-                                                <StackPanel Orientation="Horizontal">
+                                                    <Grid>
+                                                        <StackPanel x:Name="NormalContent" Orientation="Horizontal">
                                                     <TextBlock Text="{Binding Name}" VerticalAlignment="Center" 
                                                                Margin="0,0,5,0"/>
                                                     <Button Content="✏️" FontSize="10" Background="Transparent" 
@@ -279,9 +385,23 @@
                                                             ToolTip="Удалить" Tag="{Binding}"
                                                             Click="RemoveModel_Click"/>
                                                 </StackPanel>
-                                            </Border>
+                                                        <TextBlock x:Name="AddTabContent" Text="➕" FontWeight="Bold" FontSize="13"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                           Visibility="Collapsed"/> 
+                                                    </Grid>
+                                                </Border>
                                             <ControlTemplate.Triggers>
-                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Trigger Property="Tag" Value="ADD_MODEL_TAB">
+                                                        <Setter TargetName="NormalContent" Property="Visibility" Value="Collapsed"/>
+                                                        <Setter TargetName="AddTabContent" Property="Visibility" Value="Visible"/>
+                                                    </Trigger>
+                                                    <Trigger Property="Tag" Value="ADD_MODEL_TAB">
+                                                        <Setter TargetName="NormalContent" Property="Visibility" Value="Collapsed"/>
+                                                        <Setter TargetName="AddTabContent" Property="Visibility" Value="Visible"/>
+                                                        <Setter TargetName="Border" Property="Background" Value="{DynamicResource AccentPrimary}"/>
+                                                        <Setter Property="Foreground" Value="{DynamicResource ForegroundPrimary}"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsSelected" Value="True">
                                                     <Setter TargetName="Border" Property="Background" 
                                                             Value="{DynamicResource SelectionBackground}"/>
                                                     <Setter Property="Foreground" 
@@ -297,11 +417,13 @@
                                 </Setter>
                             </Style>
                         </TabControl.ItemContainerStyle>
-                    </TabControl>
+                        </TabControl>
+                        
+                    </Grid>
 
                     <!-- Панель UDIM -->
                     <Border Grid.Row="2" Background="{DynamicResource BackgroundSecondary}" 
-                            Margin="10" CornerRadius="8">
+                        Margin="10,4,10,10" CornerRadius="8">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -321,25 +443,30 @@
                                     <!-- Верхняя строка -->
                                     <StackPanel Grid.Row="0" Orientation="Horizontal">
                                         <Button Content="➕ Добавить ряд" 
-                                                Background="{DynamicResource ButtonBackground}" 
-                                                Foreground="{DynamicResource ForegroundPrimary}" 
-                                                Padding="10,6" Margin="0,0,10,0" Click="AddUdimRow_Click"/>
+        Style="{StaticResource TintedOutlineButtonStyle}"
+        Foreground="{DynamicResource TextureErmAccent}"
+        BorderBrush="{DynamicResource TextureErm}"
+        Margin="0,0,10,0" Click="AddUdimRow_Click"/>
                                         <Button Content="➖ Удалить верхний ряд" 
-                                                Background="{DynamicResource ButtonBackground}" 
-                                                Foreground="{DynamicResource ForegroundPrimary}" 
-                                                Padding="10,6" Margin="0,0,10,0" Click="RemoveUdimRow_Click"/>
+        Style="{StaticResource TintedOutlineButtonStyle}"
+        Foreground="{DynamicResource Resolution1K}"
+        BorderBrush="{DynamicResource Resolution1K}"
+        Margin="0,0,10,0" Click="RemoveUdimRow_Click"/>
                                         <Separator Width="1" Background="{DynamicResource BorderSecondary}" Margin="10,0"/>
                                         <Button x:Name="CopyTileBtn" Content="📋 Копировать" 
-                                                Background="{DynamicResource ButtonBackground}" 
-                                                Foreground="{DynamicResource ForegroundPrimary}" 
-                                                Padding="10,6" Margin="0,0,5,0" Click="CopyTile_Click"/>
+        Style="{StaticResource TintedOutlineButtonStyle}"
+        Foreground="{DynamicResource TextureNormalAccent}"
+        BorderBrush="{DynamicResource TextureNormal}"
+        Margin="0,0,5,0" Click="CopyTile_Click"/>
                                         <Button x:Name="PasteTileBtn" Content="📥 Вставить" 
-                                                Padding="10,6" Click="PasteTile_Click"
-                                                Style="{StaticResource DisableableButtonStyle}"/>
+        Style="{StaticResource TintedOutlineButtonStyle}"
+        Foreground="{DynamicResource TextureNormalAccent}"
+        BorderBrush="{DynamicResource TextureNormal}"
+        Margin="0,0,5,0" Click="PasteTile_Click"/>
                                         <Button x:Name="ClearTileBtn" Content="🗑️ Очистить" 
-                                                Padding="10,6" Click="ClearTile_Click"
-                                                Style="{StaticResource ClearButtonStyle}"/>     
-                                    </StackPanel>
+            Style="{StaticResource DangerActionButtonStyle}"
+            Click="ClearTile_Click"/>
+</StackPanel>
 
                                     <!-- Строка пресетов -->
                                     <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,10,0,0">
@@ -347,37 +474,22 @@
                                                    Foreground="{DynamicResource ForegroundTertiary}" 
                                                    VerticalAlignment="Center" Margin="0,0,10,0"/>
                                         <Button Content="➕ Сохранить как пресет" 
-                                                Background="{DynamicResource AccentTertiary}" 
-                                                Foreground="{DynamicResource ForegroundPrimary}" 
-                                                Padding="10,6" Margin="0,0,10,0" Click="SavePreset_Click"/>
-                                        <ComboBox x:Name="PresetComboBox" 
-                                                  Width="200" 
-                                                  Margin="0,0,10,0"
-                                                  DisplayMemberPath="Name"
-                                                  SelectionChanged="PresetComboBox_SelectionChanged"/>
+        Style="{StaticResource PrimaryActionButtonStyle}"
+        Margin="0,0,10,0" Click="SavePreset_Click"/>
+<ComboBox x:Name="PresetComboBox" 
+          Width="200" 
+          Margin="0,0,10,0"
+          DisplayMemberPath="Name"
+          SelectionChanged="PresetComboBox_SelectionChanged"/>
                                         <Button x:Name="ApplyPresetBtn" Content="📥 Применить" 
-                                                Padding="10,6" Margin="0,0,5,0" Click="ApplyPreset_Click"
-                                                Style="{StaticResource DisableableButtonStyle}"/>
+        Style="{StaticResource TintedOutlineButtonStyle}"
+        Foreground="{DynamicResource TextureErmAccent}"
+        BorderBrush="{DynamicResource TextureErm}"
+        Margin="0,0,5,0" Click="ApplyPreset_Click"/>
                                         <Button x:Name="DeletePresetBtn" Content="🗑️" 
-                                                Padding="8,6" ToolTip="Удалить пресет" Click="DeletePreset_Click">
-                                            <Button.Style>
-                                                <Style TargetType="Button">
-                                                    <Setter Property="Background" 
-                                                            Value="{DynamicResource ButtonBackgroundDisabled}"/>
-                                                    <Setter Property="Foreground" 
-                                                            Value="{DynamicResource ForegroundDisabled}"/>
-                                                    <Setter Property="IsEnabled" Value="False"/>
-                                                    <Style.Triggers>
-                                                        <Trigger Property="IsEnabled" Value="True">
-                                                            <Setter Property="Background" 
-                                                                    Value="{DynamicResource DangerButtonBackground}"/>
-                                                            <Setter Property="Foreground" 
-                                                                    Value="{DynamicResource ForegroundPrimary}"/>
-                                                        </Trigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Button.Style>
-                                        </Button>
+        Style="{StaticResource DangerActionButtonStyle}"
+        Padding="8,6" ToolTip="Удалить пресет" 
+        IsEnabled="False" Click="DeletePreset_Click"/>
                                     </StackPanel>
 
                                     <!-- Нижняя строка - шаблон имени файла -->
@@ -418,21 +530,15 @@
                                                     <DataTemplate>
                                                         <!-- Один UDIM тайл -->
                                                         <Border Background="{DynamicResource BackgroundTertiary}" 
-        BorderBrush="{DynamicResource BorderPrimary}" 
-        BorderThickness="1" 
-        Margin="3" 
-        CornerRadius="6"
-        MouseLeftButtonDown="UdimTile_MouseDown"
-        Cursor="Hand"
-        Focusable="False">
+                                                        Margin="3" 
+                                                        CornerRadius="6"
+                                                        MouseLeftButtonDown="UdimTile_MouseDown"
+                                                        Cursor="Hand"
+                                                        Focusable="False">
                                                             <Border.Style>
                                                                 <Style TargetType="Border">
-                                                                    <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding HasAnyTexture}" Value="True">
-                                                                            <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimary}"/>
-                                                                            <Setter Property="BorderThickness" Value="2"/>
-                                                                        </DataTrigger>
-                                                                    </Style.Triggers>
+                                                                    <Setter Property="BorderBrush" Value="{DynamicResource BorderPrimary}"/>
+                                                                    <Setter Property="BorderThickness" Value="1"/>
                                                                 </Style>
                                                             </Border.Style>
 
@@ -489,44 +595,57 @@
                                                                         <StackPanel Grid.Column="0" Margin="1">
                                                                             <!-- Кнопка D -->
                                                                             <Border Tag="Diffuse"
-                            CornerRadius="3"
-                            Padding="4,2"
-                            Cursor="Hand"
-                            MouseLeftButtonDown="TextureZone_Click"
-                            ToolTip="{Binding DiffusePath}">
+                                                                                    CornerRadius="3"
+                                                                                    Padding="4,2"
+                                                                                    BorderThickness="2,0,0,0"
+                                                                                    Cursor="Hand"
+                                                                                    MouseLeftButtonDown="TextureZone_Click"
+                                                                                    ToolTip="{Binding DiffusePath}">        
                                                                                 <Border.Style>
                                                                                     <Style TargetType="Border">
                                                                                         <Setter Property="Background" Value="{DynamicResource TextureZoneEmpty}"/>
+                                                                                        <Setter Property="BorderBrush" Value="{DynamicResource BorderSecondary}"/>
                                                                                         <Style.Triggers>
                                                                                             <DataTrigger Binding="{Binding HasDiffuse}" Value="True">
-                                                                                                <Setter Property="Background" Value="{DynamicResource TextureDiffuse}"/>
+                                                                                                <Setter Property="BorderBrush" Value="{DynamicResource TextureDiffuse}"/>
                                                                                             </DataTrigger>
                                                                                             <Trigger Property="IsMouseOver" Value="True">
                                                                                                 <Setter Property="Background" Value="{DynamicResource TextureDiffuseHover}"/>
+                                                                                                <Setter Property="Opacity" Value="0.85"/>
                                                                                             </Trigger>
                                                                                         </Style.Triggers>
                                                                                     </Style>
                                                                                 </Border.Style>
                                                                                 <TextBlock Text="D" 
-                                   Foreground="{DynamicResource ForegroundPrimary}"
-                                   FontWeight="Bold"
-                                   FontSize="11"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"/>
+                                                                                           FontWeight="Bold"
+                                                                                           FontSize="11"
+                                                                                           HorizontalAlignment="Center"
+                                                                                           VerticalAlignment="Center">  
+                                                                                    <TextBlock.Style>
+                                                                                        <Style TargetType="TextBlock">
+                                                                                            <Setter Property="Foreground" Value="{DynamicResource ForegroundTertiary}"/>
+                                                                                            <Style.Triggers>
+                                                                                                <DataTrigger Binding="{Binding HasDiffuse}" Value="True">
+                                                                                                    <Setter Property="Foreground" Value="{DynamicResource TextureDiffuseAccent}"/>
+                                                                                                </DataTrigger>
+                                                                                            </Style.Triggers>
+                                                                                        </Style>
+                                                                                    </TextBlock.Style>
+                                                                                </TextBlock>
                                                                             </Border>
 
                                                                             <!-- Индикатор разрешения Diffuse -->
                                                                             <Border Margin="0,2,0,0"
-                            CornerRadius="2"
-                            Padding="3,1"
-                            Background="{Binding DiffuseResolution, Converter={StaticResource ResolutionToBrushConverter}}"
-                            Visibility="{Binding DiffuseResolution, Converter={StaticResource ResolutionToVisibilityConverter}}"
-                            HorizontalAlignment="Center">
+                                                                                    CornerRadius="2"
+                                                                                    Padding="3,1"
+                                                                                    Background="{Binding DiffuseResolution, Converter={StaticResource ResolutionToBrushConverter}}"
+                                                                                    Visibility="{Binding DiffuseResolution, Converter={StaticResource ResolutionToVisibilityConverter}}"
+                                                                                    HorizontalAlignment="Center">
                                                                                 <TextBlock Text="{Binding DiffuseResolution}"
-                                   Foreground="{DynamicResource ForegroundPrimary}"
-                                   FontSize="8"
-                                   FontWeight="Bold"
-                                   HorizontalAlignment="Center"/>
+                                                                                           Foreground="{DynamicResource ForegroundPrimary}"
+                                                                                           FontSize="8"
+                                                                                           FontWeight="Bold"
+                                                                                           HorizontalAlignment="Center"/>
                                                                             </Border>
                                                                         </StackPanel>
 
@@ -534,44 +653,57 @@
                                                                         <StackPanel Grid.Column="1" Margin="1">
                                                                             <!-- Кнопка E -->
                                                                             <Border Tag="ERM"
-                            CornerRadius="3"
-                            Padding="4,2"
-                            Cursor="Hand"
-                            MouseLeftButtonDown="TextureZone_Click"
-                            ToolTip="{Binding ErmPath}">
+        CornerRadius="3"
+        Padding="4,2"
+        BorderThickness="2,0,0,0"
+        Cursor="Hand"
+        MouseLeftButtonDown="TextureZone_Click"
+        ToolTip="{Binding ErmPath}">
                                                                                 <Border.Style>
                                                                                     <Style TargetType="Border">
                                                                                         <Setter Property="Background" Value="{DynamicResource TextureZoneEmpty}"/>
+                                                                                        <Setter Property="BorderBrush" Value="{DynamicResource BorderSecondary}"/>
                                                                                         <Style.Triggers>
                                                                                             <DataTrigger Binding="{Binding HasErm}" Value="True">
-                                                                                                <Setter Property="Background" Value="{DynamicResource TextureErm}"/>
+                                                                                                <Setter Property="BorderBrush" Value="{DynamicResource TextureErm}"/>
                                                                                             </DataTrigger>
                                                                                             <Trigger Property="IsMouseOver" Value="True">
                                                                                                 <Setter Property="Background" Value="{DynamicResource TextureErmHover}"/>
+                                                                                                <Setter Property="Opacity" Value="0.85"/>
                                                                                             </Trigger>
                                                                                         </Style.Triggers>
                                                                                     </Style>
                                                                                 </Border.Style>
                                                                                 <TextBlock Text="E" 
-                                   Foreground="{DynamicResource ForegroundPrimary}"
-                                   FontWeight="Bold"
-                                   FontSize="11"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"/>
+               FontWeight="Bold"
+               FontSize="11"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center">
+                                                                                    <TextBlock.Style>
+                                                                                        <Style TargetType="TextBlock">
+                                                                                            <Setter Property="Foreground" Value="{DynamicResource ForegroundTertiary}"/>
+                                                                                            <Style.Triggers>
+                                                                                                <DataTrigger Binding="{Binding HasErm}" Value="True">
+                                                                                                    <Setter Property="Foreground" Value="{DynamicResource TextureErmAccent}"/>
+                                                                                                </DataTrigger>
+                                                                                            </Style.Triggers>
+                                                                                        </Style>
+                                                                                    </TextBlock.Style>
+                                                                                </TextBlock>
                                                                             </Border>
 
                                                                             <!-- Индикатор разрешения ERM -->
                                                                             <Border Margin="0,2,0,0"
-                            CornerRadius="2"
-                            Padding="3,1"
-                            Background="{Binding ErmResolution, Converter={StaticResource ResolutionToBrushConverter}}"
-                            Visibility="{Binding ErmResolution, Converter={StaticResource ResolutionToVisibilityConverter}}"
-                            HorizontalAlignment="Center">
+                                                                                    CornerRadius="2"
+                                                                                    Padding="3,1"
+                                                                                    Background="{Binding ErmResolution, Converter={StaticResource ResolutionToBrushConverter}}"
+                                                                                    Visibility="{Binding ErmResolution, Converter={StaticResource ResolutionToVisibilityConverter}}"
+                                                                                    HorizontalAlignment="Center">
                                                                                 <TextBlock Text="{Binding ErmResolution}"
-                                   Foreground="{DynamicResource ForegroundPrimary}"
-                                   FontSize="8"
-                                   FontWeight="Bold"
-                                   HorizontalAlignment="Center"/>
+                                                                                           Foreground="{DynamicResource ForegroundPrimary}"
+                                                                                           FontSize="8"
+                                                                                           FontWeight="Bold"
+                                                                                           HorizontalAlignment="Center"/>
                                                                             </Border>
                                                                         </StackPanel>
 
@@ -579,58 +711,71 @@
                                                                         <StackPanel Grid.Column="2" Margin="1">
                                                                             <!-- Кнопка N -->
                                                                             <Border Tag="Normal"
-                            CornerRadius="3"
-                            Padding="4,2"
-                            Cursor="Hand"
-                            MouseLeftButtonDown="TextureZone_Click"
-                            ToolTip="{Binding NormalPath}">
+        CornerRadius="3"
+        Padding="4,2"
+        BorderThickness="2,0,0,0"
+        Cursor="Hand"
+        MouseLeftButtonDown="TextureZone_Click"
+        ToolTip="{Binding NormalPath}">
                                                                                 <Border.Style>
                                                                                     <Style TargetType="Border">
                                                                                         <Setter Property="Background" Value="{DynamicResource TextureZoneEmpty}"/>
+                                                                                        <Setter Property="BorderBrush" Value="{DynamicResource BorderSecondary}"/>
                                                                                         <Style.Triggers>
                                                                                             <DataTrigger Binding="{Binding HasNormal}" Value="True">
-                                                                                                <Setter Property="Background" Value="{DynamicResource TextureNormal}"/>
+                                                                                                <Setter Property="BorderBrush" Value="{DynamicResource TextureNormal}"/>
                                                                                             </DataTrigger>
                                                                                             <Trigger Property="IsMouseOver" Value="True">
                                                                                                 <Setter Property="Background" Value="{DynamicResource TextureNormalHover}"/>
+                                                                                                <Setter Property="Opacity" Value="0.85"/>
                                                                                             </Trigger>
                                                                                         </Style.Triggers>
                                                                                     </Style>
                                                                                 </Border.Style>
                                                                                 <TextBlock Text="N" 
-                                   Foreground="{DynamicResource ForegroundPrimary}"
-                                   FontWeight="Bold"
-                                   FontSize="11"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"/>
+               FontWeight="Bold"
+               FontSize="11"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center">
+                                                                                    <TextBlock.Style>
+                                                                                        <Style TargetType="TextBlock">
+                                                                                            <Setter Property="Foreground" Value="{DynamicResource ForegroundTertiary}"/>
+                                                                                            <Style.Triggers>
+                                                                                                <DataTrigger Binding="{Binding HasNormal}" Value="True">
+                                                                                                    <Setter Property="Foreground" Value="{DynamicResource TextureNormalAccent}"/>
+                                                                                                </DataTrigger>
+                                                                                            </Style.Triggers>
+                                                                                        </Style>
+                                                                                    </TextBlock.Style>
+                                                                                </TextBlock>
                                                                             </Border>
 
                                                                             <!-- Индикатор разрешения Normal -->
                                                                             <Border Margin="0,2,0,0"
-                            CornerRadius="2"
-                            Padding="3,1"
-                            Background="{Binding NormalResolution, Converter={StaticResource ResolutionToBrushConverter}}"
-                            Visibility="{Binding NormalResolution, Converter={StaticResource ResolutionToVisibilityConverter}}"
-                            HorizontalAlignment="Center">
+                                                                                    CornerRadius="2"
+                                                                                    Padding="3,1"
+                                                                                    Background="{Binding NormalResolution, Converter={StaticResource ResolutionToBrushConverter}}"
+                                                                                    Visibility="{Binding NormalResolution, Converter={StaticResource ResolutionToVisibilityConverter}}"
+                                                                                    HorizontalAlignment="Center">
                                                                                 <TextBlock Text="{Binding NormalResolution}"
-                                   Foreground="{DynamicResource ForegroundPrimary}"
-                                   FontSize="8"
-                                   FontWeight="Bold"
-                                   HorizontalAlignment="Center"/>
+                                                                                           Foreground="{DynamicResource ForegroundPrimary}"
+                                                                                           FontSize="8"
+                                                                                           FontWeight="Bold"
+                                                                                           HorizontalAlignment="Center"/>
                                                                             </Border>
                                                                         </StackPanel>
                                                                     </Grid>
 
                                                                     <!-- Номер UDIM (внизу) -->
                                                                     <Border Grid.Row="3" 
-                    Background="{DynamicResource BackgroundPrimary}" 
-                    CornerRadius="3" 
-                    Padding="6,2"
-                    HorizontalAlignment="Center">
+                                                                            Background="{DynamicResource BackgroundPrimary}" 
+                                                                            CornerRadius="3" 
+                                                                            Padding="6,2"
+                                                                            HorizontalAlignment="Center">
                                                                         <TextBlock Text="{Binding UdimNumber}" 
-                           Foreground="{DynamicResource ForegroundTertiary}" 
-                           FontSize="10"
-                           FontWeight="Bold"/>
+                                                                                   Foreground="{DynamicResource ForegroundTertiary}" 
+                                                                                   FontSize="10"
+                                                                                   FontWeight="Bold"/>
                                                                     </Border>
                                                                 </Grid>
                                                             </Grid>
@@ -644,6 +789,8 @@
                             </ScrollViewer>
                         </Grid>
                     </Border>
+
+
 
                     <!-- Панель экспорта -->
                     <Border Grid.Row="3" Background="{DynamicResource BackgroundSecondary}" 
@@ -670,28 +817,86 @@
                             </StackPanel>
 
                             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                <Button Content="📤 Экспорт текущей модели" 
-                                        Background="{DynamicResource AccentPrimary}" 
-                                        Foreground="{DynamicResource ForegroundPrimary}" 
-                                        Padding="15,8" Margin="0,0,10,0" FontWeight="SemiBold"
-                                        Click="ExportCurrentModel_Click"/>
                                 <Button x:Name="ExportSelectedUdimBtn"
-                                        Content="📤 Экспорт выбранного UDIM" 
-                                        Background="{DynamicResource AccentTertiary}" 
-                                        Foreground="{DynamicResource ForegroundPrimary}" 
-                                        Padding="15,8" Margin="0,0,10,0" FontWeight="SemiBold"
-                                        Click="ExportSelectedUdim_Click"
-                                        IsEnabled="False"/>
-                                <Button Content="📤 Экспорт всех моделей" 
-                                        Background="{DynamicResource AccentSecondary}" 
-                                        Foreground="{DynamicResource ForegroundPrimary}" 
-                                        Padding="15,8" FontWeight="SemiBold"
-                                        Click="ExportAllModels_Click"/>
+                    Content="📤 Выбранный UDIM" 
+                    Style="{StaticResource SecondaryActionButtonStyle}"
+                    Margin="0,0,10,0"
+                    Click="ExportSelectedUdim_Click"
+                    IsEnabled="False"/>
+                                        <Button Content="📤 Все модели" 
+                    Style="{StaticResource SecondaryActionButtonStyle}"
+                    Margin="0,0,10,0"
+                    Click="ExportAllModels_Click"/>
+                                        <Button Content="📤 Экспорт текущей модели" 
+                    Style="{StaticResource PrimaryActionButtonStyle}"
+                    Click="ExportCurrentModel_Click"/>
                             </StackPanel>
                         </Grid>
                     </Border>
                 </Grid>
             </Grid>
         </Border>
+
+        <StackPanel Orientation="Horizontal"
+            Grid.ColumnSpan="2"
+            HorizontalAlignment="Right" VerticalAlignment="Top"
+            Margin="0,8,10,0" Panel.ZIndex="100">
+            <TextBlock Text="🎨 Тема:" Foreground="{DynamicResource ForegroundSecondary}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <ComboBox x:Name="ThemeComboBox" Width="140" Margin="0,0,8,0"
+              VerticalAlignment="Center"
+              SelectionChanged="ThemeComboBox_SelectionChanged">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding DisplayName}" Foreground="{DynamicResource ForegroundPrimary}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <Button x:Name="UtilitiesToggle" Content="🔧 Утилиты" 
+                    Height="32"
+                    Width="260"
+        Style="{StaticResource TintedOutlineButtonStyle}"
+        ToolTip="Утилиты"
+        Foreground="{DynamicResource TextureErmAccent}"
+        BorderBrush="{DynamicResource TextureErm}"
+        Click="UtilitiesToggle_Click"/>
+        </StackPanel>
+
+        <Border x:Name="UtilitiesSidePanel"
+Grid.ColumnSpan="2"
+HorizontalAlignment="Right" VerticalAlignment="Top"
+Width="260" Panel.ZIndex="99"
+Margin="0,44,10,0"
+Background="{DynamicResource BackgroundTertiary}"
+BorderBrush="{DynamicResource BorderPrimary}" BorderThickness="1"
+CornerRadius="8"
+Visibility="Collapsed"
+RenderTransformOrigin="0.5,0">
+            <Border.RenderTransform>
+                <ScaleTransform x:Name="UtilitiesPanelScale" ScaleY="0"/>
+            </Border.RenderTransform>
+            <Border.Effect>
+                <DropShadowEffect Color="Black" Opacity="0.35" BlurRadius="18" ShadowDepth="4" Direction="270"/>
+            </Border.Effect>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="560">
+                <StackPanel Margin="12">
+
+                    <Button Content="🖼️ Texture Manager" Style="{StaticResource DisableableButtonStyle}" HorizontalContentAlignment="Left" Margin="0,0,0,6" Padding="10,8" FontWeight="SemiBold" Click="TextureManagerBtn_Click"/>
+                    <Button Content="🎨 RAL Colors" Style="{StaticResource DisableableButtonStyle}" HorizontalContentAlignment="Left" Margin="0,0,0,6" Padding="10,8" Click="RalColorsBtn_Click"/>
+                    <Button Content="🔤 Name Generator" Style="{StaticResource DisableableButtonStyle}" HorizontalContentAlignment="Left" Margin="0,0,0,6" Padding="10,8" Click="NameGeneratorBtn_Click"/>
+                    <Button Content="📁 Создать папку проекта" Style="{StaticResource DisableableButtonStyle}" HorizontalContentAlignment="Left" Margin="0,0,0,6" Padding="10,8" Click="CreateFolderBtn_Click"/>
+                    <Button Content="🌍 GeoJSON Generator" Style="{StaticResource DisableableButtonStyle}" HorizontalContentAlignment="Left" Margin="0,0,0,6" Padding="10,8" Click="GeoJsonBtn_Click"/>
+                    <Button Content="📄 PDF → Image" Style="{StaticResource DisableableButtonStyle}" HorizontalContentAlignment="Left" Margin="0,0,0,6" Padding="10,8" Click="PdfConverterBtn_Click"/>
+                    <Button Content="🌍 WGS → МСК-77" Style="{StaticResource DisableableButtonStyle}" HorizontalContentAlignment="Left" Margin="0,0,0,6" Padding="10,8" Click="CoordinateConverterBtn_Click"/>
+                    <Button Content="🟢 ERM Creator" Style="{StaticResource DisableableButtonStyle}" HorizontalContentAlignment="Left" Margin="0,0,0,6" Padding="10,8" Click="ErmCreatorBtn_Click"/>
+                    <Button Content="📦 Archive Builder" Style="{StaticResource DisableableButtonStyle}" HorizontalContentAlignment="Left" Margin="0,0,0,6" Padding="10,8" Click="ArchiveBuilderBtn_Click"/>
+
+                    <Separator Background="{DynamicResource BorderPrimary}" Margin="0,4"/>
+
+                    <Button Content="📖 Справка" Style="{StaticResource DisableableButtonStyle}" HorizontalContentAlignment="Left" Margin="0,6,0,6" Padding="10,8" Click="HelpBtn_Click"/>
+                    <Button Content="📋 Актуальные требования" Style="{StaticResource DisableableButtonStyle}" HorizontalContentAlignment="Left" Padding="10,8" Click="RequirementsBtn_Click"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
     </Grid>
 </Window>

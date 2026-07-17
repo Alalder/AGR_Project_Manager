@@ -55,6 +55,11 @@
     <SolidColorBrush x:Key="TextureNormal" Color="#B8860B"/>
     <SolidColorBrush x:Key="TextureNormalHover" Color="#D4A017"/>
 
+    <!-- Акцентные (текстовые) варианты каналов — ярче базовых, для текста поверх тёмного фона зоны -->
+    <SolidColorBrush x:Key="TextureDiffuseAccent" Color="#e08a8a"/>
+    <SolidColorBrush x:Key="TextureErmAccent" Color="#7fd99a"/>
+    <SolidColorBrush x:Key="TextureNormalAccent" Color="#8a9ee0"/>
+
     <!-- ===== СПИСКИ ===== -->
     <SolidColorBrush x:Key="ListItemBackground" Color="Transparent"/>
     <SolidColorBrush x:Key="ListItemBackgroundSelected" Color="#D4A017"/>

@@ -15,7 +15,7 @@ namespace AGR_Project_Manager.Models
         private ObservableCollection<ModelData> _models;
         private int _selectedModelIndex;
         private string _districtCode;  // НОВОЕ: код района
-
+        private bool _isArchived;
         public Guid Id { get; set; } = Guid.NewGuid();
 
         public string Name
@@ -61,6 +61,13 @@ namespace AGR_Project_Manager.Models
             set { _districtCode = value; OnPropertyChanged(); }
         }
 
+        // НОВОЕ: Проект в архиве (скрыт из основного списка, не удалён)
+        public bool IsArchived
+        {
+            get => _isArchived;
+            set { _isArchived = value; OnPropertyChanged(); }
+        }
+
 
         private GeoJsonProjectData _geoJsonData;
 
@@ -78,6 +85,7 @@ namespace AGR_Project_Manager.Models
             Models.Add(new ModelData("Ground"));
             SelectedModelIndex = 0;
             DistrictCode = "";
+            IsArchived = false;
             GeoJsonData = new GeoJsonProjectData();
         }
 

@@ -8,6 +8,8 @@ using Ookii.Dialogs.Wpf;
 using AGR_Project_Manager.Models;
 using AGR_Project_Manager.Services;
 using AGR_Project_Manager.Windows;
+using System.Windows.Data;
+using System.Windows.Media.Animation;
 
 namespace AGR_Project_Manager
 {
@@ -17,6 +19,8 @@ namespace AGR_Project_Manager
         private readonly TextureExportService _exportService;
         private readonly PresetService _presetService;
         private Project _selectedProject;
+        private ListCollectionView _activeProjectsView;
+        private ListCollectionView _archivedProjectsView;
         private UdimTile _copiedTile;
         private UdimTile _selectedTile;
         private Border _selectedTileBorder;
@@ -25,12 +29,22 @@ namespace AGR_Project_Manager
         {
             InitializeComponent();
             InitializeThemeSelector();
+            ((Storyboard)Resources["HideUtilitiesPanelStoryboard"]).Completed += HideUtilitiesPanelStoryboard_Completed;
             _projectService = new ProjectService();
             _exportService = new TextureExportService();
             _presetService = new PresetService();
 
-            ProjectsList.ItemsSource = _projectService.Projects;
+            _activeProjectsView = new ListCollectionView(_projectService.Projects) { Filter = p => !((Project)p).IsArchived };
+            _archivedProjectsView = new ListCollectionView(_projectService.Projects) { Filter = p => ((Project)p).IsArchived };
+            ActiveProjectsList.ItemsSource = _activeProjectsView;
+            ArchivedProjectsList.ItemsSource = _archivedProjectsView;
             PresetComboBox.ItemsSource = _presetService.Presets;
+            if (Properties.Settings.Default.ProjectsPanelCollapsed)
+            {
+                ProjectsPanelExpanded.Visibility = Visibility.Collapsed;
+                ProjectsPanelCollapsedBar.Visibility = Visibility.Visible;
+                ProjectsPanelColumn.Width = new GridLength(32);
+            }
         }
 
         #region Helper Methods
@@ -80,6 +94,35 @@ namespace AGR_Project_Manager
 
         #endregion
 
+        private void UtilitiesToggle_Click(object sender, RoutedEventArgs e)
+        {
+            bool isOpening = UtilitiesSidePanel.Visibility != Visibility.Visible;
+            string storyboardKey = isOpening ? "ShowUtilitiesPanelStoryboard" : "HideUtilitiesPanelStoryboard";
+
+            if (isOpening)
+            {
+                UtilitiesSidePanel.Visibility = Visibility.Visible;
+            }
+
+            ((Storyboard)Resources[storyboardKey]).Begin(this);
+        }
+
+        private void HideUtilitiesPanelStoryboard_Completed(object sender, EventArgs e)
+        {
+            UtilitiesSidePanel.Visibility = Visibility.Collapsed;
+        }
+        private void ToggleProjectsPanel_Click(object sender, RoutedEventArgs e)
+        {
+            bool willCollapse = ProjectsPanelExpanded.Visibility == Visibility.Visible;
+
+            ProjectsPanelExpanded.Visibility = willCollapse ? Visibility.Collapsed : Visibility.Visible;
+            ProjectsPanelCollapsedBar.Visibility = willCollapse ? Visibility.Visible : Visibility.Collapsed;
+            ProjectsPanelColumn.Width = new GridLength(willCollapse ? 32 : 240);
+
+            Properties.Settings.Default.ProjectsPanelCollapsed = willCollapse;
+            Properties.Settings.Default.Save();
+        }
+
         #region Project Management
 
         private void NewProjectBtn_Click(object sender, RoutedEventArgs e)
@@ -89,13 +132,13 @@ namespace AGR_Project_Manager
             if (dialog.ShowDialog() == true)
             {
                 _projectService.AddProject(dialog.Project);
-                ProjectsList.SelectedItem = dialog.Project;
+                ActiveProjectsList.SelectedItem = dialog.Project;
             }
         }
 
         private void EditProject_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button { Tag: Project project })
+            if (sender is MenuItem { Tag: Project project })
             {
                 var dialog = new ProjectDialog(project) { Owner = this };
 
@@ -109,17 +152,42 @@ namespace AGR_Project_Manager
 
         private void CloneProject_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button { Tag: Project project })
+            if (sender is MenuItem { Tag: Project project })
             {
                 var clone = _projectService.CloneProject(project);
-                ProjectsList.SelectedItem = clone;
+                ActiveProjectsList.SelectedItem = clone;
+            }
+        }
+
+        private void ArchiveProject_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem { Tag: Project project })
+            {
+                _projectService.ArchiveProject(project);
+                _activeProjectsView.Refresh();
+                _archivedProjectsView.Refresh();
+
+                if (_selectedProject == project)
+                {
+                    _selectedProject = null;
+                    ShowPlaceholder();
+                }
+            }
+        }
+
+        private void RestoreProject_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem { Tag: Project project })
+            {
+                _projectService.RestoreProject(project);
+                _activeProjectsView.Refresh();
+                _archivedProjectsView.Refresh();
             }
         }
 
         private void DeleteProject_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is not Button { Tag: Project project }) return;
-
+            if (sender is not MenuItem { Tag: Project project }) return;
             var result = MessageBox.Show(
                 $"Удалить проект \"{project.Name}\"?",
                 "Подтверждение",
@@ -139,8 +207,12 @@ namespace AGR_Project_Manager
 
         private void ProjectsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ProjectsList.SelectedItem is Project project)
+            if (sender is ListBox listBox && listBox.SelectedItem is Project project)
             {
+                // Сбрасываем выделение в другом списке — активен только один выбор одновременно
+                var otherList = listBox == ActiveProjectsList ? ArchivedProjectsList : ActiveProjectsList;
+                otherList.SelectedItem = null;
+
                 _selectedProject = project;
                 UpdateProjectPanel(project);
                 ShowProjectPanel();
@@ -180,12 +252,24 @@ namespace AGR_Project_Manager
                 ModelsTabControl.Items.Add(tabItem);
             }
 
-            if (ModelsTabControl.Items.Count > 0)
+            // Вкладка-кнопка "+" — всегда последняя, сдвигается вместе с реальными вкладками
+            var addModelTab = new TabItem { Tag = "ADD_MODEL_TAB", Focusable = false };
+            addModelTab.PreviewMouseLeftButtonDown += AddModelTab_PreviewMouseLeftButtonDown;
+            ModelsTabControl.Items.Add(addModelTab);
+
+            int modelTabsCount = _selectedProject.Models.Count; // без учёта "+"
+            if (modelTabsCount > 0)
             {
-                ModelsTabControl.SelectedIndex = previousIndex >= 0 && previousIndex < ModelsTabControl.Items.Count
+                ModelsTabControl.SelectedIndex = previousIndex >= 0 && previousIndex < modelTabsCount
                     ? previousIndex
                     : 0;
             }
+        }
+
+        private void AddModelTab_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true; // не даём вкладке "+" стать выбранной
+            AddModel_Click(sender, e);
         }
 
         private void ShowProjectPanel()
@@ -291,9 +375,10 @@ namespace AGR_Project_Manager
             _selectedProject.AddModel();
             RefreshModelTabs();
 
-            if (ModelsTabControl.Items.Count > 1)
+            int newModelIndex = ModelsTabControl.Items.Count - 3; // последний — "+", предпоследний — Ground
+            if (newModelIndex >= 0)
             {
-                ModelsTabControl.SelectedIndex = ModelsTabControl.Items.Count - 2;
+                ModelsTabControl.SelectedIndex = newModelIndex;
             }
 
             _projectService.UpdateProject(_selectedProject);
@@ -439,15 +524,18 @@ namespace AGR_Project_Manager
             if (sender is Border border && border.DataContext is UdimTile tile)
             {
                 // Убираем выделение с предыдущего
+                // Снимаем рамку выделения — откатываемся к обычному стилю (или к подсветке HasAnyTexture)
                 if (_selectedTileBorder != null)
                 {
-                    _selectedTileBorder.Background = GetThemeBrush("BackgroundTertiary");
+                    _selectedTileBorder.ClearValue(Border.BorderBrushProperty);
+                    _selectedTileBorder.ClearValue(Border.BorderThicknessProperty);
                 }
 
-                // Выделяем новый
+                // Выделяем новый — только рамка акцентным цветом, фон не трогаем
                 _selectedTile = tile;
                 _selectedTileBorder = border;
-                border.Background = GetThemeBrush("SelectionBackground");
+                border.BorderBrush = GetThemeBrush("AccentSecondary");
+                border.BorderThickness = new Thickness(3);
 
                 // Активируем кнопку применения пресета если есть выбранный пресет
                 ApplyPresetBtn.IsEnabled = PresetComboBox.SelectedItem != null;
@@ -707,6 +795,18 @@ namespace AGR_Project_Manager
         private void CreateFolderBtn_Click(object sender, RoutedEventArgs e)
         {
             var window = new CreateFolderWindow();
+            window.Show();
+        }
+
+        private void ErmCreatorBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var window = new ErmCreatorWindow();
+            window.Show();
+        }
+
+        private void ArchiveBuilderBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var window = new ArchiveBuilderWindow(_projectService, _selectedProject);
             window.Show();
         }
 

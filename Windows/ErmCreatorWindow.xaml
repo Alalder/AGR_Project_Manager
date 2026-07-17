@@ -1,0 +1,219 @@
+﻿<Window x:Class="AGR_Project_Manager.Windows.ErmCreatorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ERM Creator" Height="560" Width="1000"
+        Background="{DynamicResource BackgroundPrimary}"
+        WindowStartupLocation="CenterOwner">
+
+    <Grid Margin="15">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="260"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- ===== ЛЕВАЯ КОЛОНКА: КАНАЛЫ ===== -->
+        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,15,0">
+
+            <!-- EMISSION -> R -->
+            <Border Background="{DynamicResource BackgroundSecondary}" CornerRadius="8" Padding="12" Margin="0,0,0,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Emission (R)" Foreground="{DynamicResource ForegroundPrimary}"
+FontWeight="SemiBold" VerticalAlignment="Center"/>
+
+                    <Border Grid.Column="1" Tag="Emission"
+                            Background="{DynamicResource BackgroundTertiary}"
+                            BorderBrush="{DynamicResource BorderPrimary}" BorderThickness="1"
+                            CornerRadius="4" Padding="8" Margin="10,0" Cursor="Hand"
+                            AllowDrop="True"
+                            MouseLeftButtonDown="ChannelDropZone_Click"
+                            PreviewDragOver="ChannelDropZone_DragOver"
+                            Drop="ChannelDropZone_Drop">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="EmissionPathText" Grid.Column="0"
+                                       Text="Перетащите текстуру или кликните"
+                                       Foreground="{DynamicResource ForegroundTertiary}" FontSize="11"
+                                       TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                            <Button Grid.Column="1" Content="✖" FontSize="10" Padding="4,2" Margin="6,0,0,0"
+                                    Background="Transparent" Foreground="{DynamicResource ForegroundTertiary}"
+                                    BorderThickness="0" Cursor="Hand" ToolTip="Убрать текстуру"
+                                    Tag="Emission" Click="ClearChannel_Click"/>
+                        </Grid>
+                    </Border>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Slider x:Name="EmissionSlider" Width="140" Minimum="0" Maximum="255" Value="0"
+                                ValueChanged="ChannelSlider_ValueChanged" Tag="Emission"/>
+                        <TextBox x:Name="EmissionValueTextBox" Text="0" Width="36" Margin="6,0,0,0"
+         Background="{DynamicResource BackgroundTertiary}" Foreground="{DynamicResource ForegroundPrimary}"
+         BorderBrush="{DynamicResource BorderPrimary}" BorderThickness="1"
+         TextAlignment="Center" VerticalAlignment="Center" Tag="Emission"
+         PreviewTextInput="ChannelValueTextBox_PreviewTextInput"
+         LostFocus="ChannelValueTextBox_LostFocus"
+         KeyDown="ChannelValueTextBox_KeyDown"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- ROUGHNESS -> G -->
+            <Border Background="{DynamicResource BackgroundSecondary}" CornerRadius="8" Padding="12" Margin="0,0,0,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Roughness (G)" Foreground="{DynamicResource ForegroundPrimary}"
+                   FontWeight="SemiBold" VerticalAlignment="Center"/>
+
+                    <Border Grid.Row="0" Grid.Column="1" Tag="Roughness"
+                Background="{DynamicResource BackgroundTertiary}"
+                BorderBrush="{DynamicResource BorderPrimary}" BorderThickness="1"
+                CornerRadius="4" Padding="8" Margin="10,0" Cursor="Hand"
+                AllowDrop="True"
+                MouseLeftButtonDown="ChannelDropZone_Click"
+                PreviewDragOver="ChannelDropZone_DragOver"
+                Drop="ChannelDropZone_Drop">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="RoughnessPathText" Grid.Column="0"
+                           Text="Перетащите текстуру или кликните"
+                           Foreground="{DynamicResource ForegroundTertiary}" FontSize="11"
+                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                            <Button Grid.Column="1" Content="✖" FontSize="10" Padding="4,2" Margin="6,0,0,0"
+                        Background="Transparent" Foreground="{DynamicResource ForegroundTertiary}"
+                        BorderThickness="0" Cursor="Hand" ToolTip="Убрать текстуру"
+                        Tag="Roughness" Click="ClearChannel_Click"/>
+                        </Grid>
+                    </Border>
+
+                    <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Slider x:Name="RoughnessSlider" Width="140" Minimum="0" Maximum="255" Value="0"
+                    ValueChanged="ChannelSlider_ValueChanged" Tag="Roughness"/>
+                        <TextBox x:Name="RoughnessValueTextBox" Text="0" Width="36" Margin="6,0,0,0"
+                     Background="{DynamicResource BackgroundTertiary}" Foreground="{DynamicResource ForegroundPrimary}"
+                     BorderBrush="{DynamicResource BorderPrimary}" BorderThickness="1"
+                     TextAlignment="Center" VerticalAlignment="Center" Tag="Roughness"
+                     PreviewTextInput="ChannelValueTextBox_PreviewTextInput"
+                     LostFocus="ChannelValueTextBox_LostFocus"
+                     KeyDown="ChannelValueTextBox_KeyDown"/>
+                    </StackPanel>
+
+                    <CheckBox Grid.Row="1" Grid.Column="1" x:Name="RoughnessInvertCheckBox"
+                  Content="Инвертировать (загружена Glossiness)"
+                  Foreground="{DynamicResource ForegroundTertiary}" FontSize="11"
+                  Margin="10,6,0,0" HorizontalAlignment="Left"
+                  Checked="RoughnessInvert_Changed" Unchecked="RoughnessInvert_Changed"/>
+                </Grid>
+            </Border>
+
+            <!-- METALNESS -> B -->
+            <Border Background="{DynamicResource BackgroundSecondary}" CornerRadius="8" Padding="12" Margin="0,0,0,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Metalness (B)" Foreground="{DynamicResource ForegroundPrimary}"
+FontWeight="SemiBold" VerticalAlignment="Center"/>
+
+                    <Border Grid.Column="1" Tag="Metalness"
+                            Background="{DynamicResource BackgroundTertiary}"
+                            BorderBrush="{DynamicResource BorderPrimary}" BorderThickness="1"
+                            CornerRadius="4" Padding="8" Margin="10,0" Cursor="Hand"
+                            AllowDrop="True"
+                            MouseLeftButtonDown="ChannelDropZone_Click"
+                            PreviewDragOver="ChannelDropZone_DragOver"
+                            Drop="ChannelDropZone_Drop">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="MetalnessPathText" Grid.Column="0"
+                                       Text="Перетащите текстуру или кликните"
+                                       Foreground="{DynamicResource ForegroundTertiary}" FontSize="11"
+                                       TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                            <Button Grid.Column="1" Content="✖" FontSize="10" Padding="4,2" Margin="6,0,0,0"
+                                    Background="Transparent" Foreground="{DynamicResource ForegroundTertiary}"
+                                    BorderThickness="0" Cursor="Hand" ToolTip="Убрать текстуру"
+                                    Tag="Metalness" Click="ClearChannel_Click"/>
+                        </Grid>
+                    </Border>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Slider x:Name="MetalnessSlider" Width="140" Minimum="0" Maximum="255" Value="0"
+                                ValueChanged="ChannelSlider_ValueChanged" Tag="Metalness"/>
+                        <TextBox x:Name="MetalnessValueTextBox" Text="0" Width="36" Margin="6,0,0,0"
+Background="{DynamicResource BackgroundTertiary}" Foreground="{DynamicResource ForegroundPrimary}"
+BorderBrush="{DynamicResource BorderPrimary}" BorderThickness="1"
+TextAlignment="Center" VerticalAlignment="Center" Tag="Metalness"
+PreviewTextInput="ChannelValueTextBox_PreviewTextInput"
+LostFocus="ChannelValueTextBox_LostFocus"
+KeyDown="ChannelValueTextBox_KeyDown"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </StackPanel>
+
+        <!-- ===== ПРАВАЯ КОЛОНКА: ПРЕВЬЮ ===== -->
+        <Border Grid.Row="0" Grid.Column="1" Background="{DynamicResource BackgroundSecondary}"
+                CornerRadius="8" Padding="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="Превью" Foreground="{DynamicResource ForegroundSecondary}"
+                           FontWeight="SemiBold" Margin="0,0,0,8"/>
+                <Border Grid.Row="1" Background="{DynamicResource BackgroundTertiary}" CornerRadius="4">
+                    <Image x:Name="PreviewImage" Stretch="Uniform" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- ===== НИЖНЯЯ ПАНЕЛЬ: СОХРАНЕНИЕ ===== -->
+        <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                Background="{DynamicResource BackgroundSecondary}" CornerRadius="8" Padding="12" Margin="0,15,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="Разрешение:" VerticalAlignment="Center"
+                           Foreground="{DynamicResource ForegroundSecondary}" Margin="0,0,10,0"/>
+                <ComboBox x:Name="ResolutionComboBox" Grid.Column="1" Width="120" SelectedIndex="3"/>
+
+                <Button Grid.Column="3" x:Name="SaveButton" Content="💾 Сохранить PNG"
+                        Background="{DynamicResource AccentPrimary}" Foreground="{DynamicResource ForegroundPrimary}"
+                        Padding="15,8" FontWeight="SemiBold" Cursor="Hand" Click="SaveButton_Click"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

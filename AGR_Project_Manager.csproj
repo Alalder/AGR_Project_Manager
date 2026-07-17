@@ -15,7 +15,8 @@
 		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
 
 		<!-- Информация -->
-		<Version>1.5.2</Version>
+		<Version>1.6.0</Version>
+		<PublishDir>E:\AGR_Realese\</PublishDir>
 		<Product>AGR Project Manager</Product>
 	</PropertyGroup>
 
@@ -45,6 +46,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Compile Update="Models\ArchivePlan.cs">
+		  <Generator>MSBuild:Compile</Generator>
+		</Compile>
 		<Compile Update="Properties\Settings.Designer.cs">
 			<DesignTimeSharedInput>True</DesignTimeSharedInput>
 			<AutoGen>True</AutoGen>

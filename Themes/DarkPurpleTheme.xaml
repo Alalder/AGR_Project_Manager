@@ -42,7 +42,7 @@
 
     <!-- ===== ТЕКСТУРЫ (зоны D/ERM/N) ===== -->
     <!-- Пустая зона -->
-    <SolidColorBrush x:Key="TextureZoneEmpty" Color="#3a3a3a"/>
+    <SolidColorBrush x:Key="TextureZoneEmpty" Color="#663a3a3a"/>
 
     <!-- Diffuse - красный (приглушённый) -->
     <SolidColorBrush x:Key="TextureDiffuse" Color="#8b4a4a"/>
@@ -55,6 +55,11 @@
     <!-- Normal - синий (приглушённый) -->
     <SolidColorBrush x:Key="TextureNormal" Color="#4a5a8b"/>
     <SolidColorBrush x:Key="TextureNormalHover" Color="#5a6aab"/>
+
+    <!-- Акцентные (текстовые) варианты каналов — ярче базовых, для текста поверх тёмного фона зоны -->
+    <SolidColorBrush x:Key="TextureDiffuseAccent" Color="#e08a8a"/>
+    <SolidColorBrush x:Key="TextureErmAccent" Color="#7fd99a"/>
+    <SolidColorBrush x:Key="TextureNormalAccent" Color="#8a9ee0"/>
 
     <!-- ===== СПИСКИ ===== -->
     <SolidColorBrush x:Key="ListItemBackground" Color="Transparent"/>

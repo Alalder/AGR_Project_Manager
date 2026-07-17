@@ -49,6 +49,20 @@ namespace AGR_Project_Manager.Services
             SaveProjects();
         }
 
+        public void ArchiveProject(Project project)
+        {
+            project.IsArchived = true;
+            project.ModifiedDate = DateTime.Now;
+            SaveProjects();
+        }
+
+        public void RestoreProject(Project project)
+        {
+            project.IsArchived = false;
+            project.ModifiedDate = DateTime.Now;
+            SaveProjects();
+        }
+
         public Project CloneProject(Project original)
         {
             var json = JsonSerializer.Serialize(original);
