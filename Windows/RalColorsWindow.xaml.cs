@@ -18,7 +18,8 @@ namespace AGR_Project_Manager.Windows
         private RalColor _currentColor;
         private List<RalColor> _searchResults;
         private int _currentResultIndex;
-        private bool _isHexMode = false;  // Флаг для отслеживания режима (RAL или HEX)
+        private enum ColorInputMode { Ral, Hex, Kelvin }
+        private ColorInputMode _mode = ColorInputMode.Ral;
 
         public RalColorsWindow()
         {
@@ -144,9 +145,12 @@ namespace AGR_Project_Manager.Windows
         private void HideResult()
         {
             _currentColor = null;
-            PlaceholderText.Text = _isHexMode 
-                ? "Введите HEX код для поиска"
-                : "Введите номер RAL для поиска";
+            PlaceholderText.Text = _mode switch
+            {
+                ColorInputMode.Hex => "Введите HEX код для поиска",
+                ColorInputMode.Kelvin => "Задайте цветовую температуру",
+                _ => "Введите номер RAL для поиска"
+            };
             PlaceholderText.Visibility = Visibility.Visible;
             ResultPanel.Visibility = Visibility.Collapsed;
             SavePanel.Visibility = Visibility.Collapsed;
@@ -203,15 +207,12 @@ namespace AGR_Project_Manager.Windows
             if (dialog.ShowDialog() == true)
             {
                 // Генерируем имя файла в зависимости от режима
-                string fileName;
-                if (_isHexMode)
+                string fileName = _mode switch
                 {
-                    fileName = _colorService.GenerateFileNameForHex(_currentColor.Hex, size);
-                }
-                else
-                {
-                    fileName = _colorService.GenerateFileName(_currentColor, size);
-                }
+                    ColorInputMode.Hex => _colorService.GenerateFileNameForHex(_currentColor.Hex, size),
+                    ColorInputMode.Kelvin => _colorService.GenerateFileNameForKelvin(GetCurrentKelvinValue(), size),
+                    _ => _colorService.GenerateFileName(_currentColor, size)
+                };
 
                 string filePath = System.IO.Path.Combine(dialog.SelectedPath, fileName);
 
@@ -244,11 +245,26 @@ namespace AGR_Project_Manager.Windows
 
         #region HEX Color Operations
 
-        private void ModeTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ModeRadio_Checked(object sender, RoutedEventArgs e)
         {
-            _isHexMode = ModeTabControl.SelectedIndex == 1;
+            // Защита: RadioButton с IsChecked="True" в XAML вызывает Checked
+            // ещё во время InitializeComponent(), пока нижестоящие элементы = null
+            if (RalInputPanel == null || HexInputPanel == null || KelvinInputPanel == null)
+                return;
+
+            if (sender == ModeRalRadio) _mode = ColorInputMode.Ral;
+            else if (sender == ModeHexRadio) _mode = ColorInputMode.Hex;
+            else if (sender == ModeKelvinRadio) _mode = ColorInputMode.Kelvin;
+
+            RalInputPanel.Visibility = _mode == ColorInputMode.Ral ? Visibility.Visible : Visibility.Collapsed;
+            HexInputPanel.Visibility = _mode == ColorInputMode.Hex ? Visibility.Visible : Visibility.Collapsed;
+            KelvinInputPanel.Visibility = _mode == ColorInputMode.Kelvin ? Visibility.Visible : Visibility.Collapsed;
+
             HideResult();
             ClearInputs();
+
+            if (_mode == ColorInputMode.Kelvin)
+                PerformKelvinSearch((int)KelvinSlider.Value);
         }
 
         private void ClearInputs()
@@ -309,6 +325,51 @@ namespace AGR_Project_Manager.Windows
                 PlaceholderText.Text = $"Ошибка: {ex.Message}";
                 PlaceholderText.Visibility = Visibility.Visible;
             }
+        }
+
+        #endregion
+
+        #region Kelvin Color Operations
+
+        private void KelvinSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            // Защита: событие может сработать при парсинге XAML, ещё до выбора режима
+            if (_mode != ColorInputMode.Kelvin) return;
+
+            int kelvin = (int)e.NewValue;
+            KelvinTextBox.Text = kelvin.ToString();
+            PerformKelvinSearch(kelvin);
+        }
+
+        private void KelvinTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Enter) return;
+
+            if (int.TryParse(KelvinTextBox.Text.Trim(), out int kelvin))
+            {
+                kelvin = Math.Clamp(kelvin, (int)KelvinSlider.Minimum, (int)KelvinSlider.Maximum);
+                KelvinSlider.Value = kelvin; // вызовет KelvinSlider_ValueChanged и обновит превью
+            }
+            else
+            {
+                MessageBox.Show("Введите целое число от 2000 до 12000", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            e.Handled = true;
+        }
+
+        private void PerformKelvinSearch(int kelvin)
+        {
+            var color = _colorService.FromKelvin(kelvin);
+            DisplayColor(color);
+        }
+
+        private int GetCurrentKelvinValue()
+        {
+            return int.TryParse(KelvinTextBox.Text.Trim(), out int kelvin)
+                ? kelvin
+                : (int)KelvinSlider.Value;
         }
 
         #endregion

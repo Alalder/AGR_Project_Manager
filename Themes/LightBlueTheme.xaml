@@ -3,35 +3,35 @@
 
     <system:String x:Key="ThemeName" xmlns:system="clr-namespace:System;assembly=mscorlib">Светло-голубая</system:String>
 
-    <!-- ===== ФОНЫ ===== -->
-    <SolidColorBrush x:Key="BackgroundPrimary" Color="#f0f9ff"/>
-    <SolidColorBrush x:Key="BackgroundSecondary" Color="#e0f2fe"/>
-    <SolidColorBrush x:Key="BackgroundTertiary" Color="#ffffff"/>
-    <SolidColorBrush x:Key="BackgroundQuaternary" Color="#e8f4fc"/>
+    <!-- ===== ФОНЫ (плотнее, не белёсые — важно для подложки названия тайла с Opacity 0.7) ===== -->
+    <SolidColorBrush x:Key="BackgroundPrimary" Color="#c9dfee"/>
+    <SolidColorBrush x:Key="BackgroundSecondary" Color="#b9d3e6"/>
+    <SolidColorBrush x:Key="BackgroundTertiary" Color="#eef5fa"/>
+    <SolidColorBrush x:Key="BackgroundQuaternary" Color="#d9e9f3"/>
 
     <!-- ===== КНОПКИ ===== -->
-    <SolidColorBrush x:Key="ButtonBackground" Color="#bae6fd"/>
-    <SolidColorBrush x:Key="ButtonBackgroundHover" Color="#7dd3fc"/>
-    <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#e0f2fe"/>
-    <SolidColorBrush x:Key="ButtonBorder" Color="#7dd3fc"/>
+    <SolidColorBrush x:Key="ButtonBackground" Color="#9fc9e6"/>
+    <SolidColorBrush x:Key="ButtonBackgroundHover" Color="#6cb8ec"/>
+    <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#d9e9f3"/>
+    <SolidColorBrush x:Key="ButtonBorder" Color="#6cb8ec"/>
 
     <!-- ===== АКЦЕНТЫ ===== -->
-    <SolidColorBrush x:Key="AccentPrimary" Color="#0284c7"/>
+    <SolidColorBrush x:Key="AccentPrimary" Color="#0369a1"/>
     <SolidColorBrush x:Key="AccentSecondary" Color="#0ea5e9"/>
-    <SolidColorBrush x:Key="AccentTertiary" Color="#0369a1"/>
-    <SolidColorBrush x:Key="SelectionBackground" Color="#bae6fd"/>
-    <SolidColorBrush x:Key="HoverBackground" Color="#e0f2fe"/>
+    <SolidColorBrush x:Key="AccentTertiary" Color="#075985"/>
+    <SolidColorBrush x:Key="SelectionBackground" Color="#9fc9e6"/>
+    <SolidColorBrush x:Key="HoverBackground" Color="#cfe2ee"/>
 
-    <!-- ===== ТЕКСТ ===== -->
-    <SolidColorBrush x:Key="ForegroundPrimary" Color="#0c4a6e"/>
-    <SolidColorBrush x:Key="ForegroundSecondary" Color="#0369a1"/>
-    <SolidColorBrush x:Key="ForegroundTertiary" Color="#0284c7"/>
-    <SolidColorBrush x:Key="ForegroundQuaternary" Color="#075985"/>
-    <SolidColorBrush x:Key="ForegroundDisabled" Color="#7dd3fc"/>
-    <SolidColorBrush x:Key="CodeText" Color="#0369a1"/>
+    <!-- ===== ТЕКСТ (почти чёрно-синий — держит контраст даже поверх текстур) ===== -->
+    <SolidColorBrush x:Key="ForegroundPrimary" Color="#08121a"/>
+    <SolidColorBrush x:Key="ForegroundSecondary" Color="#1e4258"/>
+    <SolidColorBrush x:Key="ForegroundTertiary" Color="#3d6d88"/>
+    <SolidColorBrush x:Key="ForegroundQuaternary" Color="#0f2b3a"/>
+    <SolidColorBrush x:Key="ForegroundDisabled" Color="#93bcd6"/>
+    <SolidColorBrush x:Key="CodeText" Color="#075985"/>
 
     <!-- ===== ГРАНИЦЫ ===== -->
-    <SolidColorBrush x:Key="BorderPrimary" Color="#7dd3fc"/>
+    <SolidColorBrush x:Key="BorderPrimary" Color="#6cb8ec"/>
     <SolidColorBrush x:Key="BorderSecondary" Color="#38bdf8"/>
     <SolidColorBrush x:Key="BorderHover" Color="#0ea5e9"/>
 
@@ -41,7 +41,6 @@
     <SolidColorBrush x:Key="DangerButtonBackground" Color="#fecaca"/>
 
     <!-- ===== ТЕКСТУРЫ (зоны D/ERM/N) ===== -->
-    <!-- Пустая зона -->
     <SolidColorBrush x:Key="TextureZoneEmpty" Color="#66d0d0d0"/>
 
     <!-- Diffuse - красный (приглушённый) -->
@@ -63,14 +62,14 @@
 
     <!-- ===== СПИСКИ ===== -->
     <SolidColorBrush x:Key="ListItemBackground" Color="Transparent"/>
-    <SolidColorBrush x:Key="ListItemBackgroundSelected" Color="#bae6fd"/>
-    <SolidColorBrush x:Key="ListItemBackgroundHover" Color="#e0f2fe"/>
+    <SolidColorBrush x:Key="ListItemBackgroundSelected" Color="#9fc9e6"/>
+    <SolidColorBrush x:Key="ListItemBackgroundHover" Color="#cfe2ee"/>
 
     <!-- ===== COMBOBOX ===== -->
-    <SolidColorBrush x:Key="ComboBoxBackground" Color="#ffffff"/>
-    <SolidColorBrush x:Key="ComboBoxItemSelected" Color="#0284c7"/>
-    <SolidColorBrush x:Key="ComboBoxItemHighlighted" Color="#e0f2fe"/>
-    <SolidColorBrush x:Key="ComboBoxArrow" Color="#0369a1"/>
+    <SolidColorBrush x:Key="ComboBoxBackground" Color="#eef5fa"/>
+    <SolidColorBrush x:Key="ComboBoxItemSelected" Color="#0369a1"/>
+    <SolidColorBrush x:Key="ComboBoxItemHighlighted" Color="#cfe2ee"/>
+    <SolidColorBrush x:Key="ComboBoxArrow" Color="#1e4258"/>
 
     <!-- ===== ИНФОРМАЦИОННЫЕ БЛОКИ ===== -->
     <SolidColorBrush x:Key="InfoBoxSourceBackground" Color="#e8f5e9"/>
@@ -115,15 +114,9 @@
 
     <!-- ===== ИНДИКАТОРЫ РАЗРЕШЕНИЯ ТЕКСТУР ===== -->
     <SolidColorBrush x:Key="Resolution4K" Color="#10b981"/>
-    <!-- Зеленый -->
     <SolidColorBrush x:Key="Resolution2K" Color="#3b82f6"/>
-    <!-- Синий -->
     <SolidColorBrush x:Key="Resolution1K" Color="#f59e0b"/>
-    <!-- Оранжевый -->
     <SolidColorBrush x:Key="Resolution512" Color="#f59e0b"/>
-    <!-- Оранжевый -->
     <SolidColorBrush x:Key="Resolution256" Color="#ef4444"/>
-    <!-- Красный -->
-
 
 </ResourceDictionary>

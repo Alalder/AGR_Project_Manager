@@ -142,5 +142,53 @@ namespace AGR_Project_Manager.Services
                 return false;
             }
         }
+
+        /// <summary>
+        /// Конвертирует цветовую температуру (Кельвины) в RGB
+        /// Алгоритм аппроксимации чёрного тела (Tanner Helland)
+        /// </summary>
+        public RalColor FromKelvin(int kelvin)
+        {
+            double temp = kelvin / 100.0;
+            double red, green, blue;
+
+            // Red
+            red = temp <= 66
+                ? 255
+                : 329.698727446 * Math.Pow(temp - 60, -0.1332047592);
+
+            // Green
+            green = temp <= 66
+                ? 99.4708025861 * Math.Log(temp) - 161.1195681661
+                : 288.1221695283 * Math.Pow(temp - 60, -0.0755148492);
+
+            // Blue
+            if (temp >= 66) blue = 255;
+            else if (temp <= 19) blue = 0;
+            else blue = 138.5177312231 * Math.Log(temp - 10) - 305.0447927307;
+
+            byte r = (byte)Math.Clamp(red, 0, 255);
+            byte g = (byte)Math.Clamp(green, 0, 255);
+            byte b = (byte)Math.Clamp(blue, 0, 255);
+
+            return new RalColor
+            {
+                Code = $"{kelvin}K",
+                Name = "Цветовая температура",
+                Hex = $"#{r:X2}{g:X2}{b:X2}",
+                R = r,
+                G = g,
+                B = b
+            };
+        }
+
+        /// <summary>
+        /// Генерирует имя файла для цвета по температуре
+        /// </summary>
+        public string GenerateFileNameForKelvin(int kelvin, int size)
+        {
+            return $"CCT_{kelvin}K_{size}.png";
+        }
+
     }
 }

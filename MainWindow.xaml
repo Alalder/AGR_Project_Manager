@@ -116,7 +116,7 @@
                         Background="{TemplateBinding Background}"
                         BorderThickness="3,0,3,0"
                         BorderBrush="Transparent"
-                        CornerRadius="0,4,4,0">
+                        CornerRadius="4,4,4,4">
                             <ContentPresenter Margin="{TemplateBinding Padding}"/>
                         </Border>
                         <ControlTemplate.Triggers>

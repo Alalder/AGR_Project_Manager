@@ -11,7 +11,7 @@
 
     <!-- ===== КНОПКИ ===== -->
     <SolidColorBrush x:Key="ButtonBackground" Color="#222222"/>
-    <SolidColorBrush x:Key="ButtonBackgroundHover" Color="#D4A017"/>
+    <SolidColorBrush x:Key="ButtonBackgroundHover" Color="#33301F"/>
     <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#151515"/>
     <SolidColorBrush x:Key="ButtonBorder" Color="#D4A017"/>
 
@@ -19,8 +19,8 @@
     <SolidColorBrush x:Key="AccentPrimary" Color="#F5B81B"/>
     <SolidColorBrush x:Key="AccentSecondary" Color="#FFD700"/>
     <SolidColorBrush x:Key="AccentTertiary" Color="#D4A017"/>
-    <SolidColorBrush x:Key="SelectionBackground" Color="#D4A017"/>
-    <SolidColorBrush x:Key="HoverBackground" Color="#3A2E00"/>
+    <SolidColorBrush x:Key="SelectionBackground" Color="#3A2E00"/>
+    <SolidColorBrush x:Key="HoverBackground" Color="#2A2413"/>
 
     <!-- ===== ТЕКСТ (белый и серый для контраста) ===== -->
     <SolidColorBrush x:Key="ForegroundPrimary" Color="#FFFFFF"/>
@@ -62,8 +62,8 @@
 
     <!-- ===== СПИСКИ ===== -->
     <SolidColorBrush x:Key="ListItemBackground" Color="Transparent"/>
-    <SolidColorBrush x:Key="ListItemBackgroundSelected" Color="#D4A017"/>
-    <SolidColorBrush x:Key="ListItemBackgroundHover" Color="#3A2E00"/>
+    <SolidColorBrush x:Key="ListItemBackgroundSelected" Color="#3A2E00"/>
+    <SolidColorBrush x:Key="ListItemBackgroundHover" Color="#2A2413"/>
 
     <!-- ===== COMBOBOX ===== -->
     <SolidColorBrush x:Key="ComboBoxBackground" Color="#1A1A1A"/>
@@ -72,21 +72,21 @@
     <SolidColorBrush x:Key="ComboBoxArrow" Color="#D4A017"/>
 
     <!-- ===== ИНФОРМАЦИОННЫЕ БЛОКИ ===== -->
-    <SolidColorBrush x:Key="InfoBoxSourceBackground" Color="#1A1A00"/>
-    <SolidColorBrush x:Key="InfoBoxSourceForeground" Color="#D4A017"/>
+    <SolidColorBrush x:Key="InfoBoxSourceBackground" Color="#2a3a2a"/>
+    <SolidColorBrush x:Key="InfoBoxSourceForeground" Color="#6a9955"/>
 
-    <SolidColorBrush x:Key="InfoBoxExportBackground" Color="#1A1A00"/>
+    <SolidColorBrush x:Key="InfoBoxExportBackground" Color="#3a3a2a"/>
     <SolidColorBrush x:Key="InfoBoxExportForeground" Color="#FFD700"/>
 
-    <SolidColorBrush x:Key="InfoBoxWorkBackground" Color="#001A1A"/>
-    <SolidColorBrush x:Key="InfoBoxWorkForeground" Color="#D4A017"/>
+    <SolidColorBrush x:Key="InfoBoxWorkBackground" Color="#2a2a3a"/>
+    <SolidColorBrush x:Key="InfoBoxWorkForeground" Color="#5a7ac9"/>
 
-    <SolidColorBrush x:Key="InfoBoxCheckBackground" Color="#1A0000"/>
+    <SolidColorBrush x:Key="InfoBoxCheckBackground" Color="#3a2a2a"/>
     <SolidColorBrush x:Key="InfoBoxCheckForeground" Color="#FFB347"/>
 
     <!-- ===== ДОПОЛНИТЕЛЬНЫЕ КНОПКИ ===== -->
     <SolidColorBrush x:Key="ButtonDanger" Color="#5C0000"/>
-    <SolidColorBrush x:Key="ButtonInfo" Color="#1A2A00"/>
+    <SolidColorBrush x:Key="ButtonInfo" Color="#3a3a5a"/>
 
     <!-- ===== ЦВЕТОВЫЕ КАНАЛЫ RGB ===== -->
     <SolidColorBrush x:Key="ColorChannelRed" Color="#FF6666"/>
@@ -104,10 +104,10 @@
     <SolidColorBrush x:Key="HelpSectionStorage" Color="#C9C95A"/>
 
     <!-- ===== БЛОКИ СПРАВКИ ===== -->
-    <SolidColorBrush x:Key="HelpBoxPurple" Color="#1A001A"/>
-    <SolidColorBrush x:Key="HelpBoxGreen" Color="#001A00"/>
-    <SolidColorBrush x:Key="HelpBoxRed" Color="#1A0000"/>
-    <SolidColorBrush x:Key="HelpBoxBlue" Color="#00001A"/>
+    <SolidColorBrush x:Key="HelpBoxPurple" Color="#2a2a3a"/>
+    <SolidColorBrush x:Key="HelpBoxGreen" Color="#2a3a2a"/>
+    <SolidColorBrush x:Key="HelpBoxRed" Color="#3a2a2a"/>
+    <SolidColorBrush x:Key="HelpBoxBlue" Color="#2a3a3a"/>
 
     <!-- ===== СТАТУСНЫЕ ЦВЕТА ===== -->
     <SolidColorBrush x:Key="SuccessText" Color="#90EE90"/>
