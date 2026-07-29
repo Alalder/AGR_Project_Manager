@@ -207,33 +207,61 @@
                                HorizontalAlignment="Center"
                                Margin="0,5,0,15"/>
 
-                    <!-- HEX (копируемый) -->
-                    <Border Background="{DynamicResource BackgroundPrimary}" 
+                    <!-- HEX: вся панель кликабельна — левая четверть копирует с #, остальное без # -->
+                    <Border x:Name="HexRowBorder"
+                            Background="{DynamicResource BackgroundPrimary}" 
                             CornerRadius="6" 
                             Padding="15,10"
-                            Margin="0,0,0,10"
-                            Cursor="Hand"
-                            MouseLeftButtonDown="CopyHex_Click"
-                            ToolTip="Нажмите, чтобы скопировать">
+                            Margin="0,0,0,10">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
+
                             <TextBlock Text="HEX" 
                                        Foreground="{DynamicResource ForegroundTertiary}" 
                                        FontSize="12" VerticalAlignment="Center"/>
-                            <TextBlock x:Name="HexText" 
-                                       Grid.Column="1" 
-                                       FontSize="16" 
-                                       FontWeight="SemiBold"
-                                       FontFamily="Consolas"
-                                       Foreground="{DynamicResource CodeText}" 
-                                       HorizontalAlignment="Center"/>
+
+                            <!-- Зоны клика: 1/4 — с #, 3/4 — без # -->
+                            <Grid Grid.Column="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*"/>
+                                    <ColumnDefinition Width="3*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0" Background="Transparent" Cursor="Hand"
+                                        MouseLeftButtonDown="CopyHexWithHash_Click"
+                                        ToolTip="Копировать с #"/>
+                                <Border Grid.Column="1" Background="Transparent" Cursor="Hand"
+                                        MouseLeftButtonDown="CopyHexWithoutHash_Click"
+                                        ToolTip="Копировать без #"/>
+
+                                <!-- Визуальный текст поверх зон, клики не перехватывает -->
+                                <StackPanel Grid.ColumnSpan="2" Orientation="Horizontal" 
+                                            HorizontalAlignment="Center" IsHitTestVisible="False">
+                                    <TextBlock Text="#" FontSize="16" FontWeight="SemiBold" FontFamily="Consolas"
+                                               Foreground="{DynamicResource ForegroundTertiary}"/>
+                                    <TextBlock x:Name="HexText" FontSize="16" FontWeight="SemiBold" FontFamily="Consolas"
+                                               Foreground="{DynamicResource CodeText}"/>
+                                </StackPanel>
+                            </Grid>
+
                             <TextBlock Text="📋" Grid.Column="2" FontSize="14" VerticalAlignment="Center"/>
                         </Grid>
                     </Border>
+
+                    <!-- Всплывающая подсказка о копировании -->
+                    <Popup x:Name="CopyToast" 
+                           PlacementTarget="{Binding ElementName=HexRowBorder}"
+                           Placement="Top" AllowsTransparency="True" IsOpen="False">
+                        <Border Background="{DynamicResource AccentPrimary}" CornerRadius="4" 
+                                Padding="10,5" Margin="0,0,0,6">
+                            <TextBlock x:Name="CopyToastText" 
+                                       Foreground="{DynamicResource ForegroundPrimary}" FontSize="12"/>
+                        </Border>
+                    </Popup>
 
                     <!-- RGB -->
                     <Border Background="{DynamicResource BackgroundPrimary}" 

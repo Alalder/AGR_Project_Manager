@@ -9,6 +9,7 @@ using AGR_Project_Manager.Data;
 using AGR_Project_Manager.Models;
 using AGR_Project_Manager.Services;
 using Ookii.Dialogs.Wpf;
+using System.Windows.Threading;
 
 namespace AGR_Project_Manager.Windows
 {
@@ -138,7 +139,7 @@ namespace AGR_Project_Manager.Windows
             // Устанавливаем текст
             ColorCodeText.Text = color.Code;
             ColorNameText.Text = color.Name;
-            HexText.Text = color.Hex;
+            HexText.Text = color.Hex.TrimStart('#'); // "#" рисуется отдельным TextBlock рядом
             RgbText.Text = $"{color.R}, {color.G}, {color.B}";
         }
 
@@ -156,38 +157,55 @@ namespace AGR_Project_Manager.Windows
             SavePanel.Visibility = Visibility.Collapsed;
         }
 
-        private void CopyHex_Click(object sender, MouseButtonEventArgs e)
+        private DispatcherTimer _copyToastTimer;
+
+        private void CopyHexWithHash_Click(object sender, MouseButtonEventArgs e)
+        {
+            CopyHexToClipboard(withHash: true);
+            e.Handled = true;
+        }
+
+        private void CopyHexWithoutHash_Click(object sender, MouseButtonEventArgs e)
+        {
+            CopyHexToClipboard(withHash: false);
+            e.Handled = true;
+        }
+
+        private void CopyHexToClipboard(bool withHash)
         {
             if (_currentColor == null) return;
 
+            string hexNoHash = _currentColor.Hex.TrimStart('#');
+            string textToCopy = withHash ? $"#{hexNoHash}" : hexNoHash;
+
             try
             {
-                Clipboard.SetText(_currentColor.Hex);
-
-                // Визуальная обратная связь
-                string originalText = HexText.Text;
-                HexText.Text = "✓ Скопировано!";
-                HexText.Foreground = new SolidColorBrush(Colors.LightGreen);
-
-                // Возвращаем через 1 секунду
-                var timer = new System.Windows.Threading.DispatcherTimer
-                {
-                    Interval = TimeSpan.FromSeconds(1)
-                };
-                timer.Tick += (s, args) =>
-                {
-                    HexText.Text = originalText;
-                    HexText.Foreground = new SolidColorBrush(
-                        (Color)ColorConverter.ConvertFromString("#6a9955"));
-                    timer.Stop();
-                };
-                timer.Start();
+                Clipboard.SetText(textToCopy);
+                ShowCopyToast(textToCopy);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Ошибка копирования: {ex.Message}", "Ошибка",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        /// <summary>
+        /// Показывает всплывающую подсказку "Скопировано" над HEX-блоком на ~1.2 сек
+        /// </summary>
+        private void ShowCopyToast(string copiedText)
+        {
+            CopyToastText.Text = $"✓ Скопировано: {copiedText}";
+            CopyToast.IsOpen = true;
+
+            _copyToastTimer?.Stop();
+            _copyToastTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1200) };
+            _copyToastTimer.Tick += (s, args) =>
+            {
+                CopyToast.IsOpen = false;
+                _copyToastTimer.Stop();
+            };
+            _copyToastTimer.Start();
         }
 
         private void SavePng_Click(object sender, RoutedEventArgs e)
